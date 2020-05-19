@@ -7,7 +7,7 @@ Overview
 .. image:: /images/Profilingicon.png
 	:align: right
 
-The Deep Data Profiler library provides tools for analyzing the internal decision structure of a deep neural network within the
+The `DeepDataProfiler`_ library provides tools for analyzing the internal decision structure of a deep neural network within the
 context of a specific dataset. The library was inspired by the work of Qiu, et al. in Adversarial Defense Through
 Network Profiling Based Path Extraction (2019), arXiv:1904.08089.
 
@@ -40,4 +40,6 @@ Reference herein to any specific commercial product, process, or service by trad
 
 .. toctree::
    :maxdepth: 2
+
+.. _DeepDataProfiler: https://github.com/pnnl/DeepDataProfiler
 
