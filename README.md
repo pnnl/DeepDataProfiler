@@ -24,5 +24,3 @@ License
 -------
 
 Released under the 3-Clause BSD license (see License.rst)
-
-
