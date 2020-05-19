@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>utils package &mdash; Deep Data Profiler 0.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Installing Deep Data Profiler" href="../install.html" />
+    <link rel="prev" title="utils" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Deep Data Profiler
+          
+
+          
+            
+            <img src="../_static/Profilingicon.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes/modules.html">Profiling</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Utilities</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">utils package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils.helpers">utils.helpers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils.torch_hook">utils.torch_hook module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installing Deep Data Profiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Deep Data Profiler</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">utils</a> &raquo;</li>
+        
+      <li>utils package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/utils/utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="utils-package">
+<h1>utils package<a class="headerlink" href="#utils-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-utils.helpers">
+<span id="utils-helpers-module"></span><h2>utils.helpers module<a class="headerlink" href="#module-utils.helpers" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="utils.helpers.DDPCounter">
+<em class="property">class </em><code class="sig-prename descclassname">utils.helpers.</code><code class="sig-name descname">DDPCounter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">inc</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/helpers.html#DDPCounter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.helpers.DDPCounter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Useful singleton class for keeping track of layers</p>
+<dl class="py method">
+<dt id="utils.helpers.DDPCounter.inc">
+<code class="sig-name descname">inc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/helpers.html#DDPCounter.inc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.helpers.DDPCounter.inc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.helpers.get_index">
+<code class="sig-prename descclassname">utils.helpers.</code><code class="sig-name descname">get_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">b</span></em>, <em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">first</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/helpers.html#get_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.helpers.get_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return 3dim index for a flattened tensor built from kxk planes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b</strong> (<em>int</em>) – 1D index</p></li>
+<li><p><strong>k</strong> (<em>int</em>) – kernel size</p></li>
+<li><p><strong>first</strong> (<em>bool</em>) – if True then output will be channel,row,column tuple
+otherwise output will be row,column,channel tuple</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="utils.helpers.submatrix_generator">
+<code class="sig-prename descclassname">utils.helpers.</code><code class="sig-name descname">submatrix_generator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_in</span></em>, <em class="sig-param"><span class="n">stride</span></em>, <em class="sig-param"><span class="n">kernel</span></em>, <em class="sig-param"><span class="n">padding</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/helpers.html#submatrix_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.helpers.submatrix_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a function which creates the subtensor of x_in used to compute value of output at i,j index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_in</strong> (<em>numpy.ndarray</em><em> or </em><em>torch.Tensor</em>) – dimensions assumed reference: channel, row, column</p></li>
+<li><p><strong>stride</strong> (<em>int</em>) – </p></li>
+<li><p><strong>kernel</strong> (<em>int</em>) – dimension of a square plane of filter or pooling size.</p></li>
+<li><p><strong>padding</strong> (<em>int</em>) – padding is assumed equal on all four dimensions</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-utils.torch_hook">
+<span id="utils-torch-hook-module"></span><h2>utils.torch_hook module<a class="headerlink" href="#module-utils.torch_hook" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="utils.torch_hook.TorchHook">
+<em class="property">class </em><code class="sig-prename descclassname">utils.torch_hook.</code><code class="sig-name descname">TorchHook</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">'cpu'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/torch_hook.html#TorchHook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.torch_hook.TorchHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Wraps a Pytorch model with methods to easily extract activations at specified layers</p>
+<dl class="py attribute">
+<dt id="utils.torch_hook.TorchHook.activation_dict">
+<code class="sig-name descname">activation_dict</code><a class="headerlink" href="#utils.torch_hook.TorchHook.activation_dict" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="utils.torch_hook.TorchHook.hooked_module_names">
+<code class="sig-name descname">hooked_module_names</code><a class="headerlink" href="#utils.torch_hook.TorchHook.hooked_module_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="utils.torch_hook.TorchHook.model">
+<code class="sig-name descname">model</code><a class="headerlink" href="#utils.torch_hook.TorchHook.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="utils.torch_hook.TorchHook.module_dict">
+<code class="sig-name descname">module_dict</code><a class="headerlink" href="#utils.torch_hook.TorchHook.module_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="utils.torch_hook.TorchHook.add_hooks">
+<code class="sig-name descname">add_hooks</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/torch_hook.html#TorchHook.add_hooks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.torch_hook.TorchHook.add_hooks" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name_list</strong> (<em>List of module names to hook</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="utils.torch_hook.TorchHook.available_modules">
+<code class="sig-name descname">available_modules</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/torch_hook.html#TorchHook.available_modules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.torch_hook.TorchHook.available_modules" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List of available module names and associated modules</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="utils.torch_hook.TorchHook.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/torch_hook.html#TorchHook.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.torch_hook.TorchHook.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pass an input through the model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>Input tensor to predict on</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Model output and dictionary of activations</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If no hooks have been added to the model self.activation_dict will be empty</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="utils.torch_hook.TorchHook.hook_fn">
+<code class="sig-name descname">hook_fn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">module</span></em>, <em class="sig-param"><span class="n">input</span></em>, <em class="sig-param"><span class="n">output</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/torch_hook.html#TorchHook.hook_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.torch_hook.TorchHook.hook_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-utils" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../install.html" class="btn btn-neutral float-right" title="Installing Deep Data Profiler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="modules.html" class="btn btn-neutral float-left" title="utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020 Battelle Memorial Institute
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
