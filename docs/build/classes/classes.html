@@ -95,7 +95,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-classes.profile">classes.profile module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-classes.torch_profiler">classes.torch_profiler module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-classes.torch_profiler_old">classes.torch_profiler_old module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-classes">Module contents</a></li>
 </ul>
 </li>
@@ -456,130 +455,6 @@ layer n is the last layer which only holds the input for layer n-1
 below we create profiles starting with a layer 0 corresponding to the
 single neuron corresponding to the maximal logit in the last layer</p>
 <p>Parallel process uses concurrent.futures module.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-classes.torch_profiler_old">
-<span id="classes-torch-profiler-old-module"></span><h2>classes.torch_profiler_old module<a class="headerlink" href="#module-classes.torch_profiler_old" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="classes.torch_profiler_old.TorchProfiler">
-<em class="property">class </em><code class="sig-prename descclassname">classes.torch_profiler_old.</code><code class="sig-name descname">TorchProfiler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">device</span><span class="o">=</span><span class="default_value">device(type='cpu')</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/classes/torch_profiler_old.html#TorchProfiler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#classes.torch_profiler_old.TorchProfiler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Torch Profiler wraps a PyTorch model into a TorchHook model which can register activations
-as it evaluates data. Using the activations, inputs to the model may be profiled.</p>
-<dl class="py attribute">
-<dt id="classes.torch_profiler_old.TorchProfiler.activation_classes">
-<code class="sig-name descname">activation_classes</code><a class="headerlink" href="#classes.torch_profiler_old.TorchProfiler.activation_classes" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of activation classes in PyTorch</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="classes.torch_profiler_old.TorchProfiler.dropout_classes">
-<code class="sig-name descname">dropout_classes</code><a class="headerlink" href="#classes.torch_profiler_old.TorchProfiler.dropout_classes" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of dropout classes in PyTorch</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="classes.torch_profiler_old.TorchProfiler.implemented_classes">
-<code class="sig-name descname">implemented_classes</code><a class="headerlink" href="#classes.torch_profiler_old.TorchProfiler.implemented_classes" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of classes in PyTorch which have contrib functions implemented</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="classes.torch_profiler_old.TorchProfiler.contrib_functions">
-<code class="sig-name descname">contrib_functions</code><a class="headerlink" href="#classes.torch_profiler_old.TorchProfiler.contrib_functions" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of contrib functions ordered by their corresponding classes
-in implemented_classes</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="classes.torch_profiler_old.TorchProfiler.model">
-<code class="sig-name descname">model</code><a class="headerlink" href="#classes.torch_profiler_old.TorchProfiler.model" title="Permalink to this definition">¶</a></dt>
-<dd><p>model to be profiled</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>torch.nn.Sequential()</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="classes.torch_profiler_old.TorchProfiler.create_layers">
-<code class="sig-name descname">create_layers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nlayers</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/classes/torch_profiler_old.html#TorchProfiler.create_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#classes.torch_profiler_old.TorchProfiler.create_layers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a dictionary of layers to profile.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>nlayers</strong> (<em>int</em><em>, </em><em>optional</em>) – if 0 all available modules (except dropout) in the model will be used, otherwise up to n layers will
-be constructed.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>layerdict</strong> – A dictionary of layers keyed by their position from the end of the model.
-The logit layer will be keyed 0.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Because a weighted module is often followed by an activation module
-those modules are combined into a single layer to be profiled. As a consequence
-the number of layers generated will typically be less than the number of available
-modules in the model.
-When this method is called the modules used in the layers are given hooks so that their activations
-may be accessed.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="classes.torch_profiler_old.TorchProfiler.create_profile">
-<code class="sig-name descname">create_profile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">layerdict</span></em>, <em class="sig-param"><span class="n">n_layers</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">show_progress</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/classes/torch_profiler_old.html#TorchProfiler.create_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#classes.torch_profiler_old.TorchProfiler.create_profile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a profile for a single input data x as it passes through the layers in layerdict</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>torch.Tensor</em>) – input to model being profiled</p></li>
-<li><p><strong>layerdict</strong> (<em>dict</em>) – keyed by index starting from the logit layer and working backwards, each layer contains at most one weighted module</p></li>
-<li><p><strong>n_layers</strong> (<em>int</em>) – optional, number of layers to profile - useful if layerdict contains more layers than is wanted to profile</p></li>
-<li><p><strong>show_progress</strong> (<em>bool</em>) – Will print the layer number currently being computed</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>profile contains neuron_counts, synapse_counts, and synapse_weights across layers in layerdict. Corresponding number of images = 1</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#classes.profile.Profile" title="classes.profile.Profile">profile.Profile</a></p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>layerdict has n layers keyed 1 thru n
-layer n is the last layer which only holds the input for layer n-1
-below we create profiles starting with a layer 0 corresponding to the
-single neuron corresponding to the maximal logit in the last layer</p>
 </div>
 </dd></dl>
 

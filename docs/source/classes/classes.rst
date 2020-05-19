@@ -20,14 +20,6 @@ classes.torch\_profiler module
    :undoc-members:
    :show-inheritance:
 
-classes.torch\_profiler\_old module
------------------------------------
-
-.. automodule:: classes.torch_profiler_old
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 
 Module contents
 ---------------
