@@ -32,7 +32,7 @@ class TorchProfiler():
         model to be profiled
     """
 
-    def __init__(self, model, threshold=0.5, device=torch.device('cpu')):
+    def __init__(self, model, device=torch.device('cpu')):
 
         super().__init__()
         self.activation_classes = [m[1] for m in inspect.getmembers(activation, inspect.isclass) if
@@ -125,11 +125,11 @@ class TorchProfiler():
             self.model.add_hooks(namelist)
         return layerdict
 
-    def _single_profile(self, x_in, y_out, ydx, layers, layerdict, ldx):
+    def _single_profile(self, x_in, y_out, ydx, layers, layerdict, ldx, threshold):
         func = getattr(self.__class__, layerdict[ldx][1])
-        return func(self, x_in, y_out, ydx, layers)
+        return func(self, x_in, y_out, ydx, layers, threshold)
 
-    def create_profile(self, x, layerdict, n_layers=0, show_progress=False, parallel=False):
+    def create_profile(self, x, layerdict, n_layers=0, threshold=0.5, show_progress=False, parallel=False):
         """
         Generate a profile for a single input data x as it passes through the layers in layerdict
 
@@ -141,6 +141,8 @@ class TorchProfiler():
             keyed by index starting from the logit layer and working backwards, each layer contains at most one weighted module
         n_layers : int
             optional, number of layers to profile - useful if layerdict contains more layers than is wanted to profile
+        threshold : float, optional, default=0.5
+            Percentage of contribution to track in a profile
         show_progress : bool
             Will print the layer number currently being computed
         parallel : bool
@@ -196,7 +198,7 @@ class TorchProfiler():
                     if parallel == True:
 
                         with concurrent.futures.ProcessPoolExecutor() as executor:
-                            results = [executor.submit(self._single_profile, x_in, y_out, ydx, layers, layerdict, ldx) for ydx in neuron_counts[ldx - 1]]
+                            results = [executor.submit(self._single_profile, x_in, y_out, ydx, layers, layerdict, ldx, threshold) for ydx in neuron_counts[ldx - 1]]
 
                             for f in concurrent.futures.as_completed(results):
                                 nc, sc, sw = f.result()
@@ -205,7 +207,7 @@ class TorchProfiler():
                                 synapse_weights[ldx].update(sw)
                     else:
                         for ydx in neuron_counts[ldx - 1]:
-                            nc, sc, sw = self._single_profile(x_in, y_out, ydx, layers, layerdict, ldx)
+                            nc, sc, sw = self._single_profile(x_in, y_out, ydx, layers, layerdict, ldx, threshold)
                             neuron_counts[ldx].update(nc)
                             synapse_counts[ldx].update(sc)
                             synapse_weights[ldx].update(sw)
