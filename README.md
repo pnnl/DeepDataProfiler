@@ -10,16 +10,6 @@ The current version is preliminary. We are actively testing and would be gratefu
 for comments and suggestions.  Expect changes in both class names and methods as 
 many of the requirements demanded of the library are worked out. 
 
-We've included a tutorial to introduce you to the concepts behind DDPs:
-<a href="https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/master/tutorials/DDP-Tutorial.ipynb" target="_blank">
-
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
-	<span style={'margin-left':5px}>DDP-Tutorial.ipynb</span>
-</a>
-</br>
-<a href="https://colab.research.google.com/github/pnnl/HyperNetX/blob/master/tutorials/Tutorial%202%20-%20Visualization%20Methods.ipynb" target="_blank">
-
-
 For questions and comments you may contact the developers directly at:   
     deepdataprofiler@pnnl.gov
 
