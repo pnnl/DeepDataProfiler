@@ -5,7 +5,7 @@ import os.path
 __version__ = '1.0'
 
 if sys.version_info < (3, 7):
-    sys.exit('DeepDataProfiler requires Python 3.9 or later')
+    sys.exit('DeepDataProfiler requires Python 3.7 or later')
 
 setup(
     name='deep_data_profiler',
