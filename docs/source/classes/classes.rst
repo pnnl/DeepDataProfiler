@@ -20,7 +20,6 @@ classes.torch\_profiler module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

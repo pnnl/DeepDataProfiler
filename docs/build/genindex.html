@@ -3,20 +3,25 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Index &mdash; Deep Data Profiler 0.3.1 documentation</title>
+  <title>Index &mdash; Deep Data Profiler 1.0.0 documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -26,10 +31,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script src="_static/copybutton.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -50,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Deep Data Profiler
+            <a href="index.html" class="icon icon-home"> Deep Data Profiler
           
 
           
@@ -63,7 +68,7 @@
             
             
               <div class="version">
-                0.3
+                1.0
               </div>
             
           
@@ -91,9 +96,10 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="overview/index.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classes/modules.html">Profiling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="utils/modules.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/modules.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installing Deep Data Profiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tableofcontents.html">Index</a></li>
 </ul>
 
             
@@ -134,6 +140,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -145,7 +153,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
         
       </li>
     
@@ -166,13 +174,13 @@
  | <a href="#D"><strong>D</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
- | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#J"><strong>J</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
- | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
@@ -183,15 +191,37 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.activation_classes">activation_classes (classes.torch_profiler.TorchProfiler attribute)</a>
 </li>
-      <li><a href="utils/utils.html#utils.torch_hook.TorchHook.activation_dict">activation_dict (utils.torch_hook.TorchHook attribute)</a>
+      <li>
+    algorithms
+
+      <ul>
+        <li><a href="algorithms/algorithms.html#module-algorithms">module</a>
 </li>
+      </ul></li>
+      <li>
+    algorithms.homology
+
+      <ul>
+        <li><a href="algorithms/algorithms.html#module-algorithms.homology">module</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utils/utils.html#utils.torch_hook.TorchHook.add_hooks">add_hooks() (utils.torch_hook.TorchHook method)</a>
+      <li>
+    algorithms.jaccard
+
+      <ul>
+        <li><a href="algorithms/algorithms.html#module-algorithms.jaccard">module</a>
 </li>
-      <li><a href="utils/utils.html#utils.torch_hook.TorchHook.available_modules">available_modules() (utils.torch_hook.TorchHook method)</a>
+      </ul></li>
+      <li>
+    algorithms.spectral_analysis
+
+      <ul>
+        <li><a href="algorithms/algorithms.html#module-algorithms.spectral_analysis">module</a>
 </li>
-      <li><a href="classes/classes.html#classes.profile.avg_jaccard">avg_jaccard() (in module classes.profile)</a>
+      </ul></li>
+      <li><a href="algorithms/algorithms.html#algorithms.jaccard.avg_jaccard">avg_jaccard() (in module algorithms.jaccard)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -213,8 +243,6 @@
         <li><a href="classes/classes.html#module-classes.profile">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     classes.torch_profiler
 
@@ -222,7 +250,21 @@
         <li><a href="classes/classes.html#module-classes.torch_profiler">module</a>
 </li>
       </ul></li>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_adaptive_avg_pool2d">contrib_adaptive_avg_pool2d() (classes.torch_profiler.TorchProfiler method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_conv2d">contrib_conv2d() (classes.torch_profiler.TorchProfiler method)</a>
+</li>
       <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_functions">contrib_functions (classes.torch_profiler.TorchProfiler attribute)</a>
+</li>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_identity">contrib_identity() (classes.torch_profiler.TorchProfiler method)</a>
+</li>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_linear">contrib_linear() (classes.torch_profiler.TorchProfiler method)</a>
+</li>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_max2d">contrib_max2d() (classes.torch_profiler.TorchProfiler method)</a>
+</li>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_resnetadd">contrib_resnetadd() (classes.torch_profiler.TorchProfiler method)</a>
 </li>
       <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.create_layers">create_layers() (classes.torch_profiler.TorchProfiler method)</a>
 </li>
@@ -234,7 +276,7 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utils/utils.html#utils.helpers.DDPCounter">DDPCounter (class in utils.helpers)</a>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.dict_view">dict_view() (classes.torch_profiler.TorchProfiler method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -246,7 +288,7 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utils/utils.html#utils.torch_hook.TorchHook.forward">forward() (utils.torch_hook.TorchHook method)</a>
+      <li><a href="algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.fit_power_law">fit_power_law() (algorithms.spectral_analysis.SpectralAnalysis method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -254,19 +296,7 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utils/utils.html#utils.helpers.get_index">get_index() (in module utils.helpers)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="H">H</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utils/utils.html#utils.torch_hook.TorchHook.hook_fn">hook_fn() (utils.torch_hook.TorchHook method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utils/utils.html#utils.torch_hook.TorchHook.hooked_module_names">hooked_module_names (utils.torch_hook.TorchHook attribute)</a>
+      <li><a href="algorithms/algorithms.html#algorithms.homology.graph_from_tuples">graph_from_tuples() (in module algorithms.homology)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -274,13 +304,17 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.implemented_classes">implemented_classes (classes.torch_profiler.TorchProfiler attribute)</a>
+      <li><a href="algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.implemented_classes">implemented_classes (algorithms.spectral_analysis.SpectralAnalysis attribute)</a>
+
+      <ul>
+        <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.implemented_classes">(classes.torch_profiler.TorchProfiler attribute)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utils/utils.html#utils.helpers.DDPCounter.inc">inc() (utils.helpers.DDPCounter method)</a>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.influence_generator">influence_generator() (classes.torch_profiler.TorchProfiler method)</a>
 </li>
-      <li><a href="classes/classes.html#classes.profile.instance_jaccard">instance_jaccard() (in module classes.profile)</a>
+      <li><a href="algorithms/algorithms.html#algorithms.jaccard.instance_jaccard">instance_jaccard() (in module algorithms.jaccard)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -288,11 +322,19 @@
 <h2 id="J">J</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.profile.jaccard">jaccard() (in module classes.profile)</a>
+      <li><a href="algorithms/algorithms.html#algorithms.jaccard.jaccard">jaccard() (in module algorithms.jaccard)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.profile.jaccard_simple">jaccard_simple() (in module classes.profile)</a>
+      <li><a href="algorithms/algorithms.html#algorithms.jaccard.jaccard_simple">jaccard_simple() (in module algorithms.jaccard)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.layer_RMT">layer_RMT() (algorithms.spectral_analysis.SpectralAnalysis method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -300,52 +342,50 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.model">model (classes.torch_profiler.TorchProfiler attribute)</a>
+      <li><a href="algorithms/algorithms.html#algorithms.homology.mat_from_graph">mat_from_graph() (in module algorithms.homology)</a>
+</li>
+      <li><a href="algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.model">model (algorithms.spectral_analysis.SpectralAnalysis attribute)</a>
 
       <ul>
-        <li><a href="utils/utils.html#utils.torch_hook.TorchHook.model">(utils.torch_hook.TorchHook attribute)</a>
+        <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.model">(classes.torch_profiler.TorchProfiler attribute)</a>
 </li>
       </ul></li>
       <li>
     module
 
       <ul>
+        <li><a href="algorithms/algorithms.html#module-algorithms">algorithms</a>
+</li>
+        <li><a href="algorithms/algorithms.html#module-algorithms.homology">algorithms.homology</a>
+</li>
+        <li><a href="algorithms/algorithms.html#module-algorithms.jaccard">algorithms.jaccard</a>
+</li>
+        <li><a href="algorithms/algorithms.html#module-algorithms.spectral_analysis">algorithms.spectral_analysis</a>
+</li>
         <li><a href="classes/classes.html#module-classes">classes</a>
 </li>
         <li><a href="classes/classes.html#module-classes.profile">classes.profile</a>
 </li>
         <li><a href="classes/classes.html#module-classes.torch_profiler">classes.torch_profiler</a>
 </li>
-        <li><a href="utils/utils.html#module-utils">utils</a>
-</li>
-        <li><a href="utils/utils.html#module-utils.helpers">utils.helpers</a>
-</li>
-        <li><a href="utils/utils.html#module-utils.torch_hook">utils.torch_hook</a>
-</li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utils/utils.html#utils.torch_hook.TorchHook.module_dict">module_dict (utils.torch_hook.TorchHook attribute)</a>
-</li>
   </ul></td>
 </tr></table>
 
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.profile.Profile.neuron_counts">neuron_counts() (classes.profile.Profile property)</a>
+      <li><a href="classes/classes.html#classes.profile.Profile.neuron_counts">neuron_counts (classes.profile.Profile property)</a>
+</li>
+      <li><a href="classes/classes.html#classes.profile.Profile.neuron_type">neuron_type (classes.profile.Profile property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.profile.Profile.num_inputs">num_inputs() (classes.profile.Profile property)</a>
+      <li><a href="classes/classes.html#classes.profile.Profile.neuron_weights">neuron_weights (classes.profile.Profile property)</a>
 </li>
-  </ul></td>
-</tr></table>
-
-<h2 id="O">O</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.profile.order_neuron_counts">order_neuron_counts() (in module classes.profile)</a>
+      <li><a href="classes/classes.html#classes.profile.Profile.num_inputs">num_inputs (classes.profile.Profile property)</a>
+</li>
+      <li><a href="classes/classes.html#classes.profile.Profile.num_synapses">num_synapses (classes.profile.Profile property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -358,18 +398,38 @@
   </ul></td>
 </tr></table>
 
-<h2 id="S">S</h2>
+<h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.profile.Profile.size">size() (classes.profile.Profile property)</a>
-</li>
-      <li><a href="utils/utils.html#utils.helpers.submatrix_generator">submatrix_generator() (in module utils.helpers)</a>
+      <li><a href="algorithms/algorithms.html#algorithms.homology.ripser_of_distmat">ripser_of_distmat() (in module algorithms.homology)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.profile.Profile.synapse_counts">synapse_counts() (classes.profile.Profile property)</a>
+      <li><a href="algorithms/algorithms.html#algorithms.homology.ripser_of_graph">ripser_of_graph() (in module algorithms.homology)</a>
 </li>
-      <li><a href="classes/classes.html#classes.profile.Profile.synapse_weights">synapse_weights() (classes.profile.Profile property)</a>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.sgheadtail">sgheadtail() (classes.torch_profiler.TorchProfiler method)</a>
+</li>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.single_profile">single_profile() (classes.torch_profiler.TorchProfiler method)</a>
+</li>
+      <li><a href="classes/classes.html#classes.profile.Profile.size">size (classes.profile.Profile property)</a>
+</li>
+      <li><a href="algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.spectral_analysis">spectral_analysis() (algorithms.spectral_analysis.SpectralAnalysis method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis">SpectralAnalysis (class in algorithms.spectral_analysis)</a>
+</li>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.super_nodes_graph">super_nodes_graph() (classes.torch_profiler.TorchProfiler method)</a>
+</li>
+      <li><a href="classes/classes.html#classes.profile.Profile.synapse_counts">synapse_counts (classes.profile.Profile property)</a>
+</li>
+      <li><a href="classes/classes.html#classes.profile.Profile.synapse_weights">synapse_weights (classes.profile.Profile property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -377,13 +437,13 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utils/utils.html#utils.torch_hook.TorchHook">TorchHook (class in utils.torch_hook)</a>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler">TorchProfiler (class in classes.torch_profiler)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler">TorchProfiler (class in classes.torch_profiler)</a>
+      <li><a href="classes/classes.html#classes.profile.Profile.total">total (classes.profile.Profile property)</a>
 </li>
-      <li><a href="classes/classes.html#classes.profile.Profile.total">total() (classes.profile.Profile property)</a>
+      <li><a href="algorithms/algorithms.html#algorithms.homology.tuples_from_dict">tuples_from_dict() (in module algorithms.homology)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -391,29 +451,8 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
-    utils
-
-      <ul>
-        <li><a href="utils/utils.html#module-utils">module</a>
+      <li><a href="algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.universal_metric">universal_metric() (algorithms.spectral_analysis.SpectralAnalysis method)</a>
 </li>
-      </ul></li>
-      <li>
-    utils.helpers
-
-      <ul>
-        <li><a href="utils/utils.html#module-utils.helpers">module</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
-    utils.torch_hook
-
-      <ul>
-        <li><a href="utils/utils.html#module-utils.torch_hook">module</a>
-</li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -423,28 +462,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020 Battelle Memorial Institute
+        &#169; Copyright 2020 Battelle Memorial Institute.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
