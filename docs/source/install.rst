@@ -8,7 +8,7 @@ To install with tutorials and documentation using anaconda and pip:
 
 Note: Documentation is built using Sphinx, which requires we install the matplotlib package using conda *not pip*. 
 
-	>>> conda create -n ddp python=3.9 matplotlib
+	>>> conda create -n ddp python=3.7 matplotlib
 	>>> conda activate ddp
 
 From the root directory of deep_data_profiler do 
@@ -25,6 +25,6 @@ To see the sphinx documentation
 
 You may also install without editing, tutorials and testing simply using 
 
-	>>> conda create -n ddp python=3.9
+	>>> conda create -n ddp python=3.7
 	>>> pip install .
 
