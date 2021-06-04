@@ -21,7 +21,7 @@ Then run
 
 To see the sphinx documentation 
 
-	>>> open docs/build/index.htm
+	>>> open docs/index.html
 
 You may also install without editing, tutorials and testing simply using 
 

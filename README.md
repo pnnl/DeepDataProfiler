@@ -2,7 +2,42 @@ Deep Data Profiler (DDP)
 ========================
   
 The DDP library provides tools for analyzing the internal decision structure of a deep neural network within the
-context of a specific dataset. The DDP project is part of the Mathematics of Artificial Reasoning in Science (MARS) 
+context of a specific dataset. 
+
+Installing Deep Data Profiler
+=============================
+
+Using Anaconda and Pip
+----------------------
+
+To install with tutorials and documentation using anaconda and pip:
+
+Note: Documentation is built using Sphinx, which requires we install the matplotlib package using conda *not pip*. 
+
+    >>> conda create -n ddp python=3.9 matplotlib
+    >>> conda activate ddp
+
+From the root directory of deep_data_profiler do 
+
+    >>> pip install -e.[‘all’]
+
+Then run
+
+    >>> pytest
+
+To see the sphinx documentation 
+
+    >>> open docs/index.html
+
+You may also install without editing, tutorials and testing simply using 
+
+    >>> conda create -n ddp python=3.9
+    >>> pip install .
+
+
+Notes
+-----
+The DDP project is part of the Mathematics of Artificial Reasoning in Science (MARS) 
 Initiative at Pacific Northwest National Laboratory (PNNL).  
 Research was conducted under the Laboratory Directed Research and Development Program at PNNL, 
 a multiprogram national laboratory operated by Battelle for the U.S. Department of Energy.
@@ -14,7 +49,7 @@ a multiprogram national laboratory operated by Battelle for the U.S. Department 
 
 For questions and comments you may contact the developers directly at:
     deepdataprofiler@pnnl.gov
-
+    
 Notice
 ------
 The research described in this paper is part of the Mathematics of Artificial Reasoning in Science (MARS) Initiative at Pacific Northwest National Laboratory (PNNL).  It was conducted under the Laboratory Directed Research and Development Program at PNNL, a multiprogram national laboratory operated by Battelle for the U.S. Department of Energy.
