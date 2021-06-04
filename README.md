@@ -34,6 +34,30 @@ You may also install without editing, tutorials and testing simply using
     >>> conda create -n ddp python=3.9
     >>> pip install .
 
+Tutorials may be run in your browser using Google Colab
+-------------------------------------------------------
+
+<a href="https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/develop/tutorials/Tutorial%201%20-%20DDP-Tutorial.ipynb" target="_blank">
+
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+    <span style={'margin-left':5px}>Tutorial 1 - An Introduction to a DDP Profile</span>
+</a>
+</br>
+
+<a href="https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/develop/tutorials/Tutorial%202%20-%20DDPAlgorithms.ipynb" target="_blank">
+
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+    <span style={'margin-left':5px}>Tutorial 2 - Topological Data Analysis</span>
+</a>
+</br>
+
+<a href="https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/develop/tutorials/Tutorial%203%20-%20SpectralAnalysis.ipynb" target="_blank">
+
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+    <span style={'margin-left':5px}>Tutorial 3 - Spectral Analysis of CNN</span>
+</a>
+</br>
+
 
 Notes
 -----
