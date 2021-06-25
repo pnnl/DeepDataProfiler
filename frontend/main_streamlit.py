@@ -30,7 +30,7 @@ def grouper(iterable, n, fillvalue=None):
 def load_paths():
     """Loads the dict keyed by features, with values of dicts of
     singular values and the relative image paths that maximize these singular values."""
-    img_paths = pkl.load(open("light_paths.pkl", "rb"))
+    img_paths = pkl.load(open("data/light_paths.pkl", "rb"))
 
     return img_paths
 
@@ -125,7 +125,28 @@ if __name__ == "__main__":
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
     # NOTE: in future, allow user to supply relative path
     if active_tab == "About":
-        st.write("About page")
+        st.header("About these tools")
+        header = '''
+        This is a visualization tool for the [DeepDataProfiler](https://pnnl.github.io/DeepDataProfiler/build/index.html) library. For now, it consists of two separate components:
+
+        1. Visualizations that link what we are calling the "SVD neurons" in a VGG-16 network with dataset examples from ImageNet.
+
+        2. The persistence diagrams for DDP pofile graphs for ImageNet images with VGG-16.
+
+        Use the tabs above to navigate between these visualizations, or read more below.
+        '''
+        st.write(header)
+        body = '''
+        ## 1 SVD Feature Visualizations
+        Feature visualization is an interpretability technique that (roughly) optimizes an image so that it highly activates a neuron in a deep neural network (DNN). Feature visualizations have been used to gain a better understanding of how individual neurons in DNNs represent features.
+
+        A prominent tool using feature visualizations is [OpenAI's Microscope](https://microscope.openai.com/models), which pairs these visualizations with dataset examples. Our SVD feature visualizations is a similar tool. However, our definition of "neurons," the basic unit of analysis for defining features that we are visualizing, differs from existing approaches.
+        #### SVD Neurons
+        Performing interpretability analysis on only the activations is sometimes misleading. One salient problem is that of [polysemantic neurons](https://distill.pub/2020/circuits/zoom-in/), activations that respond to many unrelated inputs. Our hypothesis is that this problem can be partially solved by representing the hidden layer activations in a basis that better represents the features learning in a DNN. The approach we have taken is to project the activations of a hidden layer onto the
+        basis of eigenvectors of the weights for the layer. By representing the activations in a basis, we hope to find a "cleaner," less polysemantic, feature space.
+        ## 2 TDA Visualizations
+        '''
+        st.write(body)
 
     elif active_tab == "SVD Feature Visualizations":
         st.subheader("Singular value feature visualizations")
