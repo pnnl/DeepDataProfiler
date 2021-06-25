@@ -125,28 +125,34 @@ if __name__ == "__main__":
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
     # NOTE: in future, allow user to supply relative path
     if active_tab == "About":
-        st.header("About these tools")
+        st.header("About this tool")
         header = '''
         This is a visualization tool for the [DeepDataProfiler](https://pnnl.github.io/DeepDataProfiler/build/index.html) library. For now, it consists of two separate components:
 
         1. Visualizations that link what we are calling the "SVD neurons" in a VGG-16 network with dataset examples from ImageNet.
 
-        2. The persistence diagrams for DDP pofile graphs for ImageNet images with VGG-16.
+        2. The persistence diagrams for DDP pofiler graphs for ImageNet images with VGG-16.
 
         Use the tabs above to navigate between these visualizations, or read more below.
         '''
         st.write(header)
-        body = '''
+        body_svd = '''
         ## 1 SVD Feature Visualizations
         Feature visualization is an interpretability technique that (roughly) optimizes an image so that it highly activates a neuron in a deep neural network (DNN). Feature visualizations have been used to gain a better understanding of how individual neurons in DNNs represent features.
 
         A prominent tool using feature visualizations is [OpenAI's Microscope](https://microscope.openai.com/models), which pairs these visualizations with dataset examples. Our SVD feature visualizations is a similar tool. However, our definition of "neurons," the basic unit of analysis for defining features that we are visualizing, differs from existing approaches.
         #### SVD Neurons
-        Performing interpretability analysis on only the activations is sometimes misleading. One salient problem is that of [polysemantic neurons](https://distill.pub/2020/circuits/zoom-in/), activations that respond to many unrelated inputs. Our hypothesis is that this problem can be partially solved by representing the hidden layer activations in a basis that better represents the features learning in a DNN. The approach we have taken is to project the activations of a hidden layer onto the
-        basis of eigenvectors of the weights for the layer. By representing the activations in a basis, we hope to find a "cleaner," less polysemantic, feature space.
+        Performing interpretability analysis on only the activations is sometimes misleading. One salient problem is that of [polysemantic neurons](https://distill.pub/2020/circuits/zoom-in/), activations that respond to many unrelated inputs. Our hypothesis is that this problem can be partially solved by representing the hidden layer activations in a basis that better represents the features learning in a DNN.
+
+        The approach we have taken is to project the activations of a hidden layer onto the basis of eigenvectors of the weights for the layer. By representing the activations in a basis, we hope to find a "cleaner," less polysemantic, feature space.
+        '''
+        st.write(body_svd)
+        neuron_img = Image.open("data/neuron_img2.png")
+        st.image(neuron_img, )
+        body_tda = '''
         ## 2 TDA Visualizations
         '''
-        st.write(body)
+        st.write(body_tda)
 
     elif active_tab == "SVD Feature Visualizations":
         st.subheader("Singular value feature visualizations")
@@ -156,14 +162,14 @@ if __name__ == "__main__":
         layers = list(img_paths.keys())
         # Add a selectbox to the sidebar:
         layer_selectbox = st.sidebar.selectbox(
-            "Choose a layer to view", layers, index=12
+            "Choose a hidden layer of VGG-16 to view", layers, index=12
         )
 
         features = sorted(list(img_paths[layer_selectbox].keys()))
 
         # Add a selectbox to the sidebar:
         feature_selectbox = st.sidebar.selectbox(
-            "Choose an SVD feature to view", features, index=6
+            "Choose an SVD neuron to view", features, index=6
         )
 
         st.sidebar.subheader("SVD feature visualization")
@@ -297,7 +303,7 @@ if __name__ == "__main__":
             col_tda_image, col_tda_pers, col_tda_pers_heat = st.beta_columns(3)
             col_tda_image.subheader(f"Image \n class: {cls_name}")
             col_tda_pers.subheader("Persistence Diagram")
-            col_tda_pers_heat.subheader("Persistence Heatmap")
+            col_tda_pers_heat.subheader("Persistence Image")
 
             for img in range(num_images):
                 imgname = imgnames[img]
