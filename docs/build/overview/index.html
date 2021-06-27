@@ -3,20 +3,25 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Overview &mdash; Deep Data Profiler 0.3.1 documentation</title>
+  <title>Overview &mdash; Deep Data Profiler 1.0.0 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -26,10 +31,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
         <script src="../_static/copybutton.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
@@ -52,7 +57,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Deep Data Profiler
+            <a href="../index.html" class="icon icon-home"> Deep Data Profiler
           
 
           
@@ -65,7 +70,7 @@
             
             
               <div class="version">
-                0.3
+                1.0
               </div>
             
           
@@ -92,15 +97,17 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#notice">Notice</a><ul class="simple">
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#related-work">Related Work</a><ul class="simple">
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../classes/modules.html">Profiling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../utils/modules.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/modules.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installing Deep Data Profiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tableofcontents.html">Index</a></li>
 </ul>
 
             
@@ -141,6 +148,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -152,7 +161,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../_sources/overview/index.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -166,34 +175,68 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="overview">
+  <a class="reference internal image-reference" href="../_images/eaglegraph.png"><img alt="../_images/eaglegraph.png" class="align-right" src="../_images/eaglegraph.png" style="width: 500px;" /></a>
+<div class="section" id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
-<img alt="../_images/Profilingicon.png" class="align-right" src="../_images/Profilingicon.png" />
-<p>The <a class="reference external" href="https://github.com/pnnl/DeepDataProfiler">DeepDataProfiler</a> library provides tools for analyzing the internal decision structure of a deep neural network within the
-context of a specific dataset. The library was inspired by the work of Qiu, et al. in Adversarial Defense Through
-Network Profiling Based Path Extraction (2019), arXiv:1904.08089.</p>
-<p>The current version is preliminary. We are actively testing and would be grateful
-for comments and suggestions.  Expect changes in both class names and methods as
-many of the requirements demanded of the library are worked out.</p>
-<dl class="simple">
-<dt>For questions and comments you may contact the developers directly at:</dt><dd><p><a class="reference external" href="mailto:deepdataprofiler&#37;&#52;&#48;pnnl&#46;gov">deepdataprofiler<span>&#64;</span>pnnl<span>&#46;</span>gov</a></p>
-</dd>
-</dl>
-<div class="section" id="notice">
-<h2>Notice<a class="headerlink" href="#notice" title="Permalink to this headline">¶</a></h2>
-<p>The research described in this paper is part of the Mathematics of Artificial Reasoning in Science (MARS) Initiative at Pacific Northwest National Laboratory (PNNL).  It was conducted under the Laboratory Directed Research and Development Program at PNNL, a multiprogram national laboratory operated by Battelle for the U.S. Department of Energy.
-Neither the United States Government nor the United States Department of Energy, nor Battelle, nor any of their employees, nor any jurisdiction or organization that has cooperated in the development of these materials, makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness or any information, apparatus, product, software, or process disclosed, or represents that its use would not infringe privately owned rights.
-Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States Government or any agency thereof, or Battelle Memorial Institute. The views and opinions of authors expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.</p>
-<div align=center>
-<pre style="align-text:center;font-size:10pt">
-PACIFIC NORTHWEST NATIONAL LABORATORY
-operated by
-BATTELLE
-for the
-UNITED STATES DEPARTMENT OF ENERGY
-under Contract DE-AC05-76RL01830
-</pre>
-</div><div class="toctree-wrapper compound">
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Deep neural networks (DNN) provide powerful and succesful classification tools.
+Unfortunately they are often very complex and can involve millions of trained parameters.
+This complexity makes it difficult to connect the input domain to the decisions used to classify its elements.
+<em>Does the network really see a bird or does it just see blue sky and infer there is a bird?</em>
+The <a class="reference external" href="https://github.com/pnnl/DeepDataProfiler">DeepDataProfiler</a> (DDP) challenge is to link hidden representations of existing trained neural networks to human recognizable input features
+and to identify training invariant structures and metrics for determining trustworthiness of the network.</p>
+<p>DDP is both a methodology and software package.
+The methodology has two steps.</p>
+<ol class="arabic simple">
+<li><p><strong>Profiling:</strong> Generate representations of data using the graph (or subnetwork) of neurons and synapses they most activate in a trained DNN.</p></li>
+<li><p><strong>Analysis:</strong> Apply Graph Theory and Topological Data Analysis (TDA) to identify structural features of the graphs that may be used to explain and interpret the decision process of the network.</p></li>
+</ol>
+<p>The DDP software is the implemention of this methodology in Python using the PyTorch library.
+Our first release in May 2020 profiled VGG-like Sequential CNN architectures.
+The current release extends to ResNet architectures.
+At present only models built using PyTorch can be profiled.
+Our TDA work is implemented in the homology module in the algorithms directory and depends on ripser.</p>
+</div>
+<div class="section" id="related-work">
+<h2>Related Work<a class="headerlink" href="#related-work" title="Permalink to this headline">¶</a></h2>
+<p>Providing human interpretable explanations for the decisions made by deep neural networks is a high
+priority for machine learning practioners. One popular approach is to link input data to the most influential
+<strong>neurons</strong> and <strong>synapses</strong> used for their classification.
+Our research in this area was inspired by <a class="reference external" href="https://arxiv.org/abs/1904.08089">Yuxian Qiu, Jingwen Leng, Cong Guo, Quan Chen, Chao Li,Minyi Guo, and Yuhao Zhu.
+Adversarial Defense Through Net-work Profiling Based Path Extraction.
+In2019 IEEE/CVF Con-ference on Computer Vision and Pattern Recognition (CVPR),
+pages 4772–4781, Long Beach, CA, USA, June 2019. IEEE</a>
+They create <em>graph-like</em> objects called <strong>effective paths</strong> to explore the internal organization of deep neural networks.</p>
+<p>Deep neural networks lend themselves naturally to decomposition into graphs as they are already <em>graph like</em>
+in their neural connections. Such decompositions have been explored in particular in image classification networks.
+<a class="reference external" href="https://fredhohman.com/summit/">Summit</a> creates an <strong>attribution graph</strong> of the convolutional layers
+to visualize neuron activations and linking, see
+<a class="reference external" href="https://arxiv.org/abs/1904.02323">F. Hohman, et al., “Summit: Scaling Deep Learning
+Interpretability by Visualizing Activation and Attribution Summarizations,”  arXiv:1708.01785 [cs], Nov. 2017</a></p>
+<p>Q. Zhang et al. create <strong>explanatory graphs</strong> to expose the knowledge hierarchy hidden inside a pre-trained
+CNN, see: <a class="reference external" href="http://arxiv.org/abs/1708.01785">Q. Zhang, R. Cao, F. Shi, Y. N. Wu, and S.-C. Zhu, “Interpreting CNN Knowledge via an Explanatory Graph,”
+arXiv:1708.01785 [cs], Nov. 2017.</a></p>
+<p>N. Cammarata, et al. describe <strong>circuits</strong> of neurons from the convolutional layers of a network,
+which connect to represent features
+of an image used for classification, see <a class="reference external" href="https://distill.pub/2020/circuits/">N. Cammarata, S. Carter, G. Goh, C. Olah, M. Petrov, and L. Schubert,
+“Thread: Circuits,” Distill, vol. 5, no. 3, p. e24, Mar. 2020, doi: 10.23915/distill.00024.</a></p>
+<img alt="../_images/Background.png" class="align-right" src="../_images/Background.png" />
+<p>The <a class="reference external" href="https://github.com/pnnl/DeepDataProfiler">DeepDataProfiler</a>  library builds on the ideas above to provide tools for the analysis of the internal decision
+structure of a deep neural network.
+Given a trained model, DDP generates <strong>profile graphs</strong> for inputs. These graphs are similar to the effective paths in <a class="reference external" href="https://arxiv.org/abs/1904.08089">Qiu’s</a> paper
+but with weighting and attribution similar to the graphs generated in <a class="reference external" href="https://fredhohman.com/summit/">Summit</a> .
+At present the library has a
+working pipeline to generate profiles using VGG and ResNet architectures implemented in <a class="reference external" href="https://pytorch.org/">PyTorch</a>.</p>
+<img alt="../_images/pipelineimg.png" class="align-right" src="../_images/pipelineimg.png" />
+<p>We apply Graph Theory and Topological Data Analysis to the profile graphs to explore their structure.
+The Algorithms directory contains modules
+for exploring the persistent homology of point clouds
+generated from profile graphs and for
+exploring the empirical spectral decomposition
+of the model’s linear operators.</p>
+<p>Jupyter notebooks for the library with illustrative examples are available in the tutorials directory.</p>
+<div class="toctree-wrapper compound">
 </div>
 </div>
 </div>
@@ -203,37 +246,29 @@ under Contract DE-AC05-76RL01830
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../classes/modules.html" class="btn btn-neutral float-right" title="classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="../index.html" class="btn btn-neutral float-left" title="Deep Data Profiler (DDP)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="../classes/modules.html" class="btn btn-neutral float-right" title="classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="Deep Data Profiler (DDP)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020 Battelle Memorial Institute
+        &#169; Copyright 2020 Battelle Memorial Institute.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

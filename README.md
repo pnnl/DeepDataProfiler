@@ -1,16 +1,77 @@
 Deep Data Profiler (DDP)
 ========================
-
-The Deep Data Profiler library provides tools for analyzing the internal decision structure of a deep neural network within the
-context of a specific dataset. The library was inspired by the work of Qiu, et al. in Adversarial Defense Through
-Network Profiling Based Path Extraction (2019), arXiv:1904.08089.
   
+The DDP library provides tools for analyzing the internal decision structure of a deep neural network within the
+context of a specific dataset. Documentation may be found [here](https://pnnl.github.io/DeepDataProfiler/)
 
-The current version is preliminary. We are actively testing and would be grateful 
-for comments and suggestions.  Expect changes in both class names and methods as 
-many of the requirements demanded of the library are worked out. 
+Installing Deep Data Profiler
+=============================
 
-For questions and comments you may contact the developers directly at:   
+Using Anaconda and Pip
+----------------------
+
+To install with tutorials and documentation using anaconda and pip:
+
+Note: Documentation is built using Sphinx, which requires we install the matplotlib package using conda *not pip*. 
+
+    >>> conda create -n ddp python=3.7 matplotlib
+    >>> conda activate ddp
+
+From the root directory of deep_data_profiler do 
+
+    >>> pip install -e.[‘all’]
+
+Then run
+
+    >>> pytest
+
+To see the sphinx documentation 
+
+    >>> open docs/index.html
+
+You may also install without editing, tutorials and testing simply using 
+
+    >>> conda create -n ddp python=3.7
+    >>> pip install .
+
+Tutorials may be run in your browser using Google Colab
+-------------------------------------------------------
+
+<a href="https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/master/tutorials/Tutorial%201%20-%20DDP-Tutorial.ipynb" target="_blank">
+
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+    <span style={'margin-left':5px}>Tutorial 1 - An Introduction to a DDP Profile</span>
+</a>
+</br>
+
+<a href="https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/master/tutorials/Tutorial%202%20-%20DDPAlgorithms.ipynb" target="_blank">
+
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+    <span style={'margin-left':5px}>Tutorial 2 - Topological Data Analysis</span>
+</a>
+</br>
+
+<a href="https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/master/tutorials/Tutorial%203%20-%20SpectralAnalysis.ipynb" target="_blank">
+
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+    <span style={'margin-left':5px}>Tutorial 3 - Spectral Analysis of CNN</span>
+</a>
+</br>
+
+
+Notes
+-----
+The DDP project is part of the Mathematics of Artificial Reasoning in Science (MARS) 
+Initiative at Pacific Northwest National Laboratory (PNNL).  
+Research was conducted under the Laboratory Directed Research and Development Program at PNNL, 
+a multiprogram national laboratory operated by Battelle for the U.S. Department of Energy.
+
+* Principle Investigator: Brenda Praggastis
+* Design and Development: Davis Brown, Brenda Praggastis, Madelyn Shapiro
+* Topological Data Analysis Contributors: Emilie Purvine, Bei Wang
+* Original authors: Nichole Nichols, Brenda Praggastis, Aaron Tuor
+
+For questions and comments you may contact the developers directly at:
     deepdataprofiler@pnnl.gov
 
 Notice

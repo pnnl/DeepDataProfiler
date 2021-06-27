@@ -1,0 +1,498 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>algorithms.spectral_analysis &mdash; Deep Data Profiler 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Deep Data Profiler
+          
+
+          
+            
+            <img src="../../_static/Profilingicon.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview/index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes/modules.html">Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/modules.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installing Deep Data Profiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tableofcontents.html">Index</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Deep Data Profiler</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>algorithms.spectral_analysis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for algorithms.spectral_analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">powerlaw</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">deep_data_profiler.utils</span> <span class="kn">import</span> <span class="n">aspect_ratio</span><span class="p">,</span> <span class="n">get_children</span>
+
+
+<div class="viewcode-block" id="SpectralAnalysis"><a class="viewcode-back" href="../../algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis">[docs]</a><span class="k">class</span> <span class="nc">SpectralAnalysis</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Spectral Analysis is based on methods originating from Random Matrix theory,</span>
+<span class="sd">    brought to deep neural networks by Martin and Mahoney.  `Traditional and Heavy-Tailed Self Regularization in Neural Network Models &lt;https://arxiv.org/abs/1901.08276/&gt;`_ by Martin and Mahoney</span>
+<span class="sd">    `Predicting trends in the quality of state-of-the-art neural networks without access to training or testing data &lt;https://arxiv.org/abs/2002.06716/&gt;`_ by Martin, Peng,and Mahoney</span>
+
+<span class="sd">    These methods act only on the weights of the Fully Connected and</span>
+<span class="sd">    Convolutional layers a deep neural network. Despite this, they have</span>
+<span class="sd">    proven effective in predicting</span>
+<span class="sd">    1. Test accuracies with no access to the data distribution on which it was trained OR tested</span>
+<span class="sd">    2. Relative performance between models of similar architecture classes</span>
+<span class="sd">    3. Model and architecture improvements while training</span>
+
+
+
+<span class="sd">    The major improvement we make over the above work is our handling of</span>
+<span class="sd">    convolutional layers: our methods are more principled, and over an</span>
+<span class="sd">    order of magnitude faster than the code released by the authors in</span>
+<span class="sd">    https://github.com/CalculatedContent/WeightWatcher.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    implemented_classes : set</span>
+<span class="sd">        List of classes in PyTorch we can examine,</span>
+<span class="sd">        i.e. have implemented spectral distributions</span>
+<span class="sd">    model : torch.nn.Module()</span>
+<span class="sd">        model to be spectral-analyzed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">implemented_classes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">,</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
+            <span class="n">repr_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SpectralAnalysis for a </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">repr_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SpectralAnalysis for a </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">repr_name</span>
+
+<div class="viewcode-block" id="SpectralAnalysis.spectral_analysis"><a class="viewcode-back" href="../../algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.spectral_analysis">[docs]</a>    <span class="k">def</span> <span class="nf">spectral_analysis</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dictionary keyed by the order of</span>
+<span class="sd">        the linear and convolutional layers, with the</span>
+<span class="sd">        eigenvalues of :math:`X = W W^T`.</span>
+<span class="sd">        Optional plot of the spectrum.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        plot: bool</span>
+<span class="sd">            Plot per-layer empirical spectral distribution.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        eigdict: Dict[int, Tuple[float, float]]</span>
+<span class="sd">            Dictionary with keys of the nth layer proviled,</span>
+<span class="sd">            values of :attr:`(eigenvalues, Q)`, where :attr:`eigenvalues`</span>
+<span class="sd">            are those of the weight matrix for the layer, and :attr:`Q`</span>
+<span class="sd">            is the aspect ratio of the matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eigdict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">all_ops</span> <span class="o">=</span> <span class="n">get_children</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">operation_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">op</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">all_ops</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">op</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">implemented_classes</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">operation_list</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">Linear</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                <span class="n">X_linear</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                <span class="c1"># compute aspect ratio</span>
+                <span class="n">Q</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">aspect_ratio</span><span class="p">(</span><span class="n">X_linear</span><span class="p">)</span>
+                <span class="c1"># calculate the singular values with jax</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span>
+                        <span class="n">X_linear</span><span class="p">,</span>
+                        <span class="n">compute_uv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="o">.</span><span class="n">S</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="c1"># square to get eigenvalues of W = X^TX</span>
+                <span class="n">eigenvalues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_linear</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">conv</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                <span class="n">reshape_tens</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">start_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">end_dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c1"># compute aspect ratio</span>
+                <span class="n">Q</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">aspect_ratio</span><span class="p">(</span><span class="n">reshape_tens</span><span class="p">)</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span>
+                        <span class="n">reshape_tens</span><span class="p">,</span>
+                        <span class="n">compute_uv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="o">.</span><span class="n">S</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="c1"># square to get eigenvalues of W = X^TX</span>
+                <span class="n">eigenvalues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">reshape_tens</span><span class="p">)</span>
+
+            <span class="n">eigdict</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">eigenvalues</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;ESD&quot;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Eigenvalues of $X$&quot;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Layer </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2"> spectrum&quot;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">eigdict</span></div>
+
+<div class="viewcode-block" id="SpectralAnalysis.fit_power_law"><a class="viewcode-back" href="../../algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.fit_power_law">[docs]</a>    <span class="k">def</span> <span class="nf">fit_power_law</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">eig_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">plot_alpha</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot_eig</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fits the eigenvalue spectrum distribution of</span>
+<span class="sd">        the layer weights :math:`X = W W^T` with a power-law distribution.</span>
+<span class="sd">        Uses the MLE approach from https://arxiv.org/abs/0706.1062.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        eigdict: Dict[int, Tuple[np.array, float]]</span>
+<span class="sd">            Optional, useful if pre-computed with `.spectral_analysisr()`</span>
+<span class="sd">            Dictionary with keys of the nth layer proviled,</span>
+<span class="sd">            values of :attr:`(eigenvalues, Q)`, where :attr:`eigenvalues`</span>
+<span class="sd">            are those of the weight matrix for the layer, and :attr:`Q`</span>
+<span class="sd">            is the aspect ratio of the matrix.</span>
+<span class="sd">        plot_alpha: bool</span>
+<span class="sd">            Plot per-layer power-law fit of the</span>
+<span class="sd">            eigenvalue spectrum distribution.</span>
+<span class="sd">        plot_eig: bool</span>
+<span class="sd">            Plot per-layer eigenvalue spectrum distribution</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        alpha_dict: Dict[int, Tuple[float, float]]</span>
+<span class="sd">            Dictionary with keys of the nth layer proviled,</span>
+<span class="sd">            values of `(alpha, eig_max)`, where `alpha`</span>
+<span class="sd">            is the power law fit alpha, i.e:</span>
+<span class="sd">            :math: \rho(\lambda) \sim \lambda^{-\alpha}.</span>
+<span class="sd">            `eig_max` is the max eigenvalue.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">eig_dict</span><span class="p">:</span>
+            <span class="n">eig_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectral_analysis</span><span class="p">(</span><span class="n">plot</span><span class="o">=</span><span class="n">plot_eig</span><span class="p">)</span>
+        <span class="n">all_layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">eig_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">alpha_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">all_layers</span><span class="p">:</span>
+            <span class="n">eigenvalues</span><span class="p">,</span> <span class="n">Q</span> <span class="o">=</span> <span class="n">eig_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span>
+            <span class="n">eig_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">powerlaw</span><span class="o">.</span><span class="n">Fit</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">power_law</span><span class="o">.</span><span class="n">alpha</span>
+            <span class="n">alpha_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">eig_max</span>
+            <span class="k">if</span> <span class="n">plot_alpha</span><span class="p">:</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">plot_pdf</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">power_law</span><span class="o">.</span><span class="n">plot_pdf</span><span class="p">(</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span>
+                <span class="p">)</span>  <span class="c1"># noqa</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Linear layer </span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2"> power law fit </span><span class="se">\n</span><span class="s2"> alpha = </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>  <span class="c1"># noqa</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Spectral density (log)&quot;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Eigenvalues of $W_</span><span class="si">{FC}</span><span class="s2">W_</span><span class="si">{FC}</span><span class="s2">^T$ (log)&quot;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">alpha_dict</span></div>
+
+<div class="viewcode-block" id="SpectralAnalysis.layer_RMT"><a class="viewcode-back" href="../../algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.layer_RMT">[docs]</a>    <span class="k">def</span> <span class="nf">layer_RMT</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">alpha_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot_alpha</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot_eig</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Prints the random matrix theory phenomenology of</span>
+<span class="sd">        the layer eigenspectrum distribution from :math:`X = W W^T`.</span>
+<span class="sd">        From https://arxiv.org/abs/1901.08276</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        alpha_dict: Dict[int, Tuple[float, float]]</span>
+<span class="sd">            Optional, useful if pre-computed with `.spectral_analysisr()`</span>
+<span class="sd">            Dictionary with keys of the nth layer proviled,</span>
+<span class="sd">            values of `(alpha, eig_max)`</span>
+<span class="sd">        plot_alpha: bool</span>
+<span class="sd">            Plot per-layer power-law fit of the</span>
+<span class="sd">            eigenvalue spectrum distribution.</span>
+<span class="sd">        plot_eig: bool</span>
+<span class="sd">            Plot per-layer eigenvalue spectrum distribution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">layer_proclamations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">alpha_dict</span><span class="p">:</span>
+            <span class="n">alpha_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_power_law</span><span class="p">(</span><span class="n">plot_alpha</span><span class="o">=</span><span class="n">plot_alpha</span><span class="p">,</span> <span class="n">plot_eig</span><span class="o">=</span><span class="n">plot_eig</span><span class="p">)</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">alpha_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">:</span>
+            <span class="c1"># get PL coeff for layer, and convert to mu</span>
+            <span class="n">alpha</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">alpha_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span>
+            <span class="n">mu</span> <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+            <span class="c1"># rough definition of phenomenology</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Phenomenology for layer </span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># if 0 &lt;= mu &lt;= 2:</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">mu</span> <span class="o">&lt;=</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Layer </span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2"> prediction: regularized and &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;good performance on a test set.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">layer_proclamations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                <span class="c1"># print(&quot;(Very Heavy Tailed ESD)&quot;)</span>
+            <span class="c1"># elif 2 &lt; mu &lt;= 4:</span>
+            <span class="c1">#     print(&quot;Heavy-Tailed. Predict regularized and well-trained&quot;)</span>
+            <span class="k">elif</span> <span class="n">mu</span> <span class="o">&gt;</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">mu</span> <span class="o">&lt;</span> <span class="mi">7</span><span class="p">:</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Layer </span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2"> prediction: somewhat well regularized &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;and likely has good performance on a test set.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">layer_proclamations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                <span class="c1"># print(&quot;Weakly Heavy-Tailed.&quot;)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Layer </span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2"> prediction: very likely not trained &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;and not regularized.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">layer_proclamations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">layer_proclamations</span></div>
+
+<div class="viewcode-block" id="SpectralAnalysis.universal_metric"><a class="viewcode-back" href="../../algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.universal_metric">[docs]</a>    <span class="k">def</span> <span class="nf">universal_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the universal capacity metric</span>
+<span class="sd">        :math:`\widehat{\alpha}=\frac{1}{L} \sum_{l} \alpha_{l} \log \lambda_{\max , l}` from</span>
+<span class="sd">        https://arxiv.org/abs/2002.06716</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        alpha_dict: Dict[int, Tuple[float, float]]</span>
+<span class="sd">            Optional, useful if pre-computed with `.spectral_analysisr()`</span>
+<span class="sd">            Dictionary with keys of the nth layer proviled,</span>
+<span class="sd">            values of `(alpha, eig_max)`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        metric: float</span>
+<span class="sd">            Universal capacity metric. A useful engineering metric</span>
+<span class="sd">            for average case capacity in DNNs, from</span>
+<span class="sd">            https://arxiv.org/abs/1901.08278</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">alpha_dict</span><span class="p">:</span>
+            <span class="n">alpha_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_power_law</span><span class="p">(</span><span class="n">plot_alpha</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha_dict</span><span class="p">):</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+                <span class="n">alpha</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">eig_max</span><span class="p">)</span> <span class="k">for</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">eig_max</span> <span class="ow">in</span> <span class="n">alpha_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha_dict</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">metric</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020 Battelle Memorial Institute.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

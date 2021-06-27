@@ -3,20 +3,25 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Installing Deep Data Profiler &mdash; Deep Data Profiler 0.3.1 documentation</title>
+  <title>Installing Deep Data Profiler &mdash; Deep Data Profiler 1.0.0 documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -26,10 +31,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script src="_static/copybutton.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -38,7 +43,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="License" href="license.html" />
-    <link rel="prev" title="utils package" href="utils/utils.html" /> 
+    <link rel="prev" title="algorithms package" href="algorithms/algorithms.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -52,7 +57,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Deep Data Profiler
+            <a href="index.html" class="icon icon-home"> Deep Data Profiler
           
 
           
@@ -65,7 +70,7 @@
             
             
               <div class="version">
-                0.3
+                1.0
               </div>
             
           
@@ -93,12 +98,13 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview/index.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classes/modules.html">Profiling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="utils/modules.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/modules.html">Algorithms</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installing Deep Data Profiler</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#using-anaconda-and-pip">Using Anaconda and Pip</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tableofcontents.html">Index</a></li>
 </ul>
 
             
@@ -139,6 +145,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -150,7 +158,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/install.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -169,27 +177,25 @@
 <div class="section" id="using-anaconda-and-pip">
 <h2>Using Anaconda and Pip<a class="headerlink" href="#using-anaconda-and-pip" title="Permalink to this headline">¶</a></h2>
 <p>To install with tutorials and documentation using anaconda and pip:</p>
-<p>Note: Documentation is built using Sphinx, which requires we install the matplotlib package using conda <em>not pip</em>.
-Also we must remove the mkl package automatically installed with the package to avoid having the kernel die on us.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">ddp</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.6</span> <span class="n">matplotlib</span> <span class="n">nomkl</span>
+<p>Note: Documentation is built using Sphinx, which requires we install the matplotlib package using conda <em>not pip</em>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">ddp</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.7</span> <span class="n">matplotlib</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">conda</span> <span class="n">activate</span> <span class="n">ddp</span>
 </pre></div>
 </div>
 <p>From the root directory of deep_data_profiler do</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; pip install -e .[‘all’]
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; pip install -e.[‘all’]
 </pre></div>
 </div>
 <p>Then run</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pytest</span>
 </pre></div>
 </div>
-<p>You should get 13 passed.
-To see the sphinx documentation</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">open</span> <span class="n">docs</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">htm</span>
+<p>To see the sphinx documentation</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">open</span> <span class="n">docs</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
 </pre></div>
 </div>
 <p>You may also install without editing, tutorials and testing simply using</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">ddp</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.6</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">ddp</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.7</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
 </pre></div>
 </div>
@@ -201,37 +207,29 @@ To see the sphinx documentation</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="utils/utils.html" class="btn btn-neutral float-left" title="utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="algorithms/algorithms.html" class="btn btn-neutral float-left" title="algorithms package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020 Battelle Memorial Institute
+        &#169; Copyright 2020 Battelle Memorial Institute.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

@@ -1,244 +1,392 @@
-from collections import Counter, defaultdict
-import numpy as np
+import scipy.sparse as sp
 import copy
+import torch
+import warnings
+from typing import Dict, Iterable, Tuple, Union
+
+SpMatData = Dict[int, sp.spmatrix]
+DictData = Dict[int, Dict[Tuple, float]]
+
 
 class Profile:
 
-    """Summary
-    """
-    
-    def __init__(self,profile=None, neuron_counts=None,
-                    synapse_counts=None,
-                    synapse_weights=None,
-                    num_inputs=0):
+    """Summary"""
+
+    def __init__(
+        self,
+        profile: "Profile" = None,
+        neuron_counts: Union[SpMatData, DictData] = None,
+        neuron_weights: Union[SpMatData, DictData] = None,
+        synapse_counts: Union[SpMatData, DictData] = None,
+        synapse_weights: Union[SpMatData, DictData] = None,
+        num_inputs: int = 0,
+        neuron_type: str = None,
+    ) -> None:
         """Summary
-        
+
         Parameters
         ----------
-        profile : ddp.Profile, optional
-            for instantiating a new Profile using a previous profile
-        neuron_counts : defaultdict(Counter()), optional
-        synapse_counts : defaultdict(Counter()), optional
-        synapse_weights : defaultdict(Counter()), optional
-            these are the outputs from a path profiling method.
+        profile : Profile, optional
+            For instantiating a new Profile using a previous profile
+        neuron_counts : dict, optional
+            Dictionary representing profile neurons and their counts,
+            i.e. how many synapses they were influential or contributing to
+        neuron_weights : dict, optional
+            Dictionary representing influential profile neurons and their weights
+        synapse_counts : dict, optional
+            Dictionary representing profile synapses and their counts
+        synapse_weights : dict, optional
+            Dictionary representing profile synapses and their weights
         num_inputs : int, optional
             Number of inputs represented by the profile
+        neuron_type: str, optional
+            The type of neurons used in the profile, i.e. 'element' or 'channel'
 
         Note
         ----
-        The format for the inputs is very strict so that it can be used to store 
+        The format for the inputs is very strict so that it can be used to store
         the results of a profiling process but there is no type checking. If the
         input is not in the correct format, the metrics could fail or return inaccurate
         values.
         """
         if profile is not None:
             self._neuron_counts = copy.deepcopy(profile.neuron_counts)
+            self._neuron_weights = copy.deepcopy(profile.neuron_weights)
             self._synapse_counts = copy.deepcopy(profile.synapse_counts)
             self._synapse_weights = copy.deepcopy(profile.synapse_weights)
             self._num_inputs = profile._num_inputs
-        else :
-            self._neuron_counts = neuron_counts or defaultdict(Counter)
-            self._synapse_counts = synapse_counts or defaultdict(Counter)
-            self._synapse_weights = synapse_weights or defaultdict(set)
-            self._num_inputs = num_inputs 
+            self._neuron_type = profile._neuron_type
+        else:
+            self._neuron_counts = neuron_counts or dict()
+            self._neuron_weights = neuron_weights or dict()
+            self._synapse_counts = synapse_counts or dict()
+            self._synapse_weights = synapse_weights or dict()
+            self._num_inputs = num_inputs
+            self._neuron_type = neuron_type
 
     @property
-    def neuron_counts(self):
+    def neuron_counts(self) -> Union[SpMatData, DictData]:
+        """
+        Returns
+        -------
+        neuron_counts : Dict of scipy.sparse matrices or Dict of dicts
+            Dictionary representing profile neurons and their counts,
+            i.e. how many synapses they were influential or contributing to
+        """
         return self._neuron_counts
 
     @property
-    def synapse_counts(self):
+    def neuron_weights(self) -> Union[SpMatData, DictData]:
+        """
+        Returns
+        -------
+        neuron_weights : Dict of scipy.sparse matrices or Dict of dicts
+            Dictionary representing influential profile neurons and their weights
+        """
+        return self._neuron_weights
+
+    @property
+    def synapse_counts(self) -> Union[SpMatData, DictData]:
+        """
+        Returns
+        -------
+        synapse_counts : Dict of scipy.sparse matrices or Dict of dicts
+            Dictionary representing profile synapses and their counts
+
+        Note
+        ----
+        For a single image profile (num_inputs=1) all synapses should have a count of 1
+        """
         return self._synapse_counts
-    
+
     @property
-    def synapse_weights(self):
+    def synapse_weights(self) -> Union[SpMatData, DictData]:
+        """
+        Returns
+        -------
+        synapse_weights : Dict of scipy.sparse matrices or Dict of dicts
+            Dictionary representing profile synapses and their weights
+        """
         return self._synapse_weights
-              
+
     @property
-    def num_inputs(self):
+    def num_inputs(self) -> int:
+        """
+        Returns
+        -------
+        num_inputs : int
+            The number of input images represented by the profile
+
+        Note
+        ----
+        Class profiles and other aggregate profiles will have num_inputs > 1
+        """
         return self._num_inputs
 
     @property
-    def total(self):
-        return sum([sum(self._neuron_counts[layer].values()) for layer in self._neuron_counts])
+    def neuron_type(self) -> str:
+        """
+        Returns
+        -------
+        neuron_type : str
+            The type of neurons used in the profile,
+            i.e. 'element', 'channel', or 'mixed' (aggregate of profiles with mismatched types)
+        """
+        return self._neuron_type
 
     @property
-    def size(self):
-        return sum([len(set(self.neuron_counts[layer].keys())) for layer in self.neuron_counts])
-
-    def __eq__(self,other):
-        return bool(self._neuron_counts == other.neuron_counts and
-                self._synapse_counts == other.synapse_counts and
-                self._synapse_weights == other.synapse_weights and
-                self._num_inputs == other.num_inputs)
-
-    def __iter__(self):
-        return self.neuron_counts.keys()
-
-    def __add__(self,other):
-        new_profile = Profile(profile=self)
-        new_profile._num_inputs += other.num_inputs
-        for layer in other.neuron_counts:
-            new_profile._neuron_counts[layer].update(other.neuron_counts[layer])
-            new_profile._synapse_counts[layer].update(other.synapse_counts[layer])
-            new_profile._synapse_weights[layer].update(other.synapse_weights[layer])        
-        return new_profile
-
-    def __iadd__(self,other):
+    def total(self) -> int:
         """
-        Adds in place the neuron_counts and synapse_sets of other to self.
-        Add in place.
-        
+        Returns
+        -------
+        int
+            Total sum of neuron counts across all layers
+        """
+        return sum([self._neuron_counts[layer].sum() for layer in self._neuron_counts])
+
+    @property
+    def size(self) -> int:
+        """
+        Returns
+        -------
+        int
+            Total number of neurons identified as influential or contributing
+            (neurons with nonzero neuron counts)
+        """
+        return sum(
+            [self.neuron_counts[layer].count_nonzero() for layer in self.neuron_counts]
+        )
+
+    @property
+    def num_synapses(self) -> int:
+        """
+        Returns
+        -------
+        int
+            Total number of synapses across all layers
+        """
+        return sum(
+            [
+                self.synapse_counts[layer].count_nonzero()
+                for layer in self.synapse_counts
+            ]
+        )
+
+    def __eq__(self, other: "Profile") -> bool:
+        """
         Parameters
         ----------
         other : Profile
-        
+
+        Returns
+        -------
+        bool
+            True if the profile data held by self is equal to the profile data held by other,
+            otherwise False
+
+        Note
+        ----
+        If neuron type is specified by one profile but not the other, the two can still be equal
+        if all other data is equal
+
+        """
+        return bool(
+            self._neuron_counts == other.neuron_counts
+            and self._neuron_weights == other.neuron_weights
+            and self._synapse_counts == other.synapse_counts
+            and self._synapse_weights == other.synapse_weights
+            and self._num_inputs == other.num_inputs
+            and (
+                self._neuron_type == other.neuron_type
+                or ((self._neuron_type is None) ^ (other.neuron_type is None))
+            )
+        )
+
+    def __iter__(self) -> Iterable:
+        """
+        Returns
+        -------
+        Iterable
+            An iterable over the layer keys of the neuron counts
+        """
+        return self.neuron_counts.keys()
+
+    def __add__(self, other: "Profile") -> "Profile":
+        """
+        Adds the neuron and synapse counts and weights of other and self.
+
+        Parameters
+        ----------
+        other : Profile
+
+        Returns
+        -------
+        new_profile : Profile
+            The aggregate profile of self and other
+
+        Note
+        ----
+        Not supported for dictionary-formatted profiles
+
+        """
+        with torch.no_grad():
+            if self.num_inputs == 0:
+                new_profile = Profile(profile=other)
+            else:
+                new_profile = Profile(profile=self)
+                if other.num_inputs > 0:
+                    new_profile += other
+
+        return new_profile
+
+    def __iadd__(self, other: "Profile") -> "Profile":
+        """
+        Adds in place the neuron and synapse counts and weights of other to self.
+
+        Parameters
+        ----------
+        other : Profile
+
         Returns
         -------
         self : Profile
-            
-        """            
-        for layer in other.neuron_counts:
-            self._neuron_counts[layer].update(other.neuron_counts[layer])
-            self._synapse_counts[layer].update(other.synapse_counts[layer])
-            self._synapse_weights[layer].update(other.synapse_weights[layer])
-        self._num_inputs += other.num_inputs
+
+        Note
+        ----
+        Not supported for dictionary-formatted profiles
+
+        """
+        with torch.no_grad():
+            if self._num_inputs == 0:
+                self._neuron_counts = copy.deepcopy(other.neuron_counts)
+                self._neuron_weights = copy.deepcopy(other.neuron_weights)
+                self._synapse_counts = copy.deepcopy(other.synapse_counts)
+                self._synapse_weights = copy.deepcopy(other.synapse_weights)
+                self._num_inputs = other.num_inputs
+                self._neuron_type = other.neuron_type
+            elif other.num_inputs > 0:
+                self._num_inputs += other.num_inputs
+                if (
+                    self.neuron_type is not None
+                    and other.neuron_type is not None
+                    and self.neuron_type != other.neuron_type
+                ):
+                    self._neuron_type = "mixed"
+                    warnings.warn(
+                        "Incompatible profiles: mismatched neuron types - output neuron type will be mixed"
+                    )
+
+                if (
+                    self.neuron_counts.keys() != other.neuron_counts.keys()
+                    or self.neuron_weights.keys() != other.neuron_weights.keys()
+                    or self.synapse_counts.keys() != other.synapse_counts.keys()
+                    or self.synapse_weights.keys() != other.synapse_weights.keys()
+                ):
+                    warnings.warn(
+                        "Warning: These profiles have mismatched layer key sets, aggregation may give strange results"
+                    )
+
+                # Combine neuron counts and weights
+                for layer in other.neuron_counts:
+                    if layer in self.neuron_counts:
+                        if (
+                            layer in self.neuron_weights
+                            and layer in other.neuron_weights
+                        ):
+                            # use compressed sparse row (csr) matrix for indexing and fast arithmetic
+                            # sum of neuron weights (weighted by counts)
+                            neuron_weights = (
+                                self.neuron_weights[layer].multiply(
+                                    self.neuron_counts[layer]
+                                )
+                                + other.neuron_weights[layer].multiply(
+                                    other.neuron_counts[layer]
+                                )
+                            ).tocsr()
+                            # aggregate total neuron counts
+                            self._neuron_counts[layer] += other.neuron_counts[layer]
+                            # dictionary of keys (dok) matrix lets us index by nonzero values (avoid 0/0)
+                            self._neuron_weights[layer] = sp.dok_matrix(
+                                neuron_weights.shape
+                            )
+                            # normalize by total neuron counts
+                            self._neuron_weights[layer][neuron_weights.nonzero()] = (
+                                neuron_weights[neuron_weights.nonzero()]
+                                / self.neuron_counts[layer].tocsr()[
+                                    neuron_weights.nonzero()
+                                ]
+                            )
+                            # convert back to COOrdinate matrix
+                            self._neuron_weights[layer] = self.neuron_weights[
+                                layer
+                            ].tocoo()
+                        else:
+                            # copy neuron weights if keyset is mismatched
+                            if layer in other.neuron_weights:
+                                self._neuron_weights[layer] = copy.deepcopy(
+                                    other.neuron_weights[layer]
+                                )
+                            # aggregate total neuron counts
+                            self._neuron_counts[layer] += other.neuron_counts[layer]
+
+                    else:
+                        # mismatched keysets, copy counts and weights if necessary
+                        if layer in other.neuron_weights:
+                            self._neuron_weights[layer] = copy.deepcopy(
+                                other.neuron_weights[layer]
+                            )
+                        self._neuron_counts[layer] = copy.deepcopy(
+                            other.neuron_counts[layer]
+                        )
+
+                # Combine synapse counts and weights
+                for layer in other.synapse_counts:
+                    if layer in self.synapse_counts:
+                        if (
+                            layer in self.synapse_weights
+                            and layer in other.synapse_weights
+                        ):
+                            synapse_weights = (
+                                self.synapse_weights[layer].multiply(
+                                    self.synapse_counts[layer]
+                                )
+                                + other.synapse_weights[layer].multiply(
+                                    other.synapse_counts[layer]
+                                )
+                            ).tocsr()
+                            # aggregate total synapse counts
+                            self._synapse_counts[layer] += other.synapse_counts[layer]
+                            # dictionary of keys (dok) matrix lets us index by nonzero values (avoid 0/0)
+                            self._synapse_weights[layer] = sp.dok_matrix(
+                                synapse_weights.shape
+                            )
+                            # normalize by total synapse counts
+                            self._synapse_weights[layer][synapse_weights.nonzero()] = (
+                                synapse_weights[synapse_weights.nonzero()]
+                                / self.synapse_counts[layer].tocsr()[
+                                    synapse_weights.nonzero()
+                                ]
+                            )
+                            # convert back to COOrdinate matrix
+                            self._synapse_weights[layer] = self.synapse_weights[
+                                layer
+                            ].tocoo()
+                        else:
+                            # copy synapse weights if keyset is mismatched
+                            if layer in other.synapse_weights:
+                                self._synapse_weights[layer] = copy.deepcopy(
+                                    other.synapse_weights[layer]
+                                )
+                            # aggregate total synapse counts
+                            self._synapse_counts[layer] += other.synapse_counts
+                    else:
+                        # mismatched keysets, copy counts and weights if necessary
+                        if layer in other.synapse_weights:
+                            self._synapse_weights[layer] = copy.deepcopy(
+                                other.synapse_weights[layer]
+                            )
+                        self._synapse_counts[layer] = copy.deepcopy(
+                            other.synapse_counts[layer]
+                        )
+
         return self
-
-
-def jaccard_simple(set1,set2):
-    """
-    Computes the jaccard similarity of two sets = size of their 
-    intersection / size of their union
-    
-    Parameters
-    ----------
-    set1 : set or iterable
-    set2 : set or iterable
-    
-    Returns
-    -------
-     : float
-    """
-    if len(set1) == 0 or len(set2) == 0:
-        return 0
-    s1 = set(set1);s2 = set(set2)
-    return len(s1 & s2)/len(s1 | s2)
-
-def instance_jaccard(profile1, profile2, neuron=False):
-    """
-    Computes the proportion of synapses(or neurons/neurons) of profile1 that 
-    belongs to profile2 synapses(or neurons/neurons)
-
-    Parameters
-    ----------
-    profile1 : Profile 
-        Typically a single image profile
-    profile2 : Profile 
-        Typically an aggregated profile of many images
-    neuron : bool
-        Set to True if wish to compute proportions in terms of neurons instead
-         of synapses
-    
-    Returns
-    -------
-     : float
-        The proportion of profile1 in profile2.
-    """
-    if profile1.num_inputs == 0 or profile2.num_inputs == 0:
-        return 0
-    if neuron:
-        aprofile = set([(layer,neuron) for layer in profile1.neuron_counts for neuron in profile1.neuron_counts[layer] ])
-        bprofile = set([(layer,neuron) for layer in profile2.neuron_counts for neuron in profile2.neuron_counts[layer] ])
-    else:
-        aprofile = set([(layer,synapse) for layer in profile1.synapse_counts for synapse in profile1.synapse_counts[layer] ])
-        bprofile = set([(layer,synapse) for layer in profile2.synapse_counts for synapse in profile2.synapse_counts[layer] ])
-    return len(aprofile & bprofile)/len(aprofile)
-
-def avg_jaccard(profile1, profile2, neuron=False):
-    """
-    Computes the jaccard similarity at each layer using synapse sets (or 
-    neuron sets) then averages the values.
-
-    Parameters
-    ----------
-    profile1 : Profile
-    profile2 : Profile
-    neuron : bool, optional, default=False
-        Set to true if wish to compute the iou on the neuron sets instead
-        of the synapse sets
-    
-    Returns
-    -------
-     : float
-        Mean Intersection-over-Union (IOU) across layers of synapse (neuron) sets
-        in Profile object. The final logit layer is not considered in this 
-        calculation.
-
-    See also
-    --------
-    jaccard_simple
-    """
-    if profile1.num_inputs == 0 or profile2.num_inputs == 0:
-        return 0
-    iou = []
-    layers = sorted(list(profile1.neuron_counts.keys()))[1:]
-    if neuron:
-        aprofile = profile1.neuron_counts
-        bprofile = profile2.neuron_counts
-    else:
-        aprofile = {layer: { synapse for synapse in profile1.synapse_counts[layer] } for layer in layers}
-        bprofile = {layer: { synapse for synapse in profile2.synapse_counts[layer] } for layer in layers}
-    for layer in layers:            
-        iou.append(jaccard_simple(aprofile[layer],bprofile[layer]))
-    return np.mean(iou)
-
-def jaccard(profile1, profile2, neuron=False):
-    """
-    Computes the jaccard similarity metric between two profiles using 
-    the aggregation of all synapse sets (or neuron set across all layers
-    
-    Parameters
-    ----------
-    profile1 : Profile
-    profile2 : Profile
-    neuron : bool, optional, default=False
-        Set to true if wish to compute the jaccard on the neuron sets instead
-        of the synapse sets
-    
-    Returns
-    -------
-     : float
-
-    See also
-    --------
-    jaccard_simple
-    """
-    if profile1.num_inputs == 0 or profile2.num_inputs == 0:
-        return 0
-    if neuron:
-        aprofile = [(layer,neuron) for layer in profile1.neuron_counts for neuron in profile1.neuron_counts[layer] ]
-        bprofile = [(layer,neuron) for layer in profile2.neuron_counts for neuron in profile2.neuron_counts[layer] ]
-    else:
-        aprofile = [(layer,synapse) for layer in profile1.synapse_counts for synapse in profile1.synapse_counts[layer] ]
-        bprofile = [(layer,synapse) for layer in profile2.synapse_counts for synapse in profile2.synapse_counts[layer] ]
-    return jaccard_simple(aprofile,bprofile)
-
-def order_neuron_counts(profile):
-    """
-    Generates a dictionary keyed by layer pointing at a list of tuples
-    (neuron,count) reverse ordered by count.
-    
-    Parameters
-    ----------
-    profile : Profile
-
-    Returns
-    -------
-    count_dict : dict
-    """
-    count_dict = dict()
-    for layer in profile.neuron_counts.keys():
-        count_dict[layer] = sorted([(k,v) for k,v in profile.neuron_counts[layer].items()],key=lambda x : x[1],reverse=True)
-    return count_dict
-

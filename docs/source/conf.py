@@ -19,7 +19,7 @@ import sys
 import os
 import shlex
 
-__version__ = "0.3.1"
+__version__ = "1.0.0"
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -32,7 +32,7 @@ sys.path.append(os.path.join(os.path.dirname(__name__), 'deep_data_profiler'))
 
 project = 'Deep Data Profiler'
 copyright = '2020 Battelle Memorial Institute'
-author = 'Aaron Tuor, Brenda Praggastis, Nicole Nichols'
+author = 'Brenda Praggastis, Davis Brown, Madelyn Shapiro'
 
 # The short X.Y version
 version = ".".join(__version__.split('.')[:2])
@@ -241,7 +241,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'DeepDataProfiler.tex', u'DeepDataProfiler Documentation',
-     u'Aaron Tuor, Brenda Praggastis, Nicole Nichols', 'manual'),
+     u'Brenda Praggastis, Davis Brown, Madelyn Shapiro', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
