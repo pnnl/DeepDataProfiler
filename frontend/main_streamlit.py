@@ -303,17 +303,18 @@ if __name__ == "__main__":
             value=1,  # default value
         )
 
-        path_str = st.sidebar.text_input(
-            "Relative path to ImageNet data",
-            value="imagenet/validation",
-            help="For now, we support the ImageNet validation set.",
-        )
-        relative_path = Path(path_str)
+        # path_str = st.sidebar.text_input(
+        #     "Relative path to ImageNet data",
+        #     value="imagenet/validation",
+        #     help="For now, we support the ImageNet validation set.",
+        # )
+        # relative_path = Path(path_str)
+        relative_path = Path("imagenet/validation")
 
         for cls_name in cls_names:
             cls_nmbr = names_to_numbers[cls_name]
             cls = numbers_to_folders[int(cls_nmbr)]
-            tdapath = Path(model) / Path(neurons + "_0.1TH")
+            tdapath =  Path(neurons + "_0.1TH")
             pimpath = tdapath / Path("persistence_images/H1")
 
             img_paths = relative_path / Path(cls)
@@ -338,10 +339,9 @@ if __name__ == "__main__":
                     tda_img1,
                 )
 
-                pdpath = f"ripsers/{cls}"
-                pdname = f"{imgname[:-5]}_ripser-invWspK.p"
-                st.write(pdname)
-                st.write(f"{pdpath}/{pdname}")
+                pdpath = f"{tdapath}/ripsers/{cls}"
+                stripped_imgname = imgname.split("/")[-1]
+                pdname = f"{stripped_imgname[:-5]}_ripser-invWspK.p"
                 rips = read_pickle_file(f"{pdpath}/{pdname}")
 
                 diagram = plot_diagrams(
