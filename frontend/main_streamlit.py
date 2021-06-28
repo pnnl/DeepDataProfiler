@@ -1,5 +1,10 @@
 import streamlit as st
+import boto3
+
 from PIL import Image
+from io import BytesIO
+from botocore.exceptions import ClientError
+
 import pickle as pkl
 from pathlib import Path
 from itertools import zip_longest
@@ -77,6 +82,25 @@ def svd_visualization(model, svd_dict, layer, svd_num):
         progress=False,
     )
     return output[0][0]
+
+
+@st.cache(ttl=600)
+def read_pickle_file(filename):
+    s3 = boto3.resource('s3')
+    my_pickle = pkl.loads(s3.Bucket("ddp-streamlit-data").Object(filename).get()['Body'].read())
+    return my_pickle
+
+@st.cache(ttl=600)
+def read_image_file(filename):
+    s3 = boto3.resource('s3')
+    my_image = Image.open(BytesIO(s3.Bucket("ddp-streamlit-data").Object(filename).get()['Body'].read()))
+    return my_image
+
+@st.cache(ttl=600)
+def list_image_files(pathname):
+    s3 = boto3.client('s3')
+    all_objects = s3.list_objects(Bucket = 'ddp-streamlit-data', Prefix = pathname)
+    return [dct["Key"] for dct in all_objects["Contents"]]
 
 
 if __name__ == "__main__":
@@ -185,7 +209,7 @@ if __name__ == "__main__":
         if feature_option == "Pre-computed":
             feature_path_str = st.sidebar.text_input(
                 "Relative path to pre-loaded features",
-                value="/rcfs/projects/marsddp/feature_visualizations/vgg16_imagenet_svd_average/",
+                value="vgg16_imagenet_svd_average/",
                 help="File pre-computed feature visualzations.",
             )
             relative_feature_root = Path(feature_path_str)
@@ -195,7 +219,8 @@ if __name__ == "__main__":
             )
             feature_path = relative_feature_root / feature_name_path
             try:
-                feature_array = pkl.load(open(feature_path, "rb"))
+                # feature_array = pkl.load(open(feature_path, "rb"))
+                feature_array = read_pickle_file(str(feature_path))
             except FileNotFoundError:
                 st.header("SVD feature visualization")
                 st.write(
@@ -218,7 +243,7 @@ if __name__ == "__main__":
 
         path_str = st.sidebar.text_input(
             "Relative path to ImageNet data",
-            value="/qfs/projects/marsddp/data/imagenet/validation",
+            value="imagenet/validation",
             help="File path to data. For now, we support the ImageNet validation set.",
         )
         relative_path = Path(path_str)
@@ -245,17 +270,17 @@ if __name__ == "__main__":
         ) in grouper(top_imgpaths, 3, ("", 0)):
             try:
                 relative_img_path = relative_path / img_path1
-                img1 = Image.open(relative_img_path).convert("RGB")
+                img1 = read_image_file(str(relative_img_path)).convert("RGB")
                 col1.image(img1)
 
                 relative_img_path = relative_path / img_path2
-                img2 = Image.open(relative_img_path).convert("RGB")
+                img2 = read_image_file(str(relative_img_path)).convert("RGB")
                 col2.image(img2)
 
                 relative_img_path = relative_path / img_path3
-                img3 = Image.open(relative_img_path).convert("RGB")
+                img3 = read_image_file(str(relative_img_path)).convert("RGB")
                 col3.image(img3)
-            except IsADirectoryError:
+            except (IsADirectoryError, ClientError):
                 pass
 
     elif active_tab == "TDA Visualizations":
@@ -280,26 +305,19 @@ if __name__ == "__main__":
 
         path_str = st.sidebar.text_input(
             "Relative path to ImageNet data",
-            value="/qfs/projects/marsddp/data/imagenet/validation",
+            value="imagenet/validation",
             help="For now, we support the ImageNet validation set.",
         )
         relative_path = Path(path_str)
 
-        tda_path_str = st.sidebar.text_input(
-            "Relative path to TDA data (will put this in S3 buckets when hosted)",
-            value="/rcfs/projects/marsddp/tda/imagenet/",
-            help="For now, we support the ImageNet validation set.",
-        )
-        relative_tda_path = Path(tda_path_str)
-
         for cls_name in cls_names:
             cls_nmbr = names_to_numbers[cls_name]
             cls = numbers_to_folders[int(cls_nmbr)]
-            tdapath = relative_tda_path / Path(model) / Path(neurons + "_0.1TH")
+            tdapath = Path(model) / Path(neurons + "_0.1TH")
             pimpath = tdapath / Path("persistence_images/H1")
 
             img_paths = relative_path / Path(cls)
-            imgnames = os.listdir(img_paths)
+            imgnames = list_image_files(str(img_paths))
             col_tda_image, col_tda_pers, col_tda_pers_heat = st.beta_columns(3)
             col_tda_image.subheader(f"Image \n class: {cls_name}")
             col_tda_pers.subheader("Persistence Diagram")
@@ -315,15 +333,16 @@ if __name__ == "__main__":
                     col_tda_pers_heat,
                 ) = st.beta_columns(3)
 
-                tda_impath = f"{relative_path}/{cls}/{imgname}"
-                tda_img1 = Image.open(tda_impath).convert("RGB")
+                tda_img1 = read_image_file(imgname).convert("RGB")
                 col_tda_image.image(
                     tda_img1,
                 )
 
-                pdpath = f"{tdapath}/ripsers/{cls}"
+                pdpath = f"ripsers/{cls}"
                 pdname = f"{imgname[:-5]}_ripser-invWspK.p"
-                rips = pkl.load(open(f"{pdpath}/{pdname}", "rb"))
+                st.write(pdname)
+                st.write(f"{pdpath}/{pdname}")
+                rips = read_pickle_file(f"{pdpath}/{pdname}")
 
                 diagram = plot_diagrams(
                     rips["dgms"],
@@ -332,7 +351,8 @@ if __name__ == "__main__":
                 st.set_option("deprecation.showPyplotGlobalUse", False)
                 col_tda_pers.pyplot(diagram)
 
-                pimgr = pkl.load(open(f"{pimpath}/pimager.p", "rb"))
+                # pimgr = pkl.load(open(f"{pimpath}/pimager.p", "rb"))
+                pimgr = read_pickle_file(f"{pimpath}/pimager.p")
                 dgms = rips["dgms"][1][np.isfinite(rips["dgms"][1][:, 1])]
                 pim = pimgr.transform(dgms, skew=True)
                 pimgr_diagram = pimgr.plot_image(pim).figure
