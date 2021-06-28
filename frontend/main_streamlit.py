@@ -186,14 +186,14 @@ if __name__ == "__main__":
         layers = list(img_paths.keys())
         # Add a selectbox to the sidebar:
         layer_selectbox = st.sidebar.selectbox(
-            "Choose a hidden layer of VGG-16 to view", layers, index=12
+            "Choose a hidden layer of VGG-16 to view", layers, index=10
         )
 
         features = sorted(list(img_paths[layer_selectbox].keys()))
 
         # Add a selectbox to the sidebar:
         feature_selectbox = st.sidebar.selectbox(
-            "Choose an SVD neuron to view", features, index=6
+            "Choose an SVD neuron to view", features, index=7
         )
 
         st.sidebar.subheader("SVD feature visualization")
@@ -207,12 +207,7 @@ if __name__ == "__main__":
         # NOTE: in future, allow user to supply relative path
         feature_array = np.array([])
         if feature_option == "Pre-computed":
-            feature_path_str = st.sidebar.text_input(
-                "Relative path to pre-loaded features",
-                value="vgg16_imagenet_svd_average/",
-                help="File pre-computed feature visualzations.",
-            )
-            relative_feature_root = Path(feature_path_str)
+            relative_feature_root = Path("vgg16_imagenet_svd_average/")
 
             feature_name_path = Path(layer_selectbox) / Path(
                 str(layer_selectbox) + "_" + str(feature_selectbox) + "th_singular.pkl"
@@ -241,12 +236,13 @@ if __name__ == "__main__":
         if feature_array.any():
             feature_viz.image(feature_array, width=256)
 
-        path_str = st.sidebar.text_input(
-            "Relative path to ImageNet data",
-            value="imagenet/validation",
-            help="File path to data. For now, we support the ImageNet validation set.",
-        )
-        relative_path = Path(path_str)
+        # path_str = st.sidebar.text_input(
+        #     "Relative path to ImageNet data",
+        #     value="imagenet/validation",
+        #     help="File path to data. For now, we support the ImageNet validation set.",
+        # )
+        # relative_path = Path(path_str)
+        relative_path = Path("imagenet/validation")
 
         col_slider, _ = st.beta_columns((2, 1))
         topimages = col_slider.slider(
