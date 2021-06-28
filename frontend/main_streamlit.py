@@ -216,7 +216,7 @@ if __name__ == "__main__":
             try:
                 # feature_array = pkl.load(open(feature_path, "rb"))
                 feature_array = read_pickle_file(str(feature_path))
-            except FileNotFoundError:
+            except (FileNotFoundError, ClientError):
                 st.header("SVD feature visualization")
                 st.write(
                     "Singular value feature visualizations not yet computed for the final two classification layers"
