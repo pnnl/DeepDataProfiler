@@ -76,8 +76,9 @@ def load_svd_dicts(model_pre):
 )
 def svd_visualization(model, svd_dict, layer, svd_num):
     """Renders an SVD feature visualization"""
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     output = render.render_vis(
-        model.eval(),
+        model.to(device).eval(),
         objectives.svd(layer, svd_num, svd_dict),
         progress=False,
     )
@@ -106,6 +107,7 @@ def list_image_files(pathname):
 if __name__ == "__main__":
     st.set_page_config(
         page_title="SVD Feature Visualization",
+        page_icon=":lower_left_crayon:"
     )
     st.markdown(
         '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">',
@@ -286,13 +288,13 @@ if __name__ == "__main__":
 
         names_to_numbers, numbers_to_folders = load_class_labels_dicts()
 
-        cls_names = st.sidebar.multiselect(
+        cls_names = st.multiselect(
             "Choose a class to view",
             list(names_to_numbers.keys()),
             default=["tench, Tinca tinca", "volcano"],
         )
         # col_slider, _ = st.beta_columns((2, 1))
-        num_images = st.sidebar.slider(
+        num_images = st.slider(
             "Number of images to display per class",
             min_value=1,
             max_value=50,
