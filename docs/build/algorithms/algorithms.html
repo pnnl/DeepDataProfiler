@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>algorithms package &mdash; Deep Data Profiler 1.0.0 documentation</title>
   
@@ -13,15 +13,10 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
 
   
   
-
   
-  
-
   
 
   
@@ -31,12 +26,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
         <script src="../_static/copybutton.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -58,7 +53,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Deep Data Profiler
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Deep Data Profiler
           
 
           
@@ -153,8 +148,6 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -168,7 +161,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../_sources/algorithms/algorithms.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -190,8 +183,8 @@
 <div class="section" id="module-algorithms.homology">
 <span id="algorithms-homology-module"></span><h2>algorithms.homology module<a class="headerlink" href="#module-algorithms.homology" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="algorithms.homology.graph_from_tuples">
-<span class="sig-prename descclassname"><span class="pre">algorithms.homology.</span></span><span class="sig-name descname"><span class="pre">graph_from_tuples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">tuples:</span> <span class="pre">List[Tuple[Tuple[int,</span> <span class="pre">Union[Tuple[int],</span> <span class="pre">Tuple[int,</span> <span class="pre">int]]],</span> <span class="pre">Tuple[int,</span> <span class="pre">Union[Tuple[int],</span> <span class="pre">Tuple[int,</span> <span class="pre">int]]],</span> <span class="pre">float]],</span> <span class="pre">directed:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True,</span> <span class="pre">weight_func:</span> <span class="pre">Callable[[float],</span> <span class="pre">float]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">networkx.classes.graph.Graph</span><a class="reference internal" href="../_modules/algorithms/homology.html#graph_from_tuples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.homology.graph_from_tuples" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.homology.graph_from_tuples">
+<code class="sig-prename descclassname">algorithms.homology.</code><code class="sig-name descname">graph_from_tuples</code><span class="sig-paren">(</span><em class="sig-param">tuples: List[Tuple[Tuple[int, Union[Tuple[int], Tuple[int, int]]], Tuple[int, Union[Tuple[int], Tuple[int, int]]], float]], directed: bool = True, weight_func: Callable[[float], float] = &lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span> &#x2192; networkx.classes.graph.Graph<a class="reference internal" href="../_modules/algorithms/homology.html#graph_from_tuples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.homology.graph_from_tuples" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a weighted graph constructed from a set of tuples</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -212,8 +205,8 @@ default= f(x)=x</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="algorithms.homology.mat_from_graph">
-<span class="sig-prename descclassname"><span class="pre">algorithms.homology.</span></span><span class="sig-name descname"><span class="pre">mat_from_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">G:</span> <span class="pre">networkx.classes.graph.Graph,</span> <span class="pre">kernel:</span> <span class="pre">Callable[[float],</span> <span class="pre">float]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;</span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="../_modules/algorithms/homology.html#mat_from_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.homology.mat_from_graph" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.homology.mat_from_graph">
+<code class="sig-prename descclassname">algorithms.homology.</code><code class="sig-name descname">mat_from_graph</code><span class="sig-paren">(</span><em class="sig-param">G: networkx.classes.graph.Graph, kernel: Callable[[float], float] = &lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../_modules/algorithms/homology.html#mat_from_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.homology.mat_from_graph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a weighted graph create a matrix based on a kernel function of the shortest weighted path distance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -236,8 +229,8 @@ default= f(x)=x</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="algorithms.homology.ripser_of_distmat">
-<span class="sig-prename descclassname"><span class="pre">algorithms.homology.</span></span><span class="sig-name descname"><span class="pre">ripser_of_distmat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist_matrix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdim</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="reference internal" href="../_modules/algorithms/homology.html#ripser_of_distmat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.homology.ripser_of_distmat" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.homology.ripser_of_distmat">
+<code class="sig-prename descclassname">algorithms.homology.</code><code class="sig-name descname">ripser_of_distmat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dist_matrix</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">maxdim</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="../_modules/algorithms/homology.html#ripser_of_distmat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.homology.ripser_of_distmat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a distance matrix compute the persistent homology using ripser.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -260,8 +253,8 @@ default= f(x)=x</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="algorithms.homology.ripser_of_graph">
-<span class="sig-prename descclassname"><span class="pre">algorithms.homology.</span></span><span class="sig-name descname"><span class="pre">ripser_of_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">G:</span> <span class="pre">networkx.classes.graph.Graph,</span> <span class="pre">kernel:</span> <span class="pre">Callable[[float],</span> <span class="pre">float]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;,</span> <span class="pre">maxdim:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="reference internal" href="../_modules/algorithms/homology.html#ripser_of_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.homology.ripser_of_graph" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.homology.ripser_of_graph">
+<code class="sig-prename descclassname">algorithms.homology.</code><code class="sig-name descname">ripser_of_graph</code><span class="sig-paren">(</span><em class="sig-param">G: networkx.classes.graph.Graph, kernel: Callable[[float], float] = &lt;function &lt;lambda&gt;&gt;, maxdim: int = 1</em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="../_modules/algorithms/homology.html#ripser_of_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.homology.ripser_of_graph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a weighted graph compute the persistent homology using ripser.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -285,8 +278,8 @@ default= f(x)=x</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="algorithms.homology.tuples_from_dict">
-<span class="sig-prename descclassname"><span class="pre">algorithms.homology.</span></span><span class="sig-name descname"><span class="pre">tuples_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/algorithms/homology.html#tuples_from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.homology.tuples_from_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.homology.tuples_from_dict">
+<code class="sig-prename descclassname">algorithms.homology.</code><code class="sig-name descname">tuples_from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>int<span class="p">, </span>Dict<span class="p">[</span>Tuple<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>Union<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>Union<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">layers</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>Tuple<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>Union<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>Union<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">, </span>float<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/algorithms/homology.html#tuples_from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.homology.tuples_from_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of tuples representing synapses up to a specified layer</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -314,8 +307,8 @@ The parameter nlayers is an inclusive bound.</p>
 <div class="section" id="module-algorithms.jaccard">
 <span id="algorithms-jaccard-module"></span><h2>algorithms.jaccard module<a class="headerlink" href="#module-algorithms.jaccard" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="algorithms.jaccard.avg_jaccard">
-<span class="sig-prename descclassname"><span class="pre">algorithms.jaccard.</span></span><span class="sig-name descname"><span class="pre">avg_jaccard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">deep_data_profiler.classes.profile.Profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">deep_data_profiler.classes.profile.Profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neuron</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="../_modules/algorithms/jaccard.html#avg_jaccard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.jaccard.avg_jaccard" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.jaccard.avg_jaccard">
+<code class="sig-prename descclassname">algorithms.jaccard.</code><code class="sig-name descname">avg_jaccard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">profile1</span><span class="p">:</span> <span class="n">deep_data_profiler.classes.profile.Profile</span></em>, <em class="sig-param"><span class="n">profile2</span><span class="p">:</span> <span class="n">deep_data_profiler.classes.profile.Profile</span></em>, <em class="sig-param"><span class="n">neuron</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">layers</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../_modules/algorithms/jaccard.html#avg_jaccard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.jaccard.avg_jaccard" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the jaccard similarity at each layer using synapse sets (or
 neuron sets) then averages the values.</p>
 <dl class="field-list simple">
@@ -344,8 +337,8 @@ in Profile object.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="algorithms.jaccard.instance_jaccard">
-<span class="sig-prename descclassname"><span class="pre">algorithms.jaccard.</span></span><span class="sig-name descname"><span class="pre">instance_jaccard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">deep_data_profiler.classes.profile.Profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">deep_data_profiler.classes.profile.Profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neuron</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="../_modules/algorithms/jaccard.html#instance_jaccard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.jaccard.instance_jaccard" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.jaccard.instance_jaccard">
+<code class="sig-prename descclassname">algorithms.jaccard.</code><code class="sig-name descname">instance_jaccard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">profile1</span><span class="p">:</span> <span class="n">deep_data_profiler.classes.profile.Profile</span></em>, <em class="sig-param"><span class="n">profile2</span><span class="p">:</span> <span class="n">deep_data_profiler.classes.profile.Profile</span></em>, <em class="sig-param"><span class="n">neuron</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../_modules/algorithms/jaccard.html#instance_jaccard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.jaccard.instance_jaccard" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the proportion of synapses(or neurons/neurons) of profile1 that
 belongs to profile2 synapses(or neurons/neurons)</p>
 <dl class="field-list simple">
@@ -370,8 +363,8 @@ belongs to profile2 synapses(or neurons/neurons)</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="algorithms.jaccard.jaccard">
-<span class="sig-prename descclassname"><span class="pre">algorithms.jaccard.</span></span><span class="sig-name descname"><span class="pre">jaccard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profile1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">deep_data_profiler.classes.profile.Profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">deep_data_profiler.classes.profile.Profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neuron</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="../_modules/algorithms/jaccard.html#jaccard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.jaccard.jaccard" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.jaccard.jaccard">
+<code class="sig-prename descclassname">algorithms.jaccard.</code><code class="sig-name descname">jaccard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">profile1</span><span class="p">:</span> <span class="n">deep_data_profiler.classes.profile.Profile</span></em>, <em class="sig-param"><span class="n">profile2</span><span class="p">:</span> <span class="n">deep_data_profiler.classes.profile.Profile</span></em>, <em class="sig-param"><span class="n">neuron</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">layers</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../_modules/algorithms/jaccard.html#jaccard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.jaccard.jaccard" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the jaccard similarity metric between two profiles using
 the aggregation of all synapse sets (or neuron set across all layers</p>
 <dl class="field-list simple">
@@ -399,8 +392,8 @@ to all layers of the profile</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="algorithms.jaccard.jaccard_simple">
-<span class="sig-prename descclassname"><span class="pre">algorithms.jaccard.</span></span><span class="sig-name descname"><span class="pre">jaccard_simple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">scipy.sparse.base.spmatrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mat2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">scipy.sparse.base.spmatrix</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="../_modules/algorithms/jaccard.html#jaccard_simple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.jaccard.jaccard_simple" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.jaccard.jaccard_simple">
+<code class="sig-prename descclassname">algorithms.jaccard.</code><code class="sig-name descname">jaccard_simple</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mat1</span><span class="p">:</span> <span class="n">scipy.sparse.base.spmatrix</span></em>, <em class="sig-param"><span class="n">mat2</span><span class="p">:</span> <span class="n">scipy.sparse.base.spmatrix</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../_modules/algorithms/jaccard.html#jaccard_simple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.jaccard.jaccard_simple" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the jaccard similarity of two sets = size of their
 intersection / size of their union</p>
 <dl class="field-list simple">
@@ -423,8 +416,8 @@ intersection / size of their union</p>
 <div class="section" id="module-algorithms.spectral_analysis">
 <span id="algorithms-spectral-analysis-module"></span><h2>algorithms.spectral_analysis module<a class="headerlink" href="#module-algorithms.spectral_analysis" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="algorithms.spectral_analysis.SpectralAnalysis">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">algorithms.spectral_analysis.</span></span><span class="sig-name descname"><span class="pre">SpectralAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">torch.nn.modules.module.Module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/algorithms/spectral_analysis.html#SpectralAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.spectral_analysis.SpectralAnalysis">
+<em class="property">class </em><code class="sig-prename descclassname">algorithms.spectral_analysis.</code><code class="sig-name descname">SpectralAnalysis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span><span class="p">:</span> <span class="n">torch.nn.modules.module.Module</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/algorithms/spectral_analysis.html#SpectralAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Spectral Analysis is based on methods originating from Random Matrix theory,
 brought to deep neural networks by Martin and Mahoney.  <a class="reference external" href="https://arxiv.org/abs/1901.08276/">Traditional and Heavy-Tailed Self Regularization in Neural Network Models</a> by Martin and Mahoney
@@ -440,8 +433,8 @@ convolutional layers: our methods are more principled, and over an
 order of magnitude faster than the code released by the authors in
 <a class="reference external" href="https://github.com/CalculatedContent/WeightWatcher">https://github.com/CalculatedContent/WeightWatcher</a>.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="algorithms.spectral_analysis.SpectralAnalysis.implemented_classes">
-<span class="sig-name descname"><span class="pre">implemented_classes</span></span><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.implemented_classes" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.spectral_analysis.SpectralAnalysis.implemented_classes">
+<code class="sig-name descname">implemented_classes</code><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.implemented_classes" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of classes in PyTorch we can examine,
 i.e. have implemented spectral distributions</p>
 <dl class="field-list simple">
@@ -452,8 +445,8 @@ i.e. have implemented spectral distributions</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="algorithms.spectral_analysis.SpectralAnalysis.model">
-<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.model" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.spectral_analysis.SpectralAnalysis.model">
+<code class="sig-name descname">model</code><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.model" title="Permalink to this definition">¶</a></dt>
 <dd><p>model to be spectral-analyzed</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -463,8 +456,8 @@ i.e. have implemented spectral distributions</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="algorithms.spectral_analysis.SpectralAnalysis.fit_power_law">
-<span class="sig-name descname"><span class="pre">fit_power_law</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eig_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_alpha</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_eig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/algorithms/spectral_analysis.html#SpectralAnalysis.fit_power_law"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.fit_power_law" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.spectral_analysis.SpectralAnalysis.fit_power_law">
+<code class="sig-name descname">fit_power_law</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eig_dict</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">plot_alpha</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">plot_eig</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>int<span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/algorithms/spectral_analysis.html#SpectralAnalysis.fit_power_law"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.fit_power_law" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fits the eigenvalue spectrum distribution of
 the layer weights <span class="math notranslate nohighlight">\(X = W W^T\)</span> with a power-law distribution.
 Uses the MLE approach from <a class="reference external" href="https://arxiv.org/abs/0706.1062">https://arxiv.org/abs/0706.1062</a>.</p>
@@ -495,8 +488,8 @@ is the power law fit alpha, i.e:
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="algorithms.spectral_analysis.SpectralAnalysis.layer_RMT">
-<span class="sig-name descname"><span class="pre">layer_RMT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_alpha</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_eig</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/algorithms/spectral_analysis.html#SpectralAnalysis.layer_RMT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.layer_RMT" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.spectral_analysis.SpectralAnalysis.layer_RMT">
+<code class="sig-name descname">layer_RMT</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alpha_dict</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>int<span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">plot_alpha</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">plot_eig</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span class="p">, </span>Dict<span class="p">]</span><a class="reference internal" href="../_modules/algorithms/spectral_analysis.html#SpectralAnalysis.layer_RMT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.layer_RMT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the random matrix theory phenomenology of
 the layer eigenspectrum distribution from <span class="math notranslate nohighlight">\(X = W W^T\)</span>.
 From <a class="reference external" href="https://arxiv.org/abs/1901.08276">https://arxiv.org/abs/1901.08276</a></p>
@@ -515,8 +508,8 @@ eigenvalue spectrum distribution.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="algorithms.spectral_analysis.SpectralAnalysis.spectral_analysis">
-<span class="sig-name descname"><span class="pre">spectral_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.array</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/algorithms/spectral_analysis.html#SpectralAnalysis.spectral_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.spectral_analysis" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.spectral_analysis.SpectralAnalysis.spectral_analysis">
+<code class="sig-name descname">spectral_analysis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">plot</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>int<span class="p">, </span>Tuple<span class="p">[</span>numpy.array<span class="p">, </span>float<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/algorithms/spectral_analysis.html#SpectralAnalysis.spectral_analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.spectral_analysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary keyed by the order of
 the linear and convolutional layers, with the
 eigenvalues of <span class="math notranslate nohighlight">\(X = W W^T\)</span>.
@@ -538,8 +531,8 @@ is the aspect ratio of the matrix.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="algorithms.spectral_analysis.SpectralAnalysis.universal_metric">
-<span class="sig-name descname"><span class="pre">universal_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="../_modules/algorithms/spectral_analysis.html#SpectralAnalysis.universal_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.universal_metric" title="Permalink to this definition">¶</a></dt>
+<dt id="algorithms.spectral_analysis.SpectralAnalysis.universal_metric">
+<code class="sig-name descname">universal_metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alpha_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../_modules/algorithms/spectral_analysis.html#SpectralAnalysis.universal_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithms.spectral_analysis.SpectralAnalysis.universal_metric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the universal capacity metric
 <span class="math notranslate nohighlight">\(\widehat{\alpha}=\frac{1}{L} \sum_{l} \alpha_{l} \log \lambda_{\max , l}\)</span> from
 <a class="reference external" href="https://arxiv.org/abs/2002.06716">https://arxiv.org/abs/2002.06716</a></p>
@@ -573,29 +566,37 @@ for average case capacity in DNNs, from
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../install.html" class="btn btn-neutral float-right" title="Installing Deep Data Profiler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="modules.html" class="btn btn-neutral float-left" title="algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="../install.html" class="btn btn-neutral float-right" title="Installing Deep Data Profiler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="modules.html" class="btn btn-neutral float-left" title="algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020 Battelle Memorial Institute.
+        
+        &copy; Copyright 2020 Battelle Memorial Institute
 
     </p>
   </div>
     
     
     
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 
