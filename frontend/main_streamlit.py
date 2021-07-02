@@ -176,10 +176,11 @@ if __name__ == "__main__":
         st.write(header)
         body_svd = """
         ## 1 SVD Feature Visualizations
-        Feature visualization is an interpretability technique that (roughly) optimizes an image so that it highly activates a neuron in a deep neural network (DNN). Feature visualizations have been used to gain a better understanding of how individual neurons in DNNs represent features.
+        ### Feature Visualization
+        Feature visualization is an interpretability technique that optimizes an image so that it highly activates a neuron in a deep neural network (DNN). Feature visualizations have been used to gain a better understanding of how individual neurons in DNNs represent features.
 
-        A prominent tool using feature visualizations is [OpenAI's Microscope](https://microscope.openai.com/models), which pairs these visualizations with dataset examples. Our SVD feature visualizations is a similar tool. However, our definition of "neurons," the basic unit of analysis for defining features that we are visualizing, differs from existing approaches.
-        #### SVD Neurons
+        A prominent tool using feature visualizations is [OpenAI's Microscope](https://microscope.openai.com/models), which pairs visualizations of neurons with the dataset examples that also highly activate the neuron. Our SVD feature visualizations is a similar tool. However, our definition of "neurons," the basic unit of analysis for defining features that we are visualizing, differs from existing approaches.
+        ### SVD Neuron
         Why do we want to represent the activations in a new basis? Performing interpretability analysis on only the activations is sometimes misleading. [Polysemantic neurons](https://distill.pub/2020/circuits/zoom-in/), neurons that respond to many unrelated inputs, are one prominent problem for feature visualization.
 
         The approach we have taken is to project the activations of a hidden layer onto the basis of eigenvectors of the weights for the layer.

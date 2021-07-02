@@ -26,7 +26,9 @@ setup(
     extras_require={
         'testing': ['pytest>=4.0'],
         'documentation': ['sphinx>=1.8.2', 'nb2plots>=0.6', 'sphinx-rtd-theme>=0.4.2'],
+        'frontend': ['torch-lucent', 'streamlit', 'boto3'],
         'all': ['sphinx>=1.8.2', 'nb2plots>=0.6', 'sphinx-rtd-theme>=0.4.2', 'pytest>=4.0',
-                'pillow>=5.2.0', 'torchvision>=0.4.1', 'jupyter>=1.0.0', 'opencv-python', 'pytorchcv'],
+                'pillow>=5.2.0', 'torchvision>=0.4.1', 'jupyter>=1.0.0', 'opencv-python', 'pytorchcv',
+                'torch-lucent', 'streamlit', 'boto3'],
     }
 )
