@@ -3,6 +3,7 @@
 .. image:: /images/eaglegraph.png
     :width: 500
     :align: right
+
 ========
 Overview
 ========
@@ -80,6 +81,119 @@ exploring the empirical spectral decomposition
 of the model's linear operators.
 
 Jupyter notebooks for the library with illustrative examples are available in the tutorials directory.
+
+
+
+
+Deep Data Profiler builds a profile of a model-data pairing by
+identifying key neurons and the synapses that connect them. This data
+naturally lends itself to representation as a directed bipartite graph,
+allowing us to take advantage of the rich field of graph theoretical
+analysis tools. Visit `Tutorial 2 - Topological Data
+Analysis <https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/master/tutorials/Tutorial%202%20-%20DDPAlgorithms.ipynb>`__
+for an interactive walkthrough of some of the content on this page.
+
+Profile Graphs
+--------------
+
+To construct a profile graph, we treat the influential neurons as
+vertices and the influential synapses that connect them as edges. In
+this graph, edge weights are defined as a function of the influence
+weight assigned to the corresponding synapse. We have explored two such
+functions, which we refer to as the original and inverted weighting
+schemes. Under the original weighting scheme the weight of an edge is
+equal to the influence weight of its corresponding synapse, so nodes
+connected by synapses with greater influence weights are further apart
+by shortest path distance. We define the inverted weighting scheme to
+assign a weight of :math:`w_i^{-1}` to edge :math:`i`, where :math:`w_i`
+is the influence weight of the corresponding synapse :math:`i`. Profile
+graphs that use the inverted weighting scheme are appropriate when our
+method of analyzing the graph places greater importance on points that
+are close together.
+
+.. image:: /images/eaglegraph.png
+   :alt: Eagle Profile Graph
+
+
+Topological Data Analysis
+-------------------------
+
+Topological Data Analysis (TDA) is a powerful tool for the analysis of
+large metrizable spaces of data. We explore the use of TDA to analyze
+the structure of profile graphs and uncover meaning behind the
+interconnection of the synapses, independent of labels on nodes and
+synapses. To accomplish this, we define a metric space on the vertices
+of a profile graph, which we can then analyze using persistent homology.
+
+.. image:: /images/pipelineimg.png
+   :alt: Pipeline
+
+Metric Space
+============
+
+The vertices of the profile graph can be represented in a metric space
+by constructing the distance matrix using the shortest path distance.
+Optionally, some kernel function can then be applied to the distances to
+produce a desired effect on the metric space. One example that we have
+explored is the Gaussian kernel, given by
+:math:`g(x) = 1 - e^{-x/2\sigma}`, where :math:`\sigma` is the standard
+deviation of the finite shortest path distances. The Gaussian kernel is
+an increasing function that spreads out low distances and contracts high
+distances. When the edge weights of a profile graph are defined
+according to an inverted weighting scheme, the low distances correspond
+to the most influential connections. In this case, spreading out the low
+distances can reveal more nuanced structures that emerge at those
+distance thresholds.
+
+Persistent Homology
+===================
+
+Persistent homology allows us to summarize the "shape" of profile graph
+data based on the appearance of topological features at different
+distance thresholds. We calculate the persistent homology of a metric
+space, and then study its persistence diagram to identify topological
+features of the corresponding profile graph. Persistence diagrams allow
+us to visualize the persistence of features by plotting a point for each
+topological feature, whose coordinates are :math:`(birth, death)`. The
+:math:`birth` of a feature, such as an open loop, represents the
+distance threshold when the loop was formed, and the :math:`death`
+represents the distance threshold when the loop was closed or
+triangulated. For a more in depth introduction to persistent homology,
+`A User’s Guide to Topological Data
+Analysis <https://learning-analytics.info/index.php/JLA/article/view/5196>`__
+by Elizabeth Munch gives an overview of modern TDA methods, including
+persistent homology (Section 3).
+
+Persistence Images
+==================
+
+Persistence images are finite-dimensional vector representations of
+persistence diagrams, proposed by Adams et. al. in `Persistence Images:
+A Stable Vector Representation of Persistent
+Homology <https://www.jmlr.org/papers/volume18/16-337/16-337.pdf>`__. We
+have used persistence images as part of our initial exploration of the
+topological features of profile graphs, since they provide alternative
+visualizations that can be compared by Euclidean distances (a metric
+that is much more computationally efficient than the current standard
+methods for comparing persistence diagrams).
+
+.. image:: /images/PDtoPI.png
+   :alt: Persistence Diagram vs. Persistence Image
+
+
+TDA Visualization Tool
+----------------------
+
+Our TDA visualization tool allows persistence diagrams and persistence
+images to be viewed alongside the input image from which their
+corresponding profile graph was generated by Deep Data Profiler. The
+tool includes image and persistence data for 50 images from each class
+of the ImageNet1k dataset, profiled using element-wise and channel-wise
+neuron definitions, on both VGG16 and ResNet-18 architectures. All
+persistence images were generated using the same scale and parameters,
+so they can be visually compared between different input images and
+classes. [link]
+
 
 
 .. toctree::
