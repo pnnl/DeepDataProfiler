@@ -99,7 +99,8 @@ if __name__ == "__main__":
         )
 
         uploaded_dict = st.file_uploader(
-            "PyTorch model weights (defaults to ImageNet-1k training if not provided)", type=["pt", "pth"]
+            "PyTorch model weights (defaults to ImageNet-1k training if not provided)",
+            type=["pt", "pth"],
         )
 
         if uploaded_dict:
@@ -224,10 +225,7 @@ if __name__ == "__main__":
         for idx, (layer, _) in enumerate(layers):
 
             fig, axs = plt.subplots(
-                1,
-                2,
-                constrained_layout=True,
-                figsize=(15,4)
+                1, 2, constrained_layout=True, figsize=(15, 4)
             )
             # grab eigenvalues from the trained
             eigenvalues, _ = eigenvalue_dict[layer]
