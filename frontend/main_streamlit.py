@@ -168,12 +168,12 @@ if __name__ == "__main__":
 
         A prominent tool using feature visualizations is [OpenAI's Microscope](https://microscope.openai.com/models), which pairs these visualizations with dataset examples. Our SVD feature visualizations is a similar tool. However, our definition of "neurons," the basic unit of analysis for defining features that we are visualizing, differs from existing approaches.
         #### SVD Neurons
-        Performing interpretability analysis on only the activations is sometimes misleading. One salient problem is that of [polysemantic neurons](https://distill.pub/2020/circuits/zoom-in/), activations that respond to many unrelated inputs. Our hypothesis is that this problem can be partially solved by representing the hidden layer activations in a basis that better represents the features learning in a DNN.
+        Why do we want to represent the activations in a new basis? Performing interpretability analysis on only the activations is sometimes misleading. [Polysemantic neurons](https://distill.pub/2020/circuits/zoom-in/), neurons that respond to many unrelated inputs, are one prominent problem for feature visualization.
 
-        The approach we have taken is to project the activations of a hidden layer onto the basis of eigenvectors of the weights for the layer. By representing the activations in a basis, we hope to find a "cleaner," less polysemantic, feature space.
+        The approach we have taken is to project the activations of a hidden layer onto the basis of eigenvectors of the weights for the layer.
         '''
         st.write(body_svd)
-        neuron_img = Image.open("data/neuron_img2.png")
+        neuron_img = Image.open("data/svd_neuron_viz.png")
         st.image(neuron_img, )
         body_tda = '''
         ## 2 TDA Visualizations
