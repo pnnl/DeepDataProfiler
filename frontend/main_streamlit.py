@@ -87,7 +87,7 @@ def svd_visualization(model, svd_dict, layer, svd_num):
     return output[0][0]
 
 
-@st.cache(ttl=600)
+@st.cache(ttl=600, show_spinner=False)
 def read_pickle_file(filename):
     s3 = boto3.resource("s3")
     my_pickle = pkl.loads(
@@ -96,7 +96,7 @@ def read_pickle_file(filename):
     return my_pickle
 
 
-@st.cache(ttl=600)
+@st.cache(ttl=600, show_spinner=False)
 def read_image_file(filename):
     s3 = boto3.resource("s3")
     my_image = Image.open(
@@ -110,7 +110,7 @@ def read_image_file(filename):
     return my_image
 
 
-@st.cache(ttl=600)
+@st.cache(ttl=600, show_spinner=False)
 def list_image_files(pathname):
     s3 = boto3.client("s3")
     all_objects = s3.list_objects(Bucket="ddp-streamlit-data", Prefix=pathname)

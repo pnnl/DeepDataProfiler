@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import sys
 import os.path
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 if sys.version_info < (3, 7):
     sys.exit('DeepDataProfiler requires Python 3.7 or later')
