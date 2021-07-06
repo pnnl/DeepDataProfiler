@@ -51,7 +51,9 @@ def load_model():
     """Loads a model"""
     model_str = "vgg16"
 
-    model_pre = tvmodels.__dict__[model_str](pretrained=True).eval()  # .to(device)
+    model_pre = tvmodels.__dict__[model_str](
+        pretrained=True
+    ).eval()  # .to(device)
     return model_pre
 
 
@@ -76,36 +78,48 @@ def load_svd_dicts(model_pre):
 )
 def svd_visualization(model, svd_dict, layer, svd_num):
     """Renders an SVD feature visualization"""
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     output = render.render_vis(
-        model.eval(),
+        model.to(device).eval(),
         objectives.svd(layer, svd_num, svd_dict),
         progress=False,
     )
     return output[0][0]
 
 
-@st.cache(ttl=600)
+@st.cache(ttl=600, show_spinner=False)
 def read_pickle_file(filename):
-    s3 = boto3.resource('s3')
-    my_pickle = pkl.loads(s3.Bucket("ddp-streamlit-data").Object(filename).get()['Body'].read())
+    s3 = boto3.resource("s3")
+    my_pickle = pkl.loads(
+        s3.Bucket("ddp-streamlit-data").Object(filename).get()["Body"].read()
+    )
     return my_pickle
 
-@st.cache(ttl=600)
+
+@st.cache(ttl=600, show_spinner=False)
 def read_image_file(filename):
-    s3 = boto3.resource('s3')
-    my_image = Image.open(BytesIO(s3.Bucket("ddp-streamlit-data").Object(filename).get()['Body'].read()))
+    s3 = boto3.resource("s3")
+    my_image = Image.open(
+        BytesIO(
+            s3.Bucket("ddp-streamlit-data")
+            .Object(filename)
+            .get()["Body"]
+            .read()
+        )
+    )
     return my_image
 
-@st.cache(ttl=600)
+
+@st.cache(ttl=600, show_spinner=False)
 def list_image_files(pathname):
-    s3 = boto3.client('s3')
-    all_objects = s3.list_objects(Bucket = 'ddp-streamlit-data', Prefix = pathname)
+    s3 = boto3.client("s3")
+    all_objects = s3.list_objects(Bucket="ddp-streamlit-data", Prefix=pathname)
     return [dct["Key"] for dct in all_objects["Contents"]]
 
 
 if __name__ == "__main__":
     st.set_page_config(
-        page_title="SVD Feature Visualization",
+        page_title="SVD Feature Visualization", page_icon=":lower_left_crayon:"
     )
     st.markdown(
         '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">',
@@ -150,7 +164,7 @@ if __name__ == "__main__":
     # NOTE: in future, allow user to supply relative path
     if active_tab == "About":
         st.header("About this tool")
-        header = '''
+        header = """
         This is a visualization tool for the [DeepDataProfiler](https://pnnl.github.io/DeepDataProfiler/build/index.html) library. For now, it consists of two separate components:
 
         1. Visualizations that link what we are calling the "SVD neurons" in a VGG-16 network with dataset examples from ImageNet.
@@ -158,25 +172,54 @@ if __name__ == "__main__":
         2. The persistence diagrams for DDP pofiler graphs for ImageNet images with VGG-16.
 
         Use the tabs above to navigate between these visualizations, or read more below.
-        '''
+        """
         st.write(header)
-        body_svd = '''
+        body_svd = """
         ## 1 SVD Feature Visualizations
-        Feature visualization is an interpretability technique that (roughly) optimizes an image so that it highly activates a neuron in a deep neural network (DNN). Feature visualizations have been used to gain a better understanding of how individual neurons in DNNs represent features.
+        ### Feature Visualization
+        Feature visualization is an interpretability technique that optimizes an image so that it highly activates a neuron in a deep neural network (DNN). Feature visualizations have been used to gain a better understanding of how individual neurons in DNNs represent features.
 
-        A prominent tool using feature visualizations is [OpenAI's Microscope](https://microscope.openai.com/models), which pairs these visualizations with dataset examples. Our SVD feature visualizations is a similar tool. However, our definition of "neurons," the basic unit of analysis for defining features that we are visualizing, differs from existing approaches.
-        #### SVD Neurons
-        Performing interpretability analysis on only the activations is sometimes misleading. One salient problem is that of [polysemantic neurons](https://distill.pub/2020/circuits/zoom-in/), activations that respond to many unrelated inputs. Our hypothesis is that this problem can be partially solved by representing the hidden layer activations in a basis that better represents the features learning in a DNN.
+        A prominent tool using feature visualizations is [OpenAI's Microscope](https://microscope.openai.com/models), which pairs visualizations of neurons with the dataset examples that also highly activate the neuron. Our SVD feature visualizations is a similar tool. However, our definition of "neurons," the basic unit of analysis for defining features that we are visualizing, differs from existing approaches.
+        ### SVD Neuron
+        Why do we want to represent the activations in a new basis? Performing interpretability analysis on only the activations is sometimes misleading. [Polysemantic neurons](https://distill.pub/2020/circuits/zoom-in/), neurons that respond to many unrelated inputs, are one prominent problem for feature visualization.
 
-        The approach we have taken is to project the activations of a hidden layer onto the basis of eigenvectors of the weights for the layer. By representing the activations in a basis, we hope to find a "cleaner," less polysemantic, feature space.
-        '''
+        The approach we have taken is to project the activations of a hidden layer onto the basis of eigenvectors of the weights for the layer.
+        """
         st.write(body_svd)
-        neuron_img = Image.open("data/neuron_img2.png")
-        st.image(neuron_img, )
-        body_tda = '''
+        neuron_img = Image.open("data/svd_neuron_viz.png")
+        st.image(
+            neuron_img,
+        )
+        body_tda1 = """
         ## 2 TDA Visualizations
-        '''
-        st.write(body_tda)
+        ### Topological Data Analysis
+        Topological Data Analysis (TDA) is a powerful tool for the analysis of large metrizable spaces of data. We explore the use of TDA to analyze the structure of profile graphs and uncover meaning behind the interconnection of the synapses, independent of labels on nodes and synapses. To accomplish this, we define a metric space on the vertices of a profile graph, which we can then analyze using persistent homology.
+
+        """
+        st.write(body_tda1)
+        pipeline_img = Image.open("data/pipelineimg.png")
+        st.image(pipeline_img)
+
+        body_tda2 = """
+        #### Metric Space
+        The vertices of the profile graph can be represented in a metric space by constructing the distance matrix using the shortest path distance. Optionally, some kernel function can then be applied to the distances to produce a desired effect on the metric space. One example that we have explored is the Gaussian kernel, given by $g(x) = 1 - e^{-x/2\sigma}$, where $\sigma$ is the standard deviation of the finite shortest path distances. The Gaussian kernel is an increasing function that spreads out low distances and contracts high distances. When the edge weights of a profile graph are defined according to an inverted weighting scheme, the low distances correspond to the most influential connections. In this case, spreading out the low distances can reveal more nuanced structures that emerge at those distance thresholds.
+
+        #### Persistent Homology
+        Persistent homology allows us to summarize the "shape" of profile graph data based on the appearance of topological features at different distance thresholds. We calculate the persistent homology of a metric space, and then study its persistence diagram to identify topological features of the corresponding profile graph. Persistence diagrams allow us to visualize the persistence of features by plotting a point for each topological feature, whose coordinates are $(birth, death)$. The  $birth$ of a feature, such as an open loop, represents the distance threshold when the loop was formed, and the  $death$ represents the distance threshold when the loop was closed or triangulated.  For a more in depth introduction to persistent homology, [A User’s Guide to Topological Data Analysis](https://learning-analytics.info/index.php/JLA/article/view/5196) by Elizabeth Munch gives an overview of modern TDA methods, including persistent homology (Section 3).
+
+        #### Persistence Images
+
+        Persistence images are finite-dimensional vector representations of persistence diagrams, proposed by Adams et. al. in [Persistence Images: A Stable Vector Representation of
+        Persistent Homology](https://www.jmlr.org/papers/volume18/16-337/16-337.pdf). We have used persistence images as part of our initial exploration of the topological features of profile graphs, since they provide alternative visualizations that can be compared by Euclidean distances (a metric that is much more computationally efficient than the current standard methods for comparing persistence diagrams).
+        """
+        st.write(body_tda2)
+        pd_pi_img = Image.open("data/PDtoPI.png")
+        st.image(pd_pi_img)
+        body_tda3 = """
+        ### TDA Visualization Tool
+        Our TDA visualization tool allows persistence diagrams and persistence images to be viewed alongside the input image from which their corresponding profile graph was generated by Deep Data Profiler. The tool includes image and persistence data for 50 images from each class of the ImageNet1k dataset, profiled using element-wise and channel-wise neuron definitions, on both VGG16 and ResNet-18 architectures. All persistence images were generated using the same scale and parameters, so they can be visually compared between different input images and classes.
+        """
+        st.write(body_tda3)
 
     elif active_tab == "SVD Feature Visualizations":
         st.subheader("Singular value feature visualizations")
@@ -210,7 +253,10 @@ if __name__ == "__main__":
             relative_feature_root = Path("vgg16_imagenet_svd_average/")
 
             feature_name_path = Path(layer_selectbox) / Path(
-                str(layer_selectbox) + "_" + str(feature_selectbox) + "th_singular.pkl"
+                str(layer_selectbox)
+                + "_"
+                + str(feature_selectbox)
+                + "th_singular.pkl"
             )
             feature_path = relative_feature_root / feature_name_path
             try:
@@ -281,18 +327,20 @@ if __name__ == "__main__":
 
     elif active_tab == "TDA Visualizations":
         st.subheader("Persistent homology visualizations")
-        neurons = st.sidebar.radio("Neuron type", options=("elements", "channels"))
+        neurons = st.sidebar.radio(
+            "Neuron type", options=("elements", "channels")
+        )
         model = "vgg16"  # hard-coded for now
 
         names_to_numbers, numbers_to_folders = load_class_labels_dicts()
 
-        cls_names = st.sidebar.multiselect(
+        cls_names = st.multiselect(
             "Choose a class to view",
             list(names_to_numbers.keys()),
             default=["tench, Tinca tinca", "volcano"],
         )
         # col_slider, _ = st.beta_columns((2, 1))
-        num_images = st.sidebar.slider(
+        num_images = st.slider(
             "Number of images to display per class",
             min_value=1,
             max_value=50,
@@ -310,7 +358,7 @@ if __name__ == "__main__":
         for cls_name in cls_names:
             cls_nmbr = names_to_numbers[cls_name]
             cls = numbers_to_folders[int(cls_nmbr)]
-            tdapath =  Path(neurons + "_0.1TH")
+            tdapath = Path(neurons + "_0.1TH")
             pimpath = tdapath / Path("persistence_images/H1")
 
             img_paths = relative_path / Path(cls)

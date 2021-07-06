@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Overview &mdash; Deep Data Profiler 1.0.0 documentation</title>
+  <title>Overview &mdash; Deep Data Profiler 1.1.0 documentation</title>
   
 
   
@@ -36,6 +36,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/copybutton.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -70,7 +71,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -98,7 +99,15 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#related-work">Related Work</a><ul class="simple">
+<li class="toctree-l2"><a class="reference internal" href="#related-work">Related Work</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#profile-graphs">Profile Graphs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#topological-data-analysis">Topological Data Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#metric-space">Metric Space</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#persistent-homology">Persistent Homology</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#persistence-images">Persistence Images</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tda-visualization-tool">TDA Visualization Tool</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -236,6 +245,100 @@ generated from profile graphs and for
 exploring the empirical spectral decomposition
 of the model’s linear operators.</p>
 <p>Jupyter notebooks for the library with illustrative examples are available in the tutorials directory.</p>
+<p>Deep Data Profiler builds a profile of a model-data pairing by
+identifying key neurons and the synapses that connect them. This data
+naturally lends itself to representation as a directed bipartite graph,
+allowing us to take advantage of the rich field of graph theoretical
+analysis tools. Visit <a class="reference external" href="https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/master/tutorials/Tutorial%202%20-%20DDPAlgorithms.ipynb">Tutorial 2 - Topological Data
+Analysis</a>
+for an interactive walkthrough of some of the content on this page.</p>
+</div>
+<div class="section" id="profile-graphs">
+<h2>Profile Graphs<a class="headerlink" href="#profile-graphs" title="Permalink to this headline">¶</a></h2>
+<p>To construct a profile graph, we treat the influential neurons as
+vertices and the influential synapses that connect them as edges. In
+this graph, edge weights are defined as a function of the influence
+weight assigned to the corresponding synapse. We have explored two such
+functions, which we refer to as the original and inverted weighting
+schemes. Under the original weighting scheme the weight of an edge is
+equal to the influence weight of its corresponding synapse, so nodes
+connected by synapses with greater influence weights are further apart
+by shortest path distance. We define the inverted weighting scheme to
+assign a weight of <span class="math notranslate nohighlight">\(w_i^{-1}\)</span> to edge <span class="math notranslate nohighlight">\(i\)</span>, where <span class="math notranslate nohighlight">\(w_i\)</span>
+is the influence weight of the corresponding synapse <span class="math notranslate nohighlight">\(i\)</span>. Profile
+graphs that use the inverted weighting scheme are appropriate when our
+method of analyzing the graph places greater importance on points that
+are close together.</p>
+<img alt="Eagle Profile Graph" src="../_images/eaglegraph.png" />
+</div>
+<div class="section" id="topological-data-analysis">
+<h2>Topological Data Analysis<a class="headerlink" href="#topological-data-analysis" title="Permalink to this headline">¶</a></h2>
+<p>Topological Data Analysis (TDA) is a powerful tool for the analysis of
+large metrizable spaces of data. We explore the use of TDA to analyze
+the structure of profile graphs and uncover meaning behind the
+interconnection of the synapses, independent of labels on nodes and
+synapses. To accomplish this, we define a metric space on the vertices
+of a profile graph, which we can then analyze using persistent homology.</p>
+<img alt="Pipeline" src="../_images/pipelineimg.png" />
+<div class="section" id="metric-space">
+<h3>Metric Space<a class="headerlink" href="#metric-space" title="Permalink to this headline">¶</a></h3>
+<p>The vertices of the profile graph can be represented in a metric space
+by constructing the distance matrix using the shortest path distance.
+Optionally, some kernel function can then be applied to the distances to
+produce a desired effect on the metric space. One example that we have
+explored is the Gaussian kernel, given by
+<span class="math notranslate nohighlight">\(g(x) = 1 - e^{-x/2\sigma}\)</span>, where <span class="math notranslate nohighlight">\(\sigma\)</span> is the standard
+deviation of the finite shortest path distances. The Gaussian kernel is
+an increasing function that spreads out low distances and contracts high
+distances. When the edge weights of a profile graph are defined
+according to an inverted weighting scheme, the low distances correspond
+to the most influential connections. In this case, spreading out the low
+distances can reveal more nuanced structures that emerge at those
+distance thresholds.</p>
+</div>
+<div class="section" id="persistent-homology">
+<h3>Persistent Homology<a class="headerlink" href="#persistent-homology" title="Permalink to this headline">¶</a></h3>
+<p>Persistent homology allows us to summarize the “shape” of profile graph
+data based on the appearance of topological features at different
+distance thresholds. We calculate the persistent homology of a metric
+space, and then study its persistence diagram to identify topological
+features of the corresponding profile graph. Persistence diagrams allow
+us to visualize the persistence of features by plotting a point for each
+topological feature, whose coordinates are <span class="math notranslate nohighlight">\((birth, death)\)</span>. The
+<span class="math notranslate nohighlight">\(birth\)</span> of a feature, such as an open loop, represents the
+distance threshold when the loop was formed, and the <span class="math notranslate nohighlight">\(death\)</span>
+represents the distance threshold when the loop was closed or
+triangulated. For a more in depth introduction to persistent homology,
+<a class="reference external" href="https://learning-analytics.info/index.php/JLA/article/view/5196">A User’s Guide to Topological Data
+Analysis</a>
+by Elizabeth Munch gives an overview of modern TDA methods, including
+persistent homology (Section 3).</p>
+</div>
+<div class="section" id="persistence-images">
+<h3>Persistence Images<a class="headerlink" href="#persistence-images" title="Permalink to this headline">¶</a></h3>
+<p>Persistence images are finite-dimensional vector representations of
+persistence diagrams, proposed by Adams et. al. in <a class="reference external" href="https://www.jmlr.org/papers/volume18/16-337/16-337.pdf">Persistence Images:
+A Stable Vector Representation of Persistent
+Homology</a>. We
+have used persistence images as part of our initial exploration of the
+topological features of profile graphs, since they provide alternative
+visualizations that can be compared by Euclidean distances (a metric
+that is much more computationally efficient than the current standard
+methods for comparing persistence diagrams).</p>
+<img alt="Persistence Diagram vs. Persistence Image" src="../_images/PDtoPI.png" />
+</div>
+</div>
+<div class="section" id="tda-visualization-tool">
+<h2>TDA Visualization Tool<a class="headerlink" href="#tda-visualization-tool" title="Permalink to this headline">¶</a></h2>
+<p>Our TDA visualization tool allows persistence diagrams and persistence
+images to be viewed alongside the input image from which their
+corresponding profile graph was generated by Deep Data Profiler. The
+tool includes image and persistence data for 50 images from each class
+of the ImageNet1k dataset, profiled using element-wise and channel-wise
+neuron definitions, on both VGG16 and ResNet-18 architectures. All
+persistence images were generated using the same scale and parameters,
+so they can be visually compared between different input images and
+classes. [link]</p>
 <div class="toctree-wrapper compound">
 </div>
 </div>

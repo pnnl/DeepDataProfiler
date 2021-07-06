@@ -17,3 +17,7 @@ examples1
 Untitled*
 untitled*
 *_old.*
+*.toml
+*.pdf
+*.pptx
+*.pth
