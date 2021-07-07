@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import sys
 import os.path
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 if sys.version_info < (3, 7):
     sys.exit('DeepDataProfiler requires Python 3.7 or later')
@@ -26,7 +26,9 @@ setup(
     extras_require={
         'testing': ['pytest>=4.0'],
         'documentation': ['sphinx>=1.8.2', 'nb2plots>=0.6', 'sphinx-rtd-theme>=0.4.2'],
+        'frontend': ['torch-lucent', 'streamlit', 'boto3'],
         'all': ['sphinx>=1.8.2', 'nb2plots>=0.6', 'sphinx-rtd-theme>=0.4.2', 'pytest>=4.0',
-                'pillow>=5.2.0', 'torchvision>=0.4.1', 'jupyter>=1.0.0', 'opencv-python', 'pytorchcv'],
+                'pillow>=5.2.0', 'torchvision>=0.4.1', 'jupyter>=1.0.0', 'opencv-python', 'pytorchcv',
+                'torch-lucent', 'streamlit', 'boto3'],
     }
 )
