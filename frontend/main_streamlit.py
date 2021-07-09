@@ -122,18 +122,18 @@ def list_image_files(pathname):
 
 if __name__ == "__main__":
     st.set_page_config(
-        page_title="DDP Visualization Demo", page_icon=":lower_left_crayon:", layout="wide",
+        page_title="DDP Visualization Demo", page_icon=":lower_left_crayon:", # layout="wide",
     )
     st.markdown(
         '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">',
         unsafe_allow_html=True,
     )
     query_params = st.experimental_get_query_params()
-    tabs = ["About", "SVD Feature Visualizations", "TDA Visualizations", "Spectral Analysis"]
+    tabs = ["About", "Feature Visualization", "TDA", "Spectral Analysis"]
     if "tab" in query_params:
         active_tab = query_params["tab"][0]
     else:
-        active_tab = "SVD Feature Visualizations"
+        active_tab = "Feature Visualization"
 
     if active_tab not in tabs:
         st.experimental_set_query_params(tab="About")
@@ -178,7 +178,7 @@ if __name__ == "__main__":
         """
         st.write(header)
         body_svd = """
-        ## 1 SVD Feature Visualizations
+        ## 1 Feature Visualization
         ### Feature Visualization
         Feature visualization is an interpretability technique that optimizes an image so that it highly activates a neuron in a deep neural network (DNN). Feature visualizations have been used to gain a better understanding of how individual neurons in DNNs represent features.
 
@@ -224,7 +224,7 @@ if __name__ == "__main__":
         """
         st.write(body_tda3)
 
-    elif active_tab == "SVD Feature Visualizations":
+    elif active_tab == "Feature Visualization":
         st.subheader("Singular value feature visualizations")
         with st.spinner("Loading image paths..."):
             img_paths = load_paths()
@@ -328,7 +328,7 @@ if __name__ == "__main__":
             except (IsADirectoryError, ClientError):
                 pass
 
-    elif active_tab == "TDA Visualizations":
+    elif active_tab == "TDA":
         st.subheader("Persistent homology visualizations")
         neurons = st.sidebar.radio(
             "Neuron type", options=("elements", "channels")

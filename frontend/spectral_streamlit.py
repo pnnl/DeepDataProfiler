@@ -18,8 +18,8 @@ def show_svd():
     Spectral Analysis is based on methods originating from Random Matrix theory,
     brought to deep neural networks by Martin and Mahoney.
 
-    These methods act only on the weights of the Fully Connected and
-    Convolutional layers a deep neural network. Despite this, they have
+    These methods act _only_ on the _weights_ of the Fully Connected and
+    Convolutional layers of a deep neural network. Despite this, they have
     proven effective in predicting
 
     1. Test accuracies with no access to the data distribution on which it was trained OR tested
@@ -169,13 +169,15 @@ def show_svd():
             st.write(e)
 
     with st.beta_expander("'Universal' capacity metric"):
+        st.write(r"Returns the capacity metric defined by $\widehat{\alpha}=\frac{1}{L} \sum_{l} \alpha_{l} \log \lambda_{\max , l}$")
         universal = analysis.universal_metric(alpha_dict=alpha_dict)
         universal_random = analysis_random.universal_metric(
             alpha_dict=alpha_dict_random
         )
-        st.write("Univeral capacity metric of uploaded model: ", universal)
-        st.write("Univeral capacity metric of random model: ", universal_random)
+        st.write("**Univeral capacity metric of the uploaded model**: ", universal)
+        st.write("**Univeral capacity metric of a random model**: ", universal_random)
     with st.beta_expander("Get metrics per-layer"):
+        st.write(r"Metrics on the covariance metrics of the weights for each layer, i.e. $X = W W^T$. Fits with a powerlaw distribution $\rho(\lambda) \sim \lambda^{-\alpha}$ using the MLE from https://arxiv.org/abs/0706.1062.")
         # threshold on the "fat-tailedness" of the power-law distribution
         # iterate through the final layers, which the dicts use as keys
         layers = list(alpha_dict.items())
