@@ -22,6 +22,7 @@ import os
 
 from streamlit_tda import load_class_labels_dicts
 from streamlit_svd import TorchProfilerSpectral
+from spectral_streamlit import show_svd
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -60,6 +61,7 @@ def load_model():
 @st.cache(
     show_spinner=False,
     allow_output_mutation=True,
+    max_entries=10,
 )
 def load_svd_dicts(model_pre):
     """Loads a dictionary of the SVDs per layer;
@@ -75,6 +77,7 @@ def load_svd_dicts(model_pre):
 @st.cache(
     show_spinner=False,
     allow_output_mutation=True,
+    max_entries=10,
 )
 def svd_visualization(model, svd_dict, layer, svd_num):
     """Renders an SVD feature visualization"""
@@ -96,7 +99,7 @@ def read_pickle_file(filename):
     return my_pickle
 
 
-@st.cache(ttl=600, show_spinner=False)
+@st.cache(ttl=600, max_entries=20, show_spinner=False)
 def read_image_file(filename):
     s3 = boto3.resource("s3")
     my_image = Image.open(
@@ -119,14 +122,14 @@ def list_image_files(pathname):
 
 if __name__ == "__main__":
     st.set_page_config(
-        page_title="SVD Feature Visualization", page_icon=":lower_left_crayon:"
+        page_title="DDP Visualization Demo", page_icon=":lower_left_crayon:", layout="wide",
     )
     st.markdown(
         '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">',
         unsafe_allow_html=True,
     )
     query_params = st.experimental_get_query_params()
-    tabs = ["About", "SVD Feature Visualizations", "TDA Visualizations"]
+    tabs = ["About", "SVD Feature Visualizations", "TDA Visualizations", "Spectral Analysis"]
     if "tab" in query_params:
         active_tab = query_params["tab"][0]
     else:
@@ -401,5 +404,7 @@ if __name__ == "__main__":
                 pim = pimgr.transform(dgms, skew=True)
                 pimgr_diagram = pimgr.plot_image(pim).figure
                 col_tda_pers_heat.pyplot()
+    elif active_tab == "Spectral Analysis":
+        show_svd()
     else:
         st.write("Failure")
