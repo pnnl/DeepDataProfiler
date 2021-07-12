@@ -41,7 +41,7 @@ def show_svd():
     - Mahoney, Michael, and Charles Martin. "Traditional and heavy tailed self regularization in neural network models." International Conference on Machine Learning. PMLR, 2019.
     """
 
-    with st.beta_expander("Background for this tool", expanded=True):
+    with st.beta_expander("Background for this tool",):
         st.write(about)
 
     ignore_set = {
