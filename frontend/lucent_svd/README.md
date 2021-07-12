@@ -2,6 +2,8 @@
 
 # Lucent
 
+Note: This is a fork of the lucent repo for DeepDataProfiler.
+
 <!--*It's still magic even if you know how it's done. GNU Terry Pratchett*-->
 
 [![Travis build status](https://img.shields.io/travis/greentfrapp/lucent.svg)](https://travis-ci.org/greentfrapp/lucent)
