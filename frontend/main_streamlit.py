@@ -90,18 +90,18 @@ def svd_visualization(model, svd_dict, layer, svd_num):
     return output[0][0]
 
 
-@st.cache(ttl=600, show_spinner=False)
+# @st.cache(ttl=600, show_spinner=False)
 def read_pickle_file(filename):
-    s3 = boto3.resource("s3")
+    s3 = boto3.resource("s3", aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
     my_pickle = pkl.loads(
         s3.Bucket("ddp-streamlit-data").Object(filename).get()["Body"].read()
     )
     return my_pickle
 
 
-@st.cache(ttl=600, max_entries=20, show_spinner=False)
+# @st.cache(ttl=600, max_entries=20, show_spinner=False)
 def read_image_file(filename):
-    s3 = boto3.resource("s3")
+    s3 = boto3.resource("s3", aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
     my_image = Image.open(
         BytesIO(
             s3.Bucket("ddp-streamlit-data")
@@ -113,9 +113,9 @@ def read_image_file(filename):
     return my_image
 
 
-@st.cache(ttl=600, show_spinner=False)
+# @st.cache(ttl=600, show_spinner=False)
 def list_image_files(pathname):
-    s3 = boto3.client("s3")
+    s3 = boto3.client("s3", aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
     all_objects = s3.list_objects(Bucket="ddp-streamlit-data", Prefix=pathname)
     return [dct["Key"] for dct in all_objects["Contents"]]
 
