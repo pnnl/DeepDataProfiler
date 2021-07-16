@@ -1,5 +1,5 @@
 Deep Data Profiler (DDP)
-========================
+======================== 
   
 The DDP library provides tools for analyzing the internal decision structure of a deep neural network within the
 context of a specific dataset. Documentation may be found [here](https://pnnl.github.io/DeepDataProfiler/)

@@ -22,6 +22,7 @@ import os
 
 from streamlit_tda import load_class_labels_dicts
 from streamlit_svd import TorchProfilerSpectral
+from spectral_streamlit import show_svd
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -60,6 +61,7 @@ def load_model():
 @st.cache(
     show_spinner=False,
     allow_output_mutation=True,
+    max_entries=10,
 )
 def load_svd_dicts(model_pre):
     """Loads a dictionary of the SVDs per layer;
@@ -75,6 +77,7 @@ def load_svd_dicts(model_pre):
 @st.cache(
     show_spinner=False,
     allow_output_mutation=True,
+    max_entries=10,
 )
 def svd_visualization(model, svd_dict, layer, svd_num):
     """Renders an SVD feature visualization"""
@@ -87,18 +90,18 @@ def svd_visualization(model, svd_dict, layer, svd_num):
     return output[0][0]
 
 
-@st.cache(ttl=600, show_spinner=False)
+# @st.cache(ttl=600, show_spinner=False)
 def read_pickle_file(filename):
-    s3 = boto3.resource("s3")
+    s3 = boto3.resource("s3", aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
     my_pickle = pkl.loads(
         s3.Bucket("ddp-streamlit-data").Object(filename).get()["Body"].read()
     )
     return my_pickle
 
 
-@st.cache(ttl=600, show_spinner=False)
+# @st.cache(ttl=600, max_entries=20, show_spinner=False)
 def read_image_file(filename):
-    s3 = boto3.resource("s3")
+    s3 = boto3.resource("s3", aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
     my_image = Image.open(
         BytesIO(
             s3.Bucket("ddp-streamlit-data")
@@ -110,27 +113,27 @@ def read_image_file(filename):
     return my_image
 
 
-@st.cache(ttl=600, show_spinner=False)
+# @st.cache(ttl=600, show_spinner=False)
 def list_image_files(pathname):
-    s3 = boto3.client("s3")
+    s3 = boto3.client("s3", aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
     all_objects = s3.list_objects(Bucket="ddp-streamlit-data", Prefix=pathname)
     return [dct["Key"] for dct in all_objects["Contents"]]
 
 
 if __name__ == "__main__":
     st.set_page_config(
-        page_title="SVD Feature Visualization", page_icon=":lower_left_crayon:"
+        page_title="DDP Visualization Demo", page_icon=":lower_left_crayon:", # layout="wide",
     )
     st.markdown(
         '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">',
         unsafe_allow_html=True,
     )
     query_params = st.experimental_get_query_params()
-    tabs = ["About", "SVD Feature Visualizations", "TDA Visualizations"]
+    tabs = ["About", "Feature Visualization", "TDA", "Spectral Analysis"]
     if "tab" in query_params:
         active_tab = query_params["tab"][0]
     else:
-        active_tab = "SVD Feature Visualizations"
+        active_tab = "Feature Visualization"
 
     if active_tab not in tabs:
         st.experimental_set_query_params(tab="About")
@@ -175,7 +178,7 @@ if __name__ == "__main__":
         """
         st.write(header)
         body_svd = """
-        ## 1 SVD Feature Visualizations
+        ## 1 Feature Visualization
         ### Feature Visualization
         Feature visualization is an interpretability technique that optimizes an image so that it highly activates a neuron in a deep neural network (DNN). Feature visualizations have been used to gain a better understanding of how individual neurons in DNNs represent features.
 
@@ -221,7 +224,7 @@ if __name__ == "__main__":
         """
         st.write(body_tda3)
 
-    elif active_tab == "SVD Feature Visualizations":
+    elif active_tab == "Feature Visualization":
         st.subheader("Singular value feature visualizations")
         with st.spinner("Loading image paths..."):
             img_paths = load_paths()
@@ -325,7 +328,7 @@ if __name__ == "__main__":
             except (IsADirectoryError, ClientError):
                 pass
 
-    elif active_tab == "TDA Visualizations":
+    elif active_tab == "TDA":
         st.subheader("Persistent homology visualizations")
         neurons = st.sidebar.radio(
             "Neuron type", options=("elements", "channels")
@@ -401,5 +404,7 @@ if __name__ == "__main__":
                 pim = pimgr.transform(dgms, skew=True)
                 pimgr_diagram = pimgr.plot_image(pim).figure
                 col_tda_pers_heat.pyplot()
+    elif active_tab == "Spectral Analysis":
+        show_svd()
     else:
         st.write("Failure")
