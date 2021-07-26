@@ -277,7 +277,7 @@ class SVDProfiler:
             neuron_weights=neuron_weights,
             num_inputs=1,
         )
- 
+
 
     def create_projections(
         self,
@@ -327,7 +327,7 @@ class SVDProfiler:
             # take SVD projection
             uprojy = torch.matmul(svd.U.T, layer_reshape)
             projections[k] = uprojy
-            
+
         return projections
 
     @staticmethod
