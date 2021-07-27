@@ -3,15 +3,18 @@ from typing import Optional, Tuple, List, Dict
 import torch
 import inspect
 from torch.nn.modules import dropout
+import scipy.sparse as sp
 import networkx as nx
 from deep_data_profiler.classes.profile import Profile
+from .torch_profiler import TorchProfiler
 from deep_data_profiler.utils import (
     TorchHook,
     model_graph,
+    matrix_convert,
 )
 
 
-class SVDProfiler:
+class SVDProfiler(TorchProfiler):
 
     """
     Torch Profiler wraps a PyTorch model into a TorchHook model which can
@@ -35,16 +38,22 @@ class SVDProfiler:
         compute_svd: bool = True,
     ):
 
-        super().__init__()
+        super().__init__(model)
         self.dropout_classes = [
             m[1]
             for m in inspect.getmembers(dropout, inspect.isclass)
             if m[1].__module__ == "torch.nn.modules.dropout"
         ]
-        self.implemented_classes = {
+
+        self.implemented_classes = [
             torch.nn.Linear,
             torch.nn.Conv2d,
-        }
+        ]
+
+        self.contrib_functions = [
+            "contrib_linear",
+            "contrib_conv2d",
+        ]
 
         self.model = TorchHook(model)
         self.hooks = self.model.available_modules()
@@ -249,34 +258,34 @@ class SVDProfiler:
             if not self.svd_dict:
                 self.svd_dict = self.create_svd(layers_to_find=layers_to_find)
 
-        for k, (layer_name, svd) in self.svd_dict.items():
-            layer_name = layer_name[0]
-            layer_activations = activations[layer_name].squeeze(
-                0
-            )  # noqa remove batch dimension
-            layer_reshape = layer_activations.view(
-                layer_activations.shape[0], -1
+            for k, (layer_name, svd) in self.svd_dict.items():
+                layer_name = layer_name[0]
+                layer_activations = activations[layer_name].squeeze(
+                    0
+                )  # noqa remove batch dimension
+                layer_reshape = layer_activations.view(
+                    layer_activations.shape[0], -1
+                )
+
+                # get bias term, check it's not None
+                bias = self.hooks[layer_name]._parameters["bias"]
+                if bias is not None:
+                    layer_reshape = layer_reshape - bias.unsqueeze(1)
+
+                # take SVD projection
+                uprojy = torch.matmul(svd.U.T, layer_reshape)
+                # average over the spatial dimensions
+                agg = torch.sum(uprojy, axis=1) / uprojy.shape[1]  # noqa torch.max(uprojy, axis=1).values
+                # calculate influential neurons
+                (
+                    neuron_counts[k],
+                    neuron_weights[k],
+                ) = SVDProfiler.influential_svd_neurons(agg, threshold=threshold)
+            return Profile(
+                neuron_counts=neuron_counts,
+                neuron_weights=neuron_weights,
+                num_inputs=1,
             )
-
-            # get bias term, check it's not None
-            bias = self.hooks[layer_name]._parameters["bias"]
-            if bias is not None:
-                layer_reshape = layer_reshape - bias.unsqueeze(1)
-
-            # take SVD projection
-            uprojy = torch.matmul(svd.U.T, layer_reshape)
-            # average over the spatial dimensions
-            agg = torch.sum(uprojy, axis=1) / uprojy.shape[1]  # noqa torch.max(uprojy, axis=1).values
-            # calculate influential neurons
-            (
-                neuron_counts[k],
-                neuron_weights[k],
-            ) = SVDProfiler.influential_svd_neurons(agg, threshold=threshold)
-        return Profile(
-            neuron_counts=neuron_counts,
-            neuron_weights=neuron_weights,
-            num_inputs=1,
-        )
 
 
     def create_projections(
@@ -333,7 +342,7 @@ class SVDProfiler:
     @staticmethod
     def influential_svd_neurons(
         agg: torch.Tensor, threshold: float = 0.1, norm=1
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> Tuple[sp.coo_matrix, sp.coo_matrix]:
         """
         Returns a dictionary of relative contributions keyed by influential
         SVD neurons for layer up to some threshold
@@ -349,11 +358,11 @@ class SVDProfiler:
 
         Returns
         -------
-        Tuple[torch.Tensor, torch.Tensor]
-            Tuple of influential_neurons, influential_weights.
-            influential_neurons is a tensor of the same shape as the
-            SVD of the weights (neurons).
-
+        influential_neurons : sp.coo_matrix
+            Matrix representing the influential neurons within the threshold
+        influential_weights : sp.coo_matrix
+            Matrix assigning weights to each influential neuron according to its
+            contribution to the threshold
         """
         m = torch.linalg.norm(
             agg.view((agg.shape[0], -1)), ord=norm, dim=1
@@ -392,4 +401,6 @@ class SVDProfiler:
 
         influential_neurons = influential_weights.bool().int()
 
-        return influential_neurons, influential_weights
+        return matrix_convert(influential_neurons), matrix_convert(
+            influential_weights
+        )
