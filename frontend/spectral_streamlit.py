@@ -41,7 +41,8 @@ def show_svd():
 
     with st.beta_expander("Background for this tool",):
         st.write(about)
-        st.image("data/new_spectral_plot.png", width=None)
+        path = os.path.dirname(__file__)
+        st.image(os.path.join(path, "data/new_spectral_plot.png"), width=None)
 
     ignore_set = {
         "alexnet",
