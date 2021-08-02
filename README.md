@@ -58,6 +58,10 @@ Tutorials may be run in your browser using Google Colab
 </a>
 </br>
 
+A Streamlit visualization frontend
+-------------------------------------------------------
+
+[A visualization demo can be found here.](https://share.streamlit.io/pnnl/deepdataprofiler/frontend/main_streamlit.py) The frontend tool is built with Streamlit, and showcases a few facets of the DDP library.
 
 Notes
 -----
