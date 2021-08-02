@@ -36,7 +36,9 @@ def load_paths():
     """Loads the dict keyed by features, with values of dicts of
     singular values and the relative image paths that maximize these singular values."""
     path = os.path.dirname(__file__)
-    img_paths = pkl.load(open(os.path.join(path, "data/light_paths.pkl"), "rb"))
+    img_paths = pkl.load(
+        open(os.path.join(path, "data/light_paths.pkl"), "rb")
+    )
 
     return img_paths
 
@@ -92,7 +94,11 @@ def svd_visualization(model, svd_dict, layer, svd_num):
 
 # @st.cache(ttl=600, show_spinner=False)
 def read_pickle_file(filename):
-    s3 = boto3.resource("s3", aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
+    s3 = boto3.resource(
+        "s3",
+        aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
+        aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
+    )
     my_pickle = pkl.loads(
         s3.Bucket("ddp-streamlit-data").Object(filename).get()["Body"].read()
     )
@@ -101,7 +107,11 @@ def read_pickle_file(filename):
 
 # @st.cache(ttl=600, max_entries=20, show_spinner=False)
 def read_image_file(filename):
-    s3 = boto3.resource("s3", aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
+    s3 = boto3.resource(
+        "s3",
+        aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
+        aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
+    )
     my_image = Image.open(
         BytesIO(
             s3.Bucket("ddp-streamlit-data")
@@ -115,19 +125,27 @@ def read_image_file(filename):
 
 # @st.cache(ttl=600, show_spinner=False)
 def list_image_files(pathname):
-    s3 = boto3.client("s3", aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
+        aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
+    )
     all_objects = s3.list_objects(Bucket="ddp-streamlit-data", Prefix=pathname)
     return [dct["Key"] for dct in all_objects["Contents"]]
 
 
 if __name__ == "__main__":
     st.set_page_config(
-        page_title="DDP Visualization Demo", page_icon=":lower_left_crayon:", # layout="wide",
+        page_title="DDP Visualization Demo",
+        page_icon=":lower_left_crayon:",  # layout="wide",
     )
 
     tabs = ["About", "Feature Visualization", "TDA", "Spectral Analysis"]
     active_tab = st.radio("Navigate to a page", options=tabs)
-    st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
+    st.write(
+        "<style>div.row-widget.stRadio > div{flex-direction:row;}</style>",
+        unsafe_allow_html=True,
+    )
 
     if active_tab == "About":
         st.header("About this tool")
