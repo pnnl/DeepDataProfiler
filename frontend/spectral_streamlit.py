@@ -39,9 +39,12 @@ def show_svd():
     - Mahoney, Michael, and Charles Martin. "Traditional and heavy tailed self regularization in neural network models." International Conference on Machine Learning. PMLR, 2019.
     """
 
-    with st.beta_expander("Background for this tool",):
+    with st.beta_expander(
+        "Background for this tool",
+    ):
         st.write(about)
-        st.image("data/new_spectral_plot.png", width=None)
+        path = os.path.dirname(__file__)
+        st.image(os.path.join(path, "data/new_spectral_plot.png"), width=None)
 
     ignore_set = {
         "alexnet",
@@ -95,11 +98,7 @@ def show_svd():
     model_list = list(models.__dict__.keys())
     model_list.append("LeNet")
 
-    model_options = [
-        model
-        for model in model_list
-        if model not in ignore_set
-    ]
+    model_options = [model for model in model_list if model not in ignore_set]
     with st.beta_expander("Select model", expanded=True):
         with st.form(key="my_form"):
             model_str = st.selectbox(
@@ -145,7 +144,9 @@ def show_svd():
                 random_model = get_LeNet()
             else:
                 model = models.__dict__[model_str](pretrained=True).eval()
-                random_model = models.__dict__[model_str](pretrained=False).eval()
+                random_model = models.__dict__[model_str](
+                    pretrained=False
+                ).eval()
 
             try:
                 with st.spinner("Computing spectral statistics..."):
@@ -154,11 +155,15 @@ def show_svd():
 
                     # compute the SVD of X for each layer, return in dict
                     eigenvalue_dict = analysis.spectral_analysis()
-                    eigenvalue_dict_random = analysis_random.spectral_analysis()
+                    eigenvalue_dict_random = (
+                        analysis_random.spectral_analysis()
+                    )
 
                     # fit a power law distribution for spectral distribution
                     # computed, per layer
-                    alpha_dict = analysis.fit_power_law(eig_dict=eigenvalue_dict)
+                    alpha_dict = analysis.fit_power_law(
+                        eig_dict=eigenvalue_dict
+                    )
                     alpha_dict_random = analysis_random.fit_power_law(
                         eig_dict=eigenvalue_dict_random
                     )
@@ -169,15 +174,24 @@ def show_svd():
                 st.write(e)
 
     with st.beta_expander("'Universal' capacity metric"):
-        st.write(r"Returns the capacity metric defined by $\widehat{\alpha}=\frac{1}{L} \sum_{l} \alpha_{l} \log \lambda_{\max , l}$")
+        st.write(
+            r"Returns the capacity metric defined by $\widehat{\alpha}=\frac{1}{L} \sum_{l} \alpha_{l} \log \lambda_{\max , l}$"
+        )
         universal = analysis.universal_metric(alpha_dict=alpha_dict)
         universal_random = analysis_random.universal_metric(
             alpha_dict=alpha_dict_random
         )
-        st.write("**Univeral capacity metric of the uploaded model**: ", universal)
-        st.write("**Univeral capacity metric of a random model**: ", universal_random)
+        st.write(
+            "**Univeral capacity metric of the uploaded model**: ", universal
+        )
+        st.write(
+            "**Univeral capacity metric of a random model**: ",
+            universal_random,
+        )
     with st.beta_expander("Get metrics per-layer"):
-        st.write(r"Metrics on the covariance metrics of the weights for each layer, i.e. $X = W W^T$. Fits with a powerlaw distribution $\rho(\lambda) \sim \lambda^{-\alpha}$ using the MLE from https://arxiv.org/abs/0706.1062.")
+        st.write(
+            r"Metrics on the covariance metrics of the weights for each layer, i.e. $X = W W^T$. Fits with a powerlaw distribution $\rho(\lambda) \sim \lambda^{-\alpha}$ using the MLE from https://arxiv.org/abs/0706.1062."
+        )
         # threshold on the "fat-tailedness" of the power-law distribution
         # iterate through the final layers, which the dicts use as keys
         layers = list(alpha_dict.items())
@@ -255,7 +269,9 @@ def show_svd():
                 eigenvalues, _ = eigenvalue_dict[layer]
                 # power law alphas
                 alpha, _ = alpha_dict[layer]
-                axs[0].hist(eigenvalues, bins="auto", density=True, color="red")
+                axs[0].hist(
+                    eigenvalues, bins="auto", density=True, color="red"
+                )
                 axs[0].set_title(
                     "Uploaded Network \n power-law fit"
                     + fr" $\alpha$ = {round(alpha, 1)}",
@@ -334,7 +350,6 @@ def show_svd():
     #         ax1.tick_params(axis='y', labelcolor='tab:red')
     #         plt.legend(bbox_to_anchor=(1.15, 1), loc='upper left')
 
-
     #         ax2 = ax1.twinx()
 
     #         color = 'darkblue'
@@ -347,6 +362,7 @@ def show_svd():
     #         # fig.tight_layout()  # otherwise the right y-label is slightly clipped
     #         plt.title("LeNet metric and loss vs training epoch")
     #         st.pyplot(fig)
+
 
 #         else:
 #             st.write("Per-epoch feature only implemented for LeNet")
