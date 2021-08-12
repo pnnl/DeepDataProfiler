@@ -32,11 +32,13 @@ def test_profiler_model(element_example):
         yp.detach().numpy(), y.detach().numpy(), rtol=1e-04, atol=1e-4
     ), f"failure: {v - y_out[0,ch,i,j]}"
 
+
 def test_create_layers(element_example):
     tp = element_example
     m = tp.profiler.model.available_modules()
     assert len(m) == 39
     assert len(tp.layerdict) == 23
+
 
 def test_contrib_linear(element_example):
     tp = element_example
@@ -158,7 +160,7 @@ def test_contrib_conv2d(element_example):
     infl_channels = infl_neurons[:, 0]
 
     layers = tp.layerdict[17][0]
-    
+
     nc, sc, sw = tp.profiler.contrib_conv2d(
         x_in, y_out, infl_neurons, layers, threshold=0.1
     )

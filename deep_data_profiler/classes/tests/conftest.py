@@ -25,11 +25,12 @@ class TorchExample:
 
 @pytest.fixture
 def element_example():
-    return TorchExample('element')
+    return TorchExample("element")
+
 
 @pytest.fixture
 def channel_example():
-    return TorchExample('channel')
+    return TorchExample("channel")
 
 
 class ProfileExample:

@@ -23,6 +23,7 @@ b_block = torch.Tensor(
     ]
 )
 
+
 def test_profiler_model(channel_example):
     tp = channel_example
     x = tp.input

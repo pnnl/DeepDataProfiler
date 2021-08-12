@@ -451,7 +451,7 @@ class TorchProfiler(ABC):
         pass
 
     ## Should we require implementation of the following?
-    
+
     # @abstractmethod
     # def contrib_max2d(self):
     #     pass
