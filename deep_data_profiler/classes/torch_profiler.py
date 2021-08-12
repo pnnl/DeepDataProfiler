@@ -290,12 +290,12 @@ class TorchProfiler(ABC):
             x_in = dict()
             for k in ltp:
                 y_out[k] = {
-                    k: activations[sght[k][0]]
+                    k: activations[self.sght[k][0]]
                 }  # this is the output from the first available module in the layer
                 nd = (k, self.layerdict[k][0][0])
                 pred_layers = list(self.SG.predecessors(nd))
                 x_in[k] = {
-                    pd[0]: activations[sght[pd[0]][1]] for pd in pred_layers
+                    pd[0]: activations[self.sght[pd[0]][1]] for pd in pred_layers
                 }  # this is the output from the last available module in the layer
 
             results = [

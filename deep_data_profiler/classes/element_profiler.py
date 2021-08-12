@@ -213,7 +213,7 @@ class ElementProfiler(TorchProfiler):
 
         """
 
-        func = getattr(self.__class__, layerdict[ldx][1])
+        func = getattr(self.__class__, self.layerdict[ldx][1])
         # get list of influential indices
         flat_idx = neuron_counts.nonzero()
         if func is ElementProfiler.contrib_linear:
@@ -445,12 +445,9 @@ class ElementProfiler(TorchProfiler):
             W = W[ch]
             B = B[ch] if B is not None else torch.Tensor()
 
-            y_true = y_out[0, ch, i, j]
-
             # find receptive fields for each influential neuron
             # xmat dimensions: num_infl x in_channels x kernel_size x kernel_size
             xmat = submatrix_generator(x_in, stride, kernel_size, padding)(i, j)
-
             # convolve weights and receptive fields
             z = W * xmat
             # order neurons in receptive field by greatest value/contribution
