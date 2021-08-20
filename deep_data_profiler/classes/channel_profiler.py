@@ -161,7 +161,13 @@ class ChannelProfiler(TorchProfiler):
             neuron_weights,
             synapse_counts,
             synapse_weights,
-        ) = self.build_dicts(x, layers_to_profile, param=threshold, norm=norm)
+        ) = self.build_dicts(
+            x,
+            layers_to_profile,
+            infl_threshold=threshold,
+            contrib_threshold=threshold,
+            norm=norm,
+        )
 
         return Profile(
             neuron_counts=neuron_counts,
@@ -212,8 +218,7 @@ class ChannelProfiler(TorchProfiler):
 
         func = getattr(self.__class__, self.layerdict[ldx][1])
         # get list of influential indices
-        flat_idx = neuron_counts.nonzero()
-        infl_idx = torch.Tensor(flat_idx[1]).long()
+        infl_idx = torch.Tensor(neuron_counts.col).long()
         # return ncs, scs, sws
         return func(
             self,
@@ -627,10 +632,6 @@ class ChannelProfiler(TorchProfiler):
         x1_ldx, x2_ldx = sorted(x_in.keys())
         x1_in = x_in[x1_ldx]
         x2_in = x_in[x2_ldx]
-
-        neuron_counts = dict()
-        synapse_counts = dict()
-        synapse_weights = dict()
 
         with torch.no_grad():
             maxvals = torch.zeros(2, dims[1])

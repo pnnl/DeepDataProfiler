@@ -164,7 +164,13 @@ class ElementProfiler(TorchProfiler):
             neuron_weights,
             synapse_counts,
             synapse_weights,
-        ) = self.build_dicts(x, layers_to_profile, param=threshold, use_abs=use_abs)
+        ) = self.build_dicts(
+            x,
+            layers_to_profile,
+            infl_threshold=threshold,
+            contrib_threshold=threshold,
+            use_abs=use_abs,
+        )
 
         return Profile(
             neuron_counts=neuron_counts,
@@ -215,13 +221,15 @@ class ElementProfiler(TorchProfiler):
 
         func = getattr(self.__class__, self.layerdict[ldx][1])
         # get list of influential indices
-        flat_idx = neuron_counts.nonzero()
+        flat_idx = neuron_counts.col
         if func is ElementProfiler.contrib_linear:
-            infl_idx = flat_idx[1]
+            infl_idx = neuron_counts.col
         # unravel to 3D for conv. layer
         else:
-            row_idx, col_idx = np.unravel_index(flat_idx[1], y_out[ldx].shape[-2:])
-            infl_idx = np.stack((flat_idx[0], row_idx, col_idx)).T
+            row_idx, col_idx = np.unravel_index(
+                neuron_counts.col, y_out[ldx].shape[-2:]
+            )
+            infl_idx = np.stack((neuron_counts.row, row_idx, col_idx)).T
         infl_idx = torch.Tensor(infl_idx).long()
 
         # call contrib function

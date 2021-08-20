@@ -224,7 +224,8 @@ class TorchProfiler(ABC):
         self,
         x: torch.Tensor,
         layers_to_profile: Union[List[int], Tuple[int]] = None,
-        param: float = 0.1,
+        infl_threshold: float = 0.1,
+        contrib_threshold: float = 0.1,
         **kwargs,
     ) -> Tuple[dict, dict, dict, dict]:
         """
@@ -237,7 +238,9 @@ class TorchProfiler(ABC):
         layers_to_profile : list or tuple
             list of specific layers to profile or tuple with first,last layers
             (exclusive of last) to profile and all layers inbetween
-        param : float, optional, default=0.1
+        infl_threshold : float
+            Parameter for influence
+        contrib_threshold : float, optional, default=0.1
             Parameter for contribution
 
         Returns
@@ -275,7 +278,7 @@ class TorchProfiler(ABC):
 
         # Fill dictionaries
         for k in ltp:
-            neuron_counts[k], neuron_weights[k] = influential_neurons(k, param)
+            neuron_counts[k], neuron_weights[k] = influential_neurons(k, infl_threshold)
 
         ######## Step 2: Identify Contributing Neurons (Nodes) and Synaptic connections (Edges) ########
 
@@ -304,7 +307,7 @@ class TorchProfiler(ABC):
                     y_out[ldx],
                     neuron_counts[ldx],
                     ldx,
-                    param,
+                    contrib_threshold,
                 )
                 for ldx in ltp
             ]
