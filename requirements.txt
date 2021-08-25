@@ -67,7 +67,7 @@ nbconvert==6.1.0
 nbformat==5.1.3
 nest-asyncio==1.5.1
 networkx==2.5.1
-notebook==6.4.0
+notebook==6.4.1
 numpy @ file:///opt/concourse/worker/volumes/live/660b80d1-747e-493a-6b34-55d0a0e21650/volume/numpy_and_numpy_base_1626271790683/work
 olefile==0.46
 opencv-python==4.5.3.56
