@@ -1,12 +1,12 @@
 from deep_data_profiler.classes.profile import Profile
 from deep_data_profiler.classes.channel_profiler import ChannelProfiler
-from deep_data_profiler.utils import get_index, matrix_convert, submatrix_generator
+from deep_data_profiler.utils import get_index, submatrix_generator
 import numpy as np
 import scipy.sparse as sp
 import torch
 from typing import Callable, Dict, List, Tuple, Union
 
-## TODO: pooling contribs (currently identity)
+
 class SpatialProfiler(ChannelProfiler):
     def influence_generator(
         self,
@@ -61,18 +61,12 @@ class SpatialProfiler(ChannelProfiler):
                     else:
                         m = torch.where(t > 0, t, torch.zeros(t.shape))
 
-                    # if use_quantile:
-                    #     bool_accept = m >= torch.quantile(m, threshold)
-                    #     bool_accept[:,max_infl-1:] = False
-                    #     influential_weights = torch.where(
-                    #         bool_accept, m, torch.zeros(m.shape)
-                    #     )
-                    #     influential_neurons = influential_weights.bool().int()
-
                     ordsmat_vals, ordsmat_indices = torch.sort(m, descending=True)
 
                     if use_quantile:
-                        bool_accept = ordsmat_vals >= torch.quantile(ordsmat_vals, threshold)
+                        bool_accept = ordsmat_vals >= torch.quantile(
+                            ordsmat_vals, threshold
+                        )
 
                     else:
                         # take the cumsum and normalize by total contribution per dim
@@ -97,23 +91,25 @@ class SpatialProfiler(ChannelProfiler):
                         # normalize by final accepted cumsum
                         ordsmat_vals /= cumsum[:, accept]
 
-                    # find accepted synapses, all other values zero.
-                    # note: it is ordered by largest norm value,
-                    # but "unordered" by neuron
-                    unordered_weights = torch.where(
-                        bool_accept, ordsmat_vals, torch.zeros(ordsmat_vals.shape)
+                    influential_weights = sp.coo_matrix(
+                        (
+                            ordsmat_vals[bool_accept],
+                            (torch.zeros(accept + 1), ordsmat_indices[bool_accept]),
+                        ),
+                        shape=m.shape,
                     )
-                    # re-order to mantain proper neuron ordering
-                    influential_weights = unordered_weights.gather(
-                        1, ordsmat_indices.argsort(1)
+                    influential_weights.eliminate_zeros()
+
+                    influential_neurons = sp.coo_matrix(
+                        (
+                            np.ones(influential_weights.data.shape),
+                            (influential_weights.row, influential_weights.col),
+                        ),
+                        shape=influential_weights.shape,
+                        dtype=int,
                     )
 
-                    influential_neurons = influential_weights.bool().int()
-
-                return (
-                    matrix_convert(influential_neurons),
-                    matrix_convert(influential_weights),
-                )
+                return influential_neurons, influential_weights
             else:
                 return sp.coo_matrix((0, 0)), sp.coo_matrix((0, 0))
 
@@ -136,7 +132,7 @@ class SpatialProfiler(ChannelProfiler):
         Parameters
         ----------
         x : torch.Tensor
-            input to model being profiled\
+            input to model being profiled
         layers_to_profile : list or tuple
             list of specific layers to profile or tuple with first,last layers
             (exclusive of last) to profile and all layers inbetween
@@ -278,21 +274,28 @@ class SpatialProfiler(ChannelProfiler):
 
             # fullify synapse weights to outdims x indims
             if len(xdims) == 1:
-                synapse_weights = torch.zeros(ydims[0], xdims[0])
+                synapse_weights = sp.csr_matrix((ydims[0], xdims[0]))
             else:
-                synapse_weights = torch.zeros(ydims[0], xdims[1] * xdims[2])
+                synapse_weights = sp.csr_matrix((ydims[0], xdims[1] * xdims[2]))
+
             synapse_weights[j] = sws_compact
+            synapse_weights = synapse_weights.tocoo()
+            synapse_weights.eliminate_zeros()
 
-            synapse_counts = synapse_weights.bool().int()
+            synapse_counts = sp.coo_matrix(
+                (
+                    np.ones(synapse_weights.data.shape),
+                    (synapse_weights.row, synapse_weights.col),
+                ),
+                shape=synapse_weights.shape,
+                dtype=int,
+            )
 
-            # construct neuron counts
-            neuron_counts = torch.sum(synapse_counts, dim=0).unsqueeze(0).int()
+            neuron_counts = sp.coo_matrix(
+                sp.csc_matrix(synapse_counts).sum(axis=0), dtype=int
+            )
 
-        return (
-            matrix_convert(neuron_counts),
-            matrix_convert(synapse_counts),
-            matrix_convert(synapse_weights),
-        )
+        return neuron_counts, synapse_counts, synapse_weights
 
     def contrib_conv2d(
         self,
@@ -434,7 +437,7 @@ class SpatialProfiler(ChannelProfiler):
             # note: ordsort_vals is num_infl x kernel_size**2, and each row
             #   is equal to range(kernel_size**2)
             ordsort_vals, ordsort_idx = ordproj_idx.sort()
-            sws_compact = unordered_synapses.gather(-1, ordsort_idx)
+            sws_compact = unordered_synapses.gather(-1, ordsort_idx).squeeze()
 
             # convert ordered flattened contributor indices to full indices in x_in
             ordsi = (
@@ -445,7 +448,7 @@ class SpatialProfiler(ChannelProfiler):
             )
 
             # copy influential indices along new dimension to index with contributors
-            infl_idx = infl_neurons.unsqueeze(-1).repeat(1, kernel_size ** 2)
+            infl_idx = infl_neurons.unsqueeze(-1).repeat(1, kernel_size ** 2).squeeze()
 
             # identify and remove padding indices
             if padding > 0:
@@ -457,20 +460,28 @@ class SpatialProfiler(ChannelProfiler):
                 infl_idx = infl_idx[valid_idx]
                 sws_compact = sws_compact[valid_idx]
 
-            # fullify synapse weights to h_out*w_out x h_in x w_in
-            synapse_weights = torch.zeros(h_out * w_out, h_in, w_in)
-            synapse_weights[infl_idx, ordsi, ordsj] = sws_compact
+            contrib_idx = np.ravel_multi_index((ordsi, ordsj), (h_in, w_in)).squeeze()
 
-            synapse_counts = synapse_weights.bool().int()
+            synapse_weights = sp.coo_matrix(
+                (sws_compact, (infl_idx, contrib_idx)),
+                shape=(h_out * w_out, h_in * w_in),
+            )
+            synapse_weights.eliminate_zeros()
 
-            # construct neuron counts
-            neuron_counts = torch.sum(synapse_counts, dim=0).unsqueeze(0).int()
+            synapse_counts = sp.coo_matrix(
+                (
+                    np.ones(synapse_weights.data.shape),
+                    (synapse_weights.row, synapse_weights.col),
+                ),
+                shape=(h_out * w_out, h_in * w_in),
+                dtype=int,
+            )
 
-        return (
-            matrix_convert(neuron_counts),
-            matrix_convert(synapse_counts),
-            matrix_convert(synapse_weights),
-        )
+            neuron_counts = sp.coo_matrix(
+                sp.csc_matrix(synapse_counts).sum(axis=0), dtype=int
+            )
+
+        return neuron_counts, synapse_counts, synapse_weights
 
     def contrib_max2d(
         self,
@@ -548,7 +559,7 @@ class SpatialProfiler(ChannelProfiler):
             ordsj = flat_idx % kernel_size + stride * np.expand_dims(j, -1) - padding
 
             # copy influential indices along new dimension to index with contributors
-            infl_idx = infl_neurons.unsqueeze(-1).repeat(1, kernel_size ** 2)
+            infl_idx = infl_neurons.unsqueeze(-1).repeat(1, kernel_size ** 2).squeeze()
 
             # identify and remove padding indices
             if padding > 0:
@@ -559,19 +570,29 @@ class SpatialProfiler(ChannelProfiler):
                 ordsj = ordsj[valid_idx]
                 infl_idx = infl_idx[valid_idx]
 
-            synapse_weights = torch.zeros(h_out * w_out, h_in, w_in)
-            synapse_weights[infl_idx, ordsi, ordsj] = 1
+            contrib_idx = np.ravel_multi_index((ordsi, ordsj), (h_in, w_in)).flatten()
+            infl_idx = infl_idx.view(-1)
 
-            synapse_counts = synapse_weights.int()
+            # import ipdb;ipdb.set_trace()
+            synapse_weights = sp.coo_matrix(
+                (np.ones(contrib_idx.shape), (infl_idx, contrib_idx)),
+                shape=(h_out * w_out, h_in * w_in),
+            )
 
-            # construct neuron counts
-            neuron_counts = torch.sum(synapse_counts, dim=0).unsqueeze(0).int()
+            synapse_counts = sp.coo_matrix(
+                (
+                    np.ones(contrib_idx.shape),
+                    (synapse_weights.row, synapse_weights.col),
+                ),
+                shape=(h_out * w_out, h_in * w_in),
+                dtype=int,
+            )
 
-        return (
-            matrix_convert(neuron_counts),
-            matrix_convert(synapse_counts),
-            matrix_convert(synapse_weights),
-        )
+            neuron_counts = sp.coo_matrix(
+                sp.csc_matrix(synapse_counts).sum(axis=0), dtype=int
+            )
+
+        return neuron_counts, synapse_counts, synapse_weights
 
     def contrib_adaptive_avg_pool2d(
         self,
@@ -579,7 +600,7 @@ class SpatialProfiler(ChannelProfiler):
         y_out: Dict[int, torch.Tensor],
         infl_neurons: torch.Tensor,
         layer: List[str],
-        threshold: float = None,
+        threshold: float = 0.1,
     ) -> Tuple[sp.coo_matrix, sp.coo_matrix, sp.coo_matrix]:
         """
         Return the contributing synapse for a torch.nn.Max2D layer
@@ -598,8 +619,7 @@ class SpatialProfiler(ChannelProfiler):
                         num_influential,3 if element-wise
         layer : List[str]
             list containing single key in self.model.available_modules() dictionary
-        threshold : None or float
-            not used, placeholder for uniformity in arguments.
+        threshold : float
 
         Returns
         -------
@@ -640,6 +660,24 @@ class SpatialProfiler(ChannelProfiler):
             # get i, j from flat spatial indices
             i, j = np.unravel_index(infl_neurons, (h_out, w_out))
 
+            rfield = submatrix_generator(x_in, stride, kernel_size)(i, j)
+
+            wx = rfield.view(num_infl, in_channels, kernel_size ** 2) * (
+                1 / kernel_size ** 2
+            )
+
+            # calculate sum of weighted spatials (equal to y_out spatial activation)
+            y = torch.sum(wx, dim=-1)
+            # caluclate strength of and unit vector in direction of influential spatials
+            y_norm = torch.linalg.norm(y, dim=-1)
+            y_uvec = y.T / y_norm
+
+            # project weighted spatials onto direction of the output spatial
+            wx_proj = torch.bmm(wx.transpose(1, 2), y_uvec.T.unsqueeze(-1)).squeeze(-1)
+
+            # normalize
+            wx_proj = wx_proj.squeeze() / y_norm
+
             # get flat spatial indices of receptive field
             flat_idx = torch.Tensor(
                 np.tile(np.arange(kernel_size ** 2), (num_infl, 1))
@@ -650,21 +688,33 @@ class SpatialProfiler(ChannelProfiler):
             ordsj = flat_idx % kernel_size + stride * np.expand_dims(j, -1)
 
             # copy influential indices along new dimension to index with contributors
-            infl_idx = infl_neurons.unsqueeze(-1).repeat(1, kernel_size ** 2)
+            infl_idx = infl_neurons.unsqueeze(-1).repeat(1, kernel_size ** 2).squeeze()
 
-            synapse_weights = torch.zeros(h_out * w_out, h_in, w_in)
-            synapse_weights[infl_idx, ordsi, ordsj] = 1
+            # convert full indices in x_in to flattened indices in x_in
+            contrib_idx = np.ravel_multi_index((ordsi, ordsj), (h_in, w_in)).squeeze()
 
-            synapse_counts = synapse_weights.int()
+            # construct synapse weights
+            synapse_weights = sp.coo_matrix(
+                (wx_proj.view(-1), (infl_idx, contrib_idx)),
+                shape=(h_out * w_out, h_in * w_in),
+            )
+            synapse_weights.eliminate_zeros
 
-            # construct neuron counts
-            neuron_counts = torch.sum(synapse_counts, dim=0).unsqueeze(0).int()
+            # construct synapse_counts
+            synapse_counts = sp.coo_matrix(
+                (
+                    np.ones(synapse_weights.data.shape),
+                    (synapse_weights.row, synapse_weights.col),
+                ),
+                shape=(h_out * w_out, h_in * w_in),
+                dtype=int,
+            )
+            # construct neuron_counts
+            neuron_counts = sp.coo_matrix(
+                sp.csc_matrix(synapse_counts).sum(axis=0), dtype=int
+            )
 
-        return (
-            matrix_convert(neuron_counts),
-            matrix_convert(synapse_counts),
-            matrix_convert(synapse_weights),
-        )
+        return neuron_counts, synapse_counts, synapse_weights
 
     def contrib_resnetadd(
         self,
@@ -802,17 +852,24 @@ class SpatialProfiler(ChannelProfiler):
         in_channels, h_in, w_in = x_in[0].shape
         out_channels, h_out, w_out = y_out[0].shape
 
-        sp = infl_neurons
-        neuron_counts = torch.zeros((1, h_in * w_in), dtype=torch.int)
-        synapse_counts = torch.zeros(h_out * w_out, h_in * w_in, dtype=torch.int)
-        synapse_weights = torch.zeros(h_out * w_out, h_in * w_in)
+        num_infl = infl_neurons.shape[0]
 
-        neuron_counts[:, sp] += 1
-        synapse_counts[sp, sp] += 1
-        synapse_weights[sp, sp] = 1
-
-        return (
-            matrix_convert(neuron_counts),
-            matrix_convert(synapse_counts),
-            matrix_convert(synapse_weights),
+        synapse_weights = sp.coo_matrix(
+            (torch.ones(num_infl), (infl_neurons, infl_neurons)),
+            shape=(h_out * w_out, h_in * w_in),
         )
+
+        synapse_counts = sp.coo_matrix(
+            (
+                torch.ones(num_infl),
+                (infl_neurons, infl_neurons),
+            ),
+            shape=(h_out * w_out, h_in * w_in),
+            dtype=int,
+        )
+
+        neuron_counts = sp.coo_matrix(
+            sp.csc_matrix(synapse_counts).sum(axis=0), dtype=int
+        )
+
+        return neuron_counts, synapse_counts, synapse_weights
