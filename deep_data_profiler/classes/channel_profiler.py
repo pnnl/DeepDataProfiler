@@ -61,7 +61,9 @@ class ChannelProfiler(TorchProfiler):
                     head_sign = hd > 0
                     tail_sign = nd > 0
                     t = torch.where(
-                        torch.eq(head_sign, tail_sign), nd, torch.zeros(nd.shape)
+                        torch.eq(head_sign, tail_sign).to(self.device),
+                        nd,
+                        torch.zeros(nd.shape, device=self.device),
                     )
 
                     # check if module is a conv. layer
@@ -93,7 +95,9 @@ class ChannelProfiler(TorchProfiler):
                             # take the raw activations
                             m = t
                         # ignore negative elements when not using norm
-                        m = torch.where(m > 0, m, torch.zeros(m.shape))
+                        m = torch.where(
+                            m > 0, m, torch.zeros(m.shape, device=self.device)
+                        )
 
                     # sort by influence
                     ordsmat_vals, ordsmat_indices = torch.sort(m, descending=True)
@@ -123,11 +127,16 @@ class ChannelProfiler(TorchProfiler):
                     ordsmat_vals = ordsmat_vals[bool_accept]
                     ordsmat_indices = ordsmat_indices[bool_accept]
 
+                    # send values and indices to cpu if necessary
+                    if self.device != "cpu":
+                        ordsmat_vals = ordsmat_vals.cpu()
+                        ordsmat_indices = ordsmat_indices.cpu()
+
                     # construct weights and counts sparse matrices
                     influential_weights = sp.coo_matrix(
                         (
                             ordsmat_vals,
-                            (torch.zeros(ordsmat_indices.shape), ordsmat_indices),
+                            (np.zeros(ordsmat_indices.shape), ordsmat_indices),
                         ),
                         shape=m.shape,
                     )
@@ -241,8 +250,8 @@ class ChannelProfiler(TorchProfiler):
         """
         # get the appropriate contrib function for the module
         func = getattr(self.__class__, self.layerdict[ldx][1])
-        # get list of influential indices
-        infl_idx = torch.Tensor(neuron_counts.col).long()
+        # get list of influential indices and send to correct device
+        infl_idx = torch.LongTensor(neuron_counts.col).to(self.device)
         # call contrib function to return neuron counts and synapse counts/weights
         return func(
             self,
@@ -322,7 +331,7 @@ class ChannelProfiler(TorchProfiler):
             z = x_in[0] * W[infl_neurons]
 
             # ignore negative values
-            z = torch.where(z > 0, z, torch.zeros(z.shape))
+            z = torch.where(z > 0, z, torch.zeros(z.shape, device=self.device))
 
             # sort by contribution
             ordsmat_vals, ordsmat_indices = torch.sort(z, descending=True)
@@ -352,6 +361,14 @@ class ChannelProfiler(TorchProfiler):
             # grab accepted contributor values and indices
             ordsmat_vals = ordsmat_vals[bool_accept]
             contrib_idx = ordsmat_indices[bool_accept]
+
+            # send indices and values to cpu if necessary
+            if self.device != "cpu":
+                accept = accept.cpu()
+                ordsmat_vals = ordsmat_vals.cpu()
+                contrib_idx = contrib_idx.cpu()
+                infl_neurons = infl_neurons.cpu()
+
             # repeat each influential neuron once for each of its accepted contributors
             infl_idx = np.repeat(infl_neurons, accept + 1)
 
@@ -489,14 +506,14 @@ class ChannelProfiler(TorchProfiler):
                 groups=in_channels * num_infl,
             )
 
-            # reshape to correct dimensions: num_infl x in_channels x h_out x w_out
-            z = z.view(num_infl, in_channels, h_out, w_out)
+            # reshape to dimensions: num_infl x in_channels x h_out * w_out
+            z = z.view(num_infl, in_channels, h_out * w_out)
 
             # ignore negative values
-            z = torch.where(z > 0, z, torch.zeros(z.shape))
+            z = torch.where(z > 0, z, torch.zeros(z.shape, device=self.device))
 
             # find the max value per channel
-            maxvals = F.max_pool2d(z, kernel_size=h_out).view(num_infl, in_channels)
+            maxvals = torch.max(z, dim=-1)[0]
 
             # order channels by greatest max value contribution
             ordsmat_vals, ordsmat_indices = torch.sort(maxvals, descending=True)
@@ -521,6 +538,14 @@ class ChannelProfiler(TorchProfiler):
             # grab accepted contributor values and indices
             ordsmat_vals = ordsmat_vals[bool_accept]
             contrib_idx = ordsmat_indices[bool_accept]
+
+            # send indices and values to cpu if necessary
+            if self.device != "cpu":
+                accept = accept.cpu()
+                ordsmat_vals = ordsmat_vals.cpu()
+                contrib_idx = contrib_idx.cpu()
+                infl_neurons = infl_neurons.cpu()
+
             # repeat each influential neuron once for each of its accepted contributors
             infl_idx = np.repeat(infl_neurons, accept + 1)
 
@@ -769,6 +794,10 @@ class ChannelProfiler(TorchProfiler):
             # get number of influential neurons
             num_infl = infl_neurons.shape[0]
 
+            # send indices to cpu if necessary
+            if self.device != "cpu":
+                infl_neurons = infl_neurons.cpu()
+
         # construct synapse_weights and counts
         synapse_weights = sp.coo_matrix(
             (np.ones(num_infl), (infl_neurons, infl_neurons)),
@@ -776,7 +805,7 @@ class ChannelProfiler(TorchProfiler):
         )
 
         synapse_counts = sp.coo_matrix(
-            (np.ones(num_infl),(infl_neurons, infl_neurons)),
+            (np.ones(num_infl), (infl_neurons, infl_neurons)),
             shape=(num_channels, num_channels),
             dtype=int,
         )

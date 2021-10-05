@@ -57,9 +57,9 @@ class ElementProfiler(TorchProfiler):
                     # only consider a neuron as potentially influential if its activation
                     # value in the head and tail modules have the same sign
                     t = torch.where(
-                        torch.eq(hd > 0, nd > 0),
+                        torch.eq(hd > 0, nd > 0).to(self.device),
                         nd,
-                        torch.zeros(nd.shape),
+                        torch.zeros(nd.shape, device=self.device),
                     )
 
                     if use_abs:
@@ -85,7 +85,9 @@ class ElementProfiler(TorchProfiler):
 
                     if not use_abs:
                         # ignore negative elements when not taking absolute value
-                        m = torch.where(m > 0, m, torch.zeros(m.shape))
+                        m = torch.where(
+                            m > 0, m, torch.zeros(m.shape, device=self.device)
+                        )
 
                     # sort by influence
                     ordsmat_vals, ordsmat_indices = torch.sort(m, descending=True)
@@ -115,6 +117,13 @@ class ElementProfiler(TorchProfiler):
                     ordsmat_vals = ordsmat_vals[bool_accept]
                     ordsmat_indices = ordsmat_indices[bool_accept]
 
+                    # send values and indices to cpu if necessary
+                    if self.device != "cpu":
+                        ordsmat_vals = ordsmat_vals.cpu()
+                        ordsmat_indices = ordsmat_indices.cpu()
+                        if is_conv:
+                            m_idx = m_idx.cpu()
+
                     # define shape depending on if module is conv. or FC
                     if is_conv:
                         shape = (num_channels, h * w)
@@ -122,7 +131,7 @@ class ElementProfiler(TorchProfiler):
                         indices = (ordsmat_indices, m_idx[:, ordsmat_indices].squeeze())
                     else:
                         shape = (1, num_elements)
-                        indices = (torch.zeros(accept + 1), ordsmat_indices)
+                        indices = (np.zeros(accept + 1), ordsmat_indices)
 
                     # construct weights and counts sparse matrices
                     influential_weights = sp.coo_matrix(
@@ -240,14 +249,17 @@ class ElementProfiler(TorchProfiler):
         func = getattr(self.__class__, self.layerdict[ldx][1])
         # take index as is for FC layer
         if func is ElementProfiler.contrib_linear:
-            infl_idx = torch.Tensor(neuron_counts.col).long()
+            infl_idx = torch.LongTensor(neuron_counts.col)
         # unravel (channel, flat spatial) to (channel, row, col) for conv. layer
         else:
             h, w = y_out[ldx][0].shape[1:]
             row_idx, col_idx = np.unravel_index(neuron_counts.col, (h, w))
-            infl_idx = torch.Tensor(
-                np.stack((neuron_counts.row, row_idx, col_idx)).T
-            ).long()
+            infl_idx = torch.LongTensor(
+                np.stack((neuron_counts.row, row_idx, col_idx)).T,
+            )
+
+        # send influential indices to correct device
+        infl_idx = infl_idx.to(self.device)
 
         # call contrib function to return neuron counts and synapse counts/weights
         return func(
@@ -302,8 +314,6 @@ class ElementProfiler(TorchProfiler):
         x_ldx = list(x_in.keys())[0]
         x_in = x_in[x_ldx]
 
-        j = infl_neurons
-
         with torch.no_grad():
             # grab linear module
             linear = self.model.available_modules()[layer[0]]
@@ -332,7 +342,7 @@ class ElementProfiler(TorchProfiler):
             z = x_in[0] * W[infl_neurons]
 
             # ignore negative values
-            z = torch.where(z > 0, z, torch.zeros(z.shape))
+            z = torch.where(z > 0, z, torch.zeros(z.shape, device=self.device))
 
             # sort by contribution
             ordsmat_vals, ordsmat_indices = torch.sort(z, descending=True)
@@ -362,6 +372,14 @@ class ElementProfiler(TorchProfiler):
             # grab accepted contributor values and indices
             ordsmat_vals = ordsmat_vals[bool_accept]
             contrib_idx = ordsmat_indices[bool_accept]
+
+            # send indices and values to cpu if necessary
+            if self.device != "cpu":
+                accept = accept.cpu()
+                ordsmat_vals = ordsmat_vals.cpu()
+                contrib_idx = contrib_idx.cpu()
+                infl_neurons = infl_neurons.cpu()
+
             # repeat each influential neuron once for each of its accepted contributors
             infl_idx = np.repeat(infl_neurons, accept + 1)
 
@@ -515,11 +533,22 @@ class ElementProfiler(TorchProfiler):
             ordsj = ordsj[bool_accept]
             ordsmat_vals = ordsmat_vals[bool_accept]
 
+            # send indices and values to cpu if necessary
+            if self.device != "cpu":
+                accept = accept.cpu()
+                ords_ch = ords_ch.cpu()
+                ordsi = ordsi.cpu()
+                ordsj = ordsj.cpu()
+                ordsmat_vals = ordsmat_vals.cpu()
+                ch = ch.cpu()
+                i = i.cpu()
+                j = j.cpu()
+
             # repeat each influential (channel, row, col) index once for each of its
             # accepted contributors
-            ch = ch.repeat_interleave(accept + 1)
-            i = i.repeat_interleave(accept + 1)
-            j = j.repeat_interleave(accept + 1)
+            ch = np.repeat(ch, accept + 1)
+            i = np.repeat(i, accept + 1)
+            j = np.repeat(j, accept + 1)
 
             # identify and remove padding indices, which have either row or col index
             # outside of the range [0, #row/col)
@@ -530,10 +559,10 @@ class ElementProfiler(TorchProfiler):
                 ords_ch = ords_ch[valid_idx]
                 ordsi = ordsi[valid_idx]
                 ordsj = ordsj[valid_idx]
+                ordsmat_vals = ordsmat_vals[valid_idx]
                 ch = ch[valid_idx]
                 i = i[valid_idx]
                 j = j[valid_idx]
-                ordsmat_vals = ordsmat_vals[valid_idx]
 
             # flatten all influential and contributor indices
             infl_idx = np.ravel_multi_index((ch, i, j), (out_channels, h_out, w_out))
@@ -644,16 +673,25 @@ class ElementProfiler(TorchProfiler):
             maxi = (maxidx // kernel_size + stride * i) - padding
             maxj = (maxidx % kernel_size + stride * j) - padding
 
+            # send indices and values to cpu if necessary
+            if self.device != "cpu":
+                maxi = maxi.cpu()
+                maxj = maxj.cpu()
+                maxval = maxval.cpu()
+                ch = ch.cpu()
+                i = i.cpu()
+                j = j.cpu()
+
             # identify and remove padding indices, which have either row or col index
             # outside of the range [0, #row/col)
             if padding > 0:
                 valid_idx = (maxi >= 0) & (maxi < h_in) & (maxj >= 0) & (maxj < w_in)
                 maxi = maxi[valid_idx]
                 maxj = maxj[valid_idx]
+                maxval = maxval[valid_idx]
                 ch = ch[valid_idx]
                 i = i[valid_idx]
                 j = j[valid_idx]
-                maxval = maxval[valid_idx]
 
             # flatten all influential and contributor indices
             infl_idx = np.ravel_multi_index((ch, i, j), (out_channels, h_out, w_out))
@@ -758,7 +796,9 @@ class ElementProfiler(TorchProfiler):
                 range(num_infl), ch
             ]
             # only consider values > 0
-            rfield = torch.where(rfield > 0, rfield, torch.zeros(rfield.shape))
+            rfield = torch.where(
+                rfield > 0, rfield, torch.zeros(rfield.shape, device=self.device)
+            )
 
             # order neurons in receptive field by greatest normalized contribution
             ordsmat_vals, ordsmat_indices = torch.sort(
@@ -794,11 +834,21 @@ class ElementProfiler(TorchProfiler):
             ordsj = ordsj[bool_accept]
             ordsmat_vals = ordsmat_vals[bool_accept]
 
+            # send indices and values to cpu if necessary
+            if self.device != "cpu":
+                accept = accept.cpu()
+                ordsi = ordsi.cpu()
+                ordsj = ordsj.cpu()
+                ordsmat_vals = ordsmat_vals.cpu()
+                ch = ch.cpu()
+                i = i.cpu()
+                j = j.cpu()
+
             # repeat each influential (channel, row, col) index once for each of its
             # accepted contributors
-            ch = ch.repeat_interleave(accept + 1)
-            i = i.repeat_interleave(accept + 1)
-            j = j.repeat_interleave(accept + 1)
+            ch = np.repeat(ch, accept + 1)
+            i = np.repeat(i, accept + 1)
+            j = np.repeat(j, accept + 1)
 
             # flatten all influential and contributor indices
             infl_idx = np.ravel_multi_index((ch, i, j), (out_channels, h_out, w_out))
@@ -895,19 +945,23 @@ class ElementProfiler(TorchProfiler):
             ch, i, j = infl_neurons.unbind(dim=1)
 
             # only take elements corresponding to influentials in y_out
-            vals = x_in[:,ch,i,j]
+            vals = x_in[:, ch, i, j]
 
         # construct neuron counts and synapse counts/weights for each input layer
         # when the element val in the first input layer is greater than the second,
         # fully attribute influence to the corresponding element in the first layer
         nc1, sc1, sw1 = self.contrib_identity(
-            {x1_ldx: x_in[0].unsqueeze(0)}, {y_ldx: y_out}, infl_neurons[vals[0] > vals[1]]
+            {x1_ldx: x_in[0].unsqueeze(0)},
+            {y_ldx: y_out},
+            infl_neurons[vals[0] > vals[1]],
         )
 
         # when the element val in the second input layer is greater than or equal to the
         # first, fully attribute influence to the corresponding element in the second layer
         nc2, sc2, sw2 = self.contrib_identity(
-            {x2_ldx: x_in[1].unsqueeze(0)}, {y_ldx: y_out}, infl_neurons[vals[0] <= vals[1]]
+            {x2_ldx: x_in[1].unsqueeze(0)},
+            {y_ldx: y_out},
+            infl_neurons[vals[0] <= vals[1]],
         )
 
         # return neuron counts as tuple, synapse counts/weights as block diagonal matrices
@@ -976,6 +1030,12 @@ class ElementProfiler(TorchProfiler):
 
             # get channel, row, col indices of influential neurons
             ch, i, j = infl_neurons.unbind(dim=1)
+
+            # send indices to cpu if necessary
+            if self.device != "cpu":
+                ch = ch.cpu()
+                i = i.cpu()
+                j = j.cpu()
 
             # flatten influential indices
             infl_flat = np.ravel_multi_index((ch, i, j), (num_channels, h, w))

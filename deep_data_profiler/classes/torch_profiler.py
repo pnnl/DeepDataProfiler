@@ -67,7 +67,7 @@ class TorchProfiler(ABC):
         ]
 
         self.model = TorchHook(model, device)
-        self.device = torch.device(device)
+        self.device = device
         self.hooks = self.model.available_modules()
         supernodes, SG, pos = self.super_nodes_graph()
         self.supernodes = supernodes

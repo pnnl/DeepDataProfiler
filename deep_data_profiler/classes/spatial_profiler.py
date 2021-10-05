@@ -79,7 +79,9 @@ class SpatialProfiler(TorchProfiler):
                         m = torch.linalg.norm(spatials, ord=norm, dim=1)
                     # otherwise if module is fully connected, ignore negative activations
                     else:
-                        m = torch.where(t > 0, t, torch.zeros(1, num_elements))
+                        m = torch.where(
+                            t > 0, t, torch.zeros((1, num_elements), device=self.device)
+                        )
 
                     # sort values to find strongest neurons
                     ordsmat_vals, ordsmat_indices = torch.sort(m, descending=True)
@@ -120,11 +122,16 @@ class SpatialProfiler(TorchProfiler):
                     ordsmat_vals = ordsmat_vals[bool_accept]
                     ordsmat_indices = ordsmat_indices[bool_accept]
 
+                    # send values and indices to cpu if necessary
+                    if self.device != "cpu":
+                        ordsmat_vals = ordsmat_vals.cpu()
+                        ordsmat_indices = ordsmat_indices.cpu()
+
                     # construct weights and counts sparse matrices
                     influential_weights = sp.coo_matrix(
                         (
                             ordsmat_vals,
-                            (torch.zeros(ordsmat_indices.shape), ordsmat_indices),
+                            (np.zeros(ordsmat_indices.shape), ordsmat_indices),
                         ),
                         shape=m.shape,
                     )
@@ -255,7 +262,7 @@ class SpatialProfiler(TorchProfiler):
         # get the appropriate contrib function for the module
         func = getattr(self.__class__, self.layerdict[ldx][1])
         # get list of influential indices
-        infl_idx = torch.Tensor(neuron_counts.col).long()
+        infl_idx = torch.LongTensor(neuron_counts.col)
         # call contrib function to return neuron counts and synapse counts/weights
         return func(
             self,
@@ -336,13 +343,13 @@ class SpatialProfiler(TorchProfiler):
             z = x_in[0] * W[infl_neurons]
 
             # ignore negative values
-            z = torch.where(z > 0, z, torch.zeros(z.shape))
+            z = torch.where(z > 0, z, torch.zeros(z.shape, device=self.device))
 
             # sort by contribution
             ordsmat_vals, ordsmat_indices = torch.sort(z, descending=True)
 
             # take the cumsum
-            cumsum = torch.cumsum(ordsmat_vals, dim=1).detach()
+            cumsum = torch.cumsum(ordsmat_vals, dim=1)
 
             # find threshold goal
             goal = threshold * y_out[0, infl_neurons]
@@ -366,6 +373,13 @@ class SpatialProfiler(TorchProfiler):
             # grab accepted contributor values and indices
             ordsmat_vals = ordsmat_vals[bool_accept]
             contrib_idx = ordsmat_indices[bool_accept]
+
+            # send indices and values to cpu if necessary
+            if self.device != "cpu":
+                accept = accept.cpu()
+                ordsmat_vals = ordsmat_vals.cpu()
+                contrib_idx = contrib_idx.cpu()
+
             # repeat each influential neuron once for each of its accepted contributors
             infl_idx = np.repeat(infl_neurons, accept + 1)
 
@@ -490,6 +504,7 @@ class SpatialProfiler(TorchProfiler):
                 t = j * stride - padding
                 # convert row/col index to flat spatial index
                 contrib_idx = np.ravel_multi_index((s, t), (h_in, w_in))
+                # preserve influential indices
                 infl_idx = infl_neurons
                 # sole contributors have weight 1.0
                 ordproj_vals = np.ones(num_infl)
@@ -552,19 +567,28 @@ class SpatialProfiler(TorchProfiler):
                 # update accept to be index of the first False (the distances between the
                 # partial sum vectors and the output spatial are not always monotonically
                 # decreasing so the following code handles this special case)
-                accept = torch.argsort(bool_accept, descending=True, dim=-1)[
+                accept = torch.argsort(bool_accept.int(), descending=True, dim=-1)[
                     range(num_infl), accept
                 ]
+
                 # add additional accept, ie accept + 1, and don't accept any further
                 bool_accept = torch.where(
-                    torch.arange(kernel_size ** 2).unsqueeze(0).repeat(num_infl, 1)
+                    torch.arange(kernel_size ** 2, device=self.device)
+                    .unsqueeze(0)
+                    .repeat(num_infl, 1)
                     <= accept.unsqueeze(-1),
-                    torch.ones(num_infl, kernel_size ** 2),
-                    torch.zeros(num_infl, kernel_size ** 2),
+                    torch.ones((num_infl, kernel_size ** 2), device=self.device),
+                    torch.zeros((num_infl, kernel_size ** 2), device=self.device),
                 ).bool()
 
                 # normalize magnitude of projection as a fraction of magnitude of output spatial
                 ordproj_vals /= y_norm.unsqueeze(-1)
+
+                # send indices and values to cpu if necessary
+                if self.device != "cpu":
+                    accept = accept.cpu()
+                    ordproj_idx = ordproj_idx.cpu()
+                    ordproj_vals = ordproj_vals.cpu()
 
                 # convert ordered flattened contributor indices to full row/col indices in x_in
                 ordsi = (
@@ -580,6 +604,7 @@ class SpatialProfiler(TorchProfiler):
                 ordsi = ordsi[bool_accept]
                 ordsj = ordsj[bool_accept]
                 ordproj_vals = ordproj_vals[bool_accept]
+
                 # repeat each influential neuron once for each of its accepted contributors
                 infl_idx = np.repeat(infl_neurons, accept + 1)
 
@@ -695,6 +720,7 @@ class SpatialProfiler(TorchProfiler):
                 t = j * stride - padding
                 # convert row/col index to flat spatial index
                 contrib_idx = np.ravel_multi_index((s, t), (h_in, w_in))
+                # preserve influential indices
                 infl_idx = infl_neurons
             # standard case: take all spatials in receptive field as equal contributors
             else:
@@ -714,7 +740,6 @@ class SpatialProfiler(TorchProfiler):
 
                 # identify and remove padding indices, which have either row or col index
                 # outside of the range [0, #row/col)
-
                 if padding > 0:
                     valid_idx = (
                         (ordsi >= 0) & (ordsi < h_in) & (ordsj >= 0) & (ordsj < w_in)
@@ -823,10 +848,14 @@ class SpatialProfiler(TorchProfiler):
             # special case: when there is only one spatial in the receptive field,
             # take it as the only contributor
             if kernel_size == 1:
+                # find row/col index of contributor in x_in
                 s = i * stride
                 t = j * stride
+                # convert row/col index to flat spatial index
                 contrib_idx = np.ravel_multi_index((s, t), (h_in, w_in))
+                # preserve influential indices
                 infl_idx = infl_neurons
+                # sole contributors have weight 1.0
                 ordproj_vals = np.ones(num_infl)
             # standard case: take all contributors weighted by the strength of their
             # projections in the direction of the influential output spatial
@@ -871,12 +900,16 @@ class SpatialProfiler(TorchProfiler):
 
                 ordproj_vals = wx_proj.view(-1)
 
+                # send values to cpu if necessary
+                if self.device != "cpu":
+                    ordproj_vals = ordproj_vals.cpu()
+
             # construct synapse weights and counts
             synapse_weights = sp.coo_matrix(
                 (ordproj_vals, (infl_idx, contrib_idx)),
                 shape=(h_out * w_out, h_in * w_in),
             )
-            synapse_weights.eliminate_zeros
+            synapse_weights.eliminate_zeros()
 
             synapse_counts = sp.coo_matrix(
                 (
@@ -969,6 +1002,10 @@ class SpatialProfiler(TorchProfiler):
             # normalize by strength of influential spatial
             proj /= y_norm
 
+            # send values to cpu if necessary
+            if self.device != "cpu":
+                proj = proj.cpu()
+
         # construct neuron counts and synapse counts/weights for each input layer
         nc1, sc1, sw1 = self.contrib_identity(
             {x1_ldx: x_in[0].unsqueeze(0)}, {y_ldx: y_out}, infl_neurons
@@ -1048,15 +1085,12 @@ class SpatialProfiler(TorchProfiler):
 
         # construct synapse weights and counts
         synapse_weights = sp.coo_matrix(
-            (torch.ones(num_infl), (infl_neurons, infl_neurons)),
+            (np.ones(num_infl), (infl_neurons, infl_neurons)),
             shape=(num_spatials, num_spatials),
         )
 
         synapse_counts = sp.coo_matrix(
-            (
-                torch.ones(num_infl),
-                (infl_neurons, infl_neurons),
-            ),
+            (np.ones(num_infl), (infl_neurons, infl_neurons)),
             shape=(num_spatials, num_spatials),
             dtype=int,
         )
