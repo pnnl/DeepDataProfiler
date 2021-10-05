@@ -31,7 +31,7 @@ class TorchProfiler(ABC):
         Model to be profiled
     """
 
-    def __init__(self, model: torch.nn.Module) -> None:
+    def __init__(self, model: torch.nn.Module, device: str = "cpu") -> None:
 
         super().__init__()
         self.activation_classes = [
@@ -66,7 +66,8 @@ class TorchProfiler(ABC):
             "contrib_conv2d",
         ]
 
-        self.model = TorchHook(model)
+        self.model = TorchHook(model, device)
+        self.device = torch.device(device)
         self.hooks = self.model.available_modules()
         supernodes, SG, pos = self.super_nodes_graph()
         self.supernodes = supernodes
@@ -445,15 +446,15 @@ class TorchProfiler(ABC):
     def create_profile(self):
         pass
 
-    @abstractmethod
-    def contrib_linear(self):
-        pass
-
-    @abstractmethod
-    def contrib_conv2d(self):
-        pass
-
     ## Should we require implementation of the following?
+
+    # @abstractmethod
+    # def contrib_linear(self):
+    #     pass
+
+    # @abstractmethod
+    # def contrib_conv2d(self):
+    #     pass
 
     # @abstractmethod
     # def contrib_max2d(self):

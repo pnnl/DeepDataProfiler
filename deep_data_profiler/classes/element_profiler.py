@@ -1,10 +1,10 @@
 from deep_data_profiler.classes.profile import Profile
 from deep_data_profiler.classes.torch_profiler import TorchProfiler
-from deep_data_profiler.utils import get_index, matrix_convert, submatrix_generator
+from deep_data_profiler.utils import get_index, submatrix_generator
 import numpy as np
 import scipy.sparse as sp
 import torch
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 import warnings
 
 
@@ -18,7 +18,7 @@ class ElementProfiler(TorchProfiler):
         Parameters
         ----------
         activations : dict of tensors
-        use_abs : boolean, optional, default=False
+        use_abs : boolean, default=False
             If True, use the absolute value of element activations to determine influence
 
         Returns
@@ -35,7 +35,7 @@ class ElementProfiler(TorchProfiler):
             Parameters
             ----------
             layer_number : int
-            threshold : float, optional, default=0.1
+            threshold : float, default=0.1
 
             Returns
             -------
@@ -56,73 +56,90 @@ class ElementProfiler(TorchProfiler):
 
                     # only consider a neuron as potentially influential if its activation
                     # value in the head and tail modules have the same sign
-                    head_sign = hd > 0
-                    tail_sign = nd > 0
                     t = torch.where(
-                        torch.eq(head_sign, tail_sign), nd, torch.zeros(nd.shape)
+                        torch.eq(hd > 0, nd > 0),
+                        nd,
+                        torch.zeros(nd.shape),
                     )
 
                     if use_abs:
+                        # take the absolute value of all activations
                         t = torch.abs(t)
 
-                    if len(t.shape) == 4:
-                        # we have a 3 tensor so look for greatest contributing channel
-                        channel_vals = t.view(t.shape[:2] + (-1,))
+                    # check if module is a conv. layer
+                    is_conv = len(t.shape) == 4
+
+                    # define dimensions
+                    if is_conv:
+                        num_channels, h, w = t[0].shape
+                    else:
+                        num_elements = t[0].shape[0]
+
+                    # if module is a conv. layer, consider the max val element from each channel
+                    if is_conv:
+                        channel_vals = t.view(1, num_channels, h * w)
                         m, m_idx = torch.max(channel_vals, dim=-1)
+                    # otherwise if module is fully connected, consider all elements
                     else:
                         m = t
 
-                    # only takes nonnegative elements
-                    m = torch.where(m > 0, m, torch.zeros(m.shape))
+                    if not use_abs:
+                        # ignore negative elements when not taking absolute value
+                        m = torch.where(m > 0, m, torch.zeros(m.shape))
 
-                    # sort
+                    # sort by influence
                     ordsmat_vals, ordsmat_indices = torch.sort(m, descending=True)
 
-                    # take the cumsum and normalize by total contribution per dim
+                    # take the cumsum and normalize by total contribution
                     cumsum = torch.cumsum(ordsmat_vals, dim=1)
                     totalsum = cumsum[:, -1]
 
-                    # find the indices within the threshold goal, per dim
+                    # find the indices within the threshold goal
                     bool_accept = cumsum / totalsum <= threshold
-                    accept = torch.sum(bool_accept, dim=1)
-                    # if accept == m.shape[1], all values taken as influential
+                    # find the number of accepted neurons
+                    accept = bool_accept.sum()
+
+                    # if accept == m.shape[1] (num_channels if conv., num_elements if FC),
+                    # all values are taken as influential
                     # subtract 1 in this case to avoid IndexError when adding additional accept
-                    accept = torch.where(accept < m.shape[1], accept, accept - 1)
+                    if accept == m.shape[1]:
+                        accept -= 1
+
+                    # add additional accept, ie accept + 1
+                    bool_accept[:, accept] = True
 
                     # normalize by final accepted cumsum
                     ordsmat_vals /= cumsum[:, accept]
 
-                    # add additional accept, ie accept + 1
-                    # use range to enumerate over batch size entries of accept
-                    bool_accept[range(len(accept)), accept] = True
+                    # grab accepted neuron values and indices
+                    ordsmat_vals = ordsmat_vals[bool_accept]
+                    ordsmat_indices = ordsmat_indices[bool_accept]
 
-                    # find accepted synapses, all other values zero.
-                    # note: it is ordered by largest norm value,
-                    # but "unordered" by neuron
-                    unordered_weights = torch.where(
-                        bool_accept, ordsmat_vals, torch.zeros(ordsmat_vals.shape)
+                    # define shape depending on if module is conv. or FC
+                    if is_conv:
+                        shape = (num_channels, h * w)
+                        # trace max val from accepted channel back to element index
+                        indices = (ordsmat_indices, m_idx[:, ordsmat_indices].squeeze())
+                    else:
+                        shape = (1, num_elements)
+                        indices = (torch.zeros(accept + 1), ordsmat_indices)
+
+                    # construct weights and counts sparse matrices
+                    influential_weights = sp.coo_matrix(
+                        (ordsmat_vals, indices), shape=shape
                     )
-                    # re-order to mantain proper neuron ordering
-                    influential_weights = unordered_weights.gather(
-                        1, ordsmat_indices.argsort(1)
+                    influential_weights.eliminate_zeros()
+
+                    influential_neurons = sp.coo_matrix(
+                        (
+                            np.ones(influential_weights.data.shape),
+                            (influential_weights.row, influential_weights.col),
+                        ),
+                        shape=influential_weights.shape,
+                        dtype=int,
                     )
 
-                    if len(t.shape) == 4:
-                        # m_idx (idx of max neuron per channel) are flat, so start with ch x h*w
-                        neuron_weights = torch.zeros(
-                            t.shape[1], t.shape[2] * t.shape[3]
-                        )
-                        # assign infl. weight to max neuron in each infl. channel
-                        neuron_weights[range(t.shape[1]), m_idx] = influential_weights
-                        # reshape weights to ch x h x w
-                        influential_weights = neuron_weights.view(t.shape[1:])
-
-                    influential_neurons = influential_weights.bool().int()
-
-                return (
-                    matrix_convert(influential_neurons),
-                    matrix_convert(influential_weights),
-                )
+                return influential_neurons, influential_weights
             else:
                 return sp.coo_matrix((0, 0)), sp.coo_matrix((0, 0))
 
@@ -142,13 +159,13 @@ class ElementProfiler(TorchProfiler):
         Parameters
         ----------
         x : torch.Tensor
-            input to model being profiled\
+            input to model being profiled
         layers_to_profile : list or tuple
             list of specific layers to profile or tuple with first,last layers
             (exclusive of last) to profile and all layers inbetween
-        threshold : float, optional, default=0.1
+        threshold : float, default=0.1
             Percentage of contribution to track in a profile.
-        use_abs : boolean, optional, default=False
+        use_abs : boolean, default=False
             If True, use the absolute value of element activations to determine influence
 
         Returns
@@ -219,20 +236,20 @@ class ElementProfiler(TorchProfiler):
 
         """
 
+        # get the appropriate contrib function for the module
         func = getattr(self.__class__, self.layerdict[ldx][1])
-        # get list of influential indices
-        flat_idx = neuron_counts.col
+        # take index as is for FC layer
         if func is ElementProfiler.contrib_linear:
-            infl_idx = neuron_counts.col
-        # unravel to 3D for conv. layer
+            infl_idx = torch.Tensor(neuron_counts.col).long()
+        # unravel (channel, flat spatial) to (channel, row, col) for conv. layer
         else:
-            row_idx, col_idx = np.unravel_index(
-                neuron_counts.col, y_out[ldx].shape[-2:]
-            )
-            infl_idx = np.stack((neuron_counts.row, row_idx, col_idx)).T
-        infl_idx = torch.Tensor(infl_idx).long()
+            h, w = y_out[ldx][0].shape[1:]
+            row_idx, col_idx = np.unravel_index(neuron_counts.col, (h, w))
+            infl_idx = torch.Tensor(
+                np.stack((neuron_counts.row, row_idx, col_idx)).T
+            ).long()
 
-        # call contrib function
+        # call contrib function to return neuron counts and synapse counts/weights
         return func(
             self,
             x_in,
@@ -266,7 +283,7 @@ class ElementProfiler(TorchProfiler):
             dimensions: num_influential
         layer : List[str]
             list containing single key in self.model.available_modules() dictionary
-        threshold : float
+        threshold : float, default=0.1
 
         Returns
         -------
@@ -277,8 +294,7 @@ class ElementProfiler(TorchProfiler):
 
         if len(y_out) != 1 or len(x_in) != 1:
             raise NotImplementedError(
-                "contrib_linear cannot handle more than one dict"
-                + "key for x_in or y_out"
+                "contrib_linear requires x_in and y_out to have exactly one layer key each"
             )
 
         y_ldx = list(y_out.keys())[0]
@@ -289,79 +305,95 @@ class ElementProfiler(TorchProfiler):
         j = infl_neurons
 
         with torch.no_grad():
+            # grab linear module
             linear = self.model.available_modules()[layer[0]]
 
+            # grab weights and biases
             W = linear._parameters["weight"]
             B = linear._parameters["bias"]
 
-            # subtract bias here, and then ignore for cumsum/totalsum ops
-            goal = threshold * y_out[0, j]  # 1d tensor with batch size elements # noqa
-            if torch.all(goal <= 0):
-                warnings.warn("an output neuron is less than 0")
-            ydims = y_out[0].shape
-            xdims = x_in[0].shape
+            # check if x_in is conv layer
+            conv_input = len(x_in[0].shape) > 1
 
-            if len(xdims) > 1:
+            # define dimensions
+            if conv_input:
+                in_channels, h_in, w_in = x_in[0].shape
+                in_elements = in_channels * h_in * w_in
+                # if x_in is conv layer, flatten
                 x_in = x_in[0].flatten().unsqueeze(0)
+            else:
+                in_elements = x_in[0].shape[0]
+            out_elements = y_out[0].shape[0]
 
-            z = x_in[0] * W[j]
+            # get number of influential neurons
+            num_infl = infl_neurons.shape[0]
 
-            # testing can also be batched, i.e.
-            assert torch.isclose(torch.sum(z, dim=1) + B[j], y_out[0, j]).all()
+            # multiply inputs by weights associated with influential neurons
+            z = x_in[0] * W[infl_neurons]
 
             # ignore negative values
             z = torch.where(z > 0, z, torch.zeros(z.shape))
 
+            # sort by contribution
             ordsmat_vals, ordsmat_indices = torch.sort(z, descending=True)
 
-            # take the cumsum and normalize by total contribution per dim
-            cumsum = torch.cumsum(ordsmat_vals, dim=1).detach()
+            # take the cumsum
+            cumsum = torch.cumsum(ordsmat_vals, dim=1)
 
-            # find the indices within the threshold goal, per dim
-            bool_accept = cumsum + B[j].unsqueeze(-1) <= goal.unsqueeze(-1)
-            accept = torch.sum(bool_accept, dim=1)
-            # if accept == x_in.shape[1], all values taken as contributors
-            # subtract 1 in this case to avoid IndexError when adding additional accept
-            accept = torch.where(accept < x_in.shape[1], accept, accept - 1)
-
-            # normalize
-            ordsmat_vals /= cumsum[range(len(accept)), accept].unsqueeze(-1)
-            # add additional accept, ie accept + 1
-            bool_accept[range(len(accept)), accept] = True
-
-            # find accepted synapses, all other values zero.
-            # note: ordered by largest norm value, but "unordered" by neuron
-            unordered_synapses = torch.where(
-                bool_accept, ordsmat_vals, torch.zeros(ordsmat_vals.shape)
-            )
-            # re-order to mantain proper neuron ordering
-            sws_compact = unordered_synapses.gather(1, ordsmat_indices.argsort(1))
-
-            # fullify synapse weights to outdims x indims
-            if len(xdims) == 1:
-                synapse_weights = torch.zeros(ydims[0], xdims[0])
+            # find the threshold goal
+            goal = threshold * y_out[0, infl_neurons]
+            # find the indices within the threshold goal
+            if B is not None:
+                bool_accept = cumsum + B[infl_neurons].unsqueeze(-1) <= goal.unsqueeze(
+                    -1
+                )
             else:
-                synapse_weights = torch.zeros(ydims[0], xdims[0] * xdims[1] * xdims[2])
-            synapse_weights[j] = sws_compact
+                bool_accept = cumsum <= goal.unsqueeze(-1)
+            accept = torch.sum(bool_accept, dim=1)
+            # if accept == in_elements, all values taken as contributors
+            # subtract 1 in this case to avoid IndexError when adding additional accept
+            accept = torch.where(accept < in_elements, accept, accept - 1)
+            # add additional accept, ie accept + 1
+            bool_accept[range(num_infl), accept] = True
 
-            synapse_counts = synapse_weights.bool().int()
+            # normalize by total sum of all contributions
+            ordsmat_vals /= cumsum[range(num_infl), accept].unsqueeze(-1)
 
-            # construct neuron counts
-            neuron_counts = torch.sum(synapse_counts, dim=0).unsqueeze(0).int()
-            if len(xdims) > 1:
-                synapse_counts = synapse_counts.view(
-                    ydims[0], xdims[0], xdims[1], xdims[2]
-                )
-                synapse_weights = synapse_weights.view(
-                    ydims[0], xdims[0], xdims[1], xdims[2]
-                )
-                neuron_counts = neuron_counts.view(xdims)
+            # grab accepted contributor values and indices
+            ordsmat_vals = ordsmat_vals[bool_accept]
+            contrib_idx = ordsmat_indices[bool_accept]
+            # repeat each influential neuron once for each of its accepted contributors
+            infl_idx = np.repeat(infl_neurons, accept + 1)
 
-        return (
-            matrix_convert(neuron_counts),
-            matrix_convert(synapse_counts),
-            matrix_convert(synapse_weights),
-        )
+            # define shape of synapse counts/weights
+            shape = (out_elements, in_elements)
+
+            # construct synapse weights and counts
+            synapse_weights = sp.coo_matrix(
+                (ordsmat_vals, (infl_idx, contrib_idx)),
+                shape=shape,
+            )
+            synapse_weights.eliminate_zeros()
+
+            synapse_counts = sp.coo_matrix(
+                (
+                    np.ones(synapse_weights.data.shape),
+                    (synapse_weights.row, synapse_weights.col),
+                ),
+                shape=shape,
+                dtype=int,
+            )
+
+            # construct neuron counts by summing over columns of synapse counts
+            neuron_counts = sp.coo_matrix(
+                sp.csc_matrix(synapse_counts).sum(axis=0), dtype=int
+            )
+
+            # reshape neuron counts to in_channels x h_in * w_in if x_in is a conv layer
+            if conv_input:
+                neuron_counts = neuron_counts.reshape((in_channels, h_in * w_in))
+
+        return neuron_counts, synapse_counts, synapse_weights
 
     def contrib_conv2d(
         self,
@@ -372,7 +404,7 @@ class ElementProfiler(TorchProfiler):
         threshold: float = 0.1,
     ) -> Tuple[sp.coo_matrix, sp.coo_matrix, sp.coo_matrix]:
         """
-        Profile a single output neuron from a 2d conv layer
+        Profile a single output neuron from a 2D convolutional layer
 
         Parameters
         ----------
@@ -384,13 +416,11 @@ class ElementProfiler(TorchProfiler):
             dimensions: batchsize,channels,height,width
         infl_neurons : torch.Tensor
             tensor containing indices of influential neurons in y_out
-            dimensions: num_influential if channel-wise
-                        num_influential,3 if element-wise
+            dimensions: num_influential x 3 (channel, row, col)
         layer : List[str]
-            list containing keys in self.model.available_modules() dictionary
-            for conv2d these will refer to a convolutional module and an
-            activation module
-        threshold : float
+            list containing keys in self.model.available_modules() dictionary,
+            corresponding to a convolutional module and an activation module
+        threshold : float, default=0.1
 
         Returns
         -------
@@ -402,14 +432,10 @@ class ElementProfiler(TorchProfiler):
         ----
         Only implemented for convolution using filters with same height and width
         and strides equal in both dimensions and padding equal in all dimensions
-
-        Synapse profiles for conv2d are indexed by 3 sets of tuples one for each neuron
-        and on one for the index of the filter used.
         """
-        if len(y_out) > 1 or len(x_in) > 1:
+        if len(y_out) != 1 or len(x_in) != 1:
             raise NotImplementedError(
-                "contrib_conv2d cannot handle more than one dict"
-                + "key for x_in or y_out"
+                "contrib_conv2d requires x_in and y_out to have exactly one layer key each"
             )
 
         y_ldx = list(y_out.keys())[0]
@@ -418,8 +444,12 @@ class ElementProfiler(TorchProfiler):
         x_in = x_in[x_ldx]
 
         with torch.no_grad():
-            conv = layer[0]
-            conv = self.model.available_modules()[conv]
+            # grab convolutional module
+            conv = self.model.available_modules()[layer[0]]
+
+            # grab weights and biases
+            W = conv._parameters["weight"]
+            B = conv._parameters["bias"]
 
             # assumption is that kernel size, stride are equal in both dimensions
             # and padding preserves input size
@@ -427,118 +457,115 @@ class ElementProfiler(TorchProfiler):
             stride = conv.stride[0]
             padding = conv.padding[0]
             dilation = conv.dilation[0]
-            W = conv._parameters["weight"]
-            B = (
-                conv._parameters["bias"]
-                if conv._parameters["bias"] is not None
-                else None
-            )
 
-            # define dimensions, in channels and out channels
-            xdims = x_in.shape
-            ydims = y_out.shape
-            in_channels, h_in, w_in = xdims[1:]
-            out_channels, h_out, w_out = ydims[1:]
+            # define dimensions
+            in_channels, h_in, w_in = x_in[0].shape
+            out_channels, h_out, w_out = y_out[0].shape
 
             # get number of influential neurons
             num_infl = infl_neurons.shape[0]
 
-            # get channel, i, j indices (unravel if flat)
-            if len(infl_neurons.shape) == 1:
-                ch, i, j = get_index(infl_neurons, kernel_size)
-            else:
-                ch, i, j = infl_neurons.unbind(dim=1)
+            # get channel, row, col indices of influential neurons
+            ch, i, j = infl_neurons.unbind(dim=1)
 
-            # this is not [:,ch] because W dims are [#filters=outdim, #channels = indim, ker_size,ker_size] - don't erase this
+            # W dims are [#filters=out_channels, #channels=in_channels, kernel_size, kernel_size]
             W = W[ch]
             B = B[ch] if B is not None else torch.Tensor()
 
             # find receptive fields for each influential neuron
-            # xmat dimensions: num_infl x in_channels x kernel_size x kernel_size
-            xmat = submatrix_generator(x_in, stride, kernel_size, padding)(i, j)
+            # rfield dimensions: num_infl x in_channels x kernel_size x kernel_size
+            rfield = submatrix_generator(x_in, stride, kernel_size, padding)(i, j)
             # convolve weights and receptive fields
-            z = W * xmat
-            # order neurons in receptive field by greatest value/contribution
+            z = W * rfield
+            # order neurons in receptive field by greatest contribution
             # ordsmat dimensions: num_infl x in_channels*kernel_size^2
             ordsmat_vals, ordsmat_indices = torch.sort(
                 z.view(num_infl, in_channels * kernel_size ** 2),
                 dim=1,
                 descending=True,
             )
-            # take cumulative sum of ordered values
-            cumsum = torch.cumsum(ordsmat_vals, dim=1)
 
-            # normalize for comparison to the threshold
+            # take the cumsum and normalize by the total sum to find the threshold goal
+            cumsum = torch.cumsum(ordsmat_vals, dim=1)
             totalsum = cumsum[:, -1].unsqueeze(-1)
             goals = cumsum / totalsum
 
-            # find the indices within the threshold goal, per dim
+            # find the indices within the threshold goal
             bool_accept = goals <= threshold
             accept = torch.sum(bool_accept, dim=1)
             # if accept == kernel_size**2, all values taken as contributors
             # subtract 1 in this case to avoid IndexError when adding additional accept
             accept = torch.where(accept < kernel_size ** 2, accept, accept - 1)
 
-            # normalize
-            ordsmat_vals /= cumsum[range(len(accept)), accept].unsqueeze(-1)
             # add additional accept, ie accept + 1
             bool_accept[range(len(accept)), accept] = True
 
-            # convert flattened contributor indices to index in receptor field
+            # normalize by total sum of all accepted contributions
+            ordsmat_vals /= cumsum[range(num_infl), accept].unsqueeze(-1)
+
+            # convert flattened contributor indices to index in receptive field
             ords_ch, ords_row, ords_col = get_index(ordsmat_indices, kernel_size)
-            # convert receptor field index to full index in x_in
+            # convert receptive field index to full index in x_in
             ordsi = ords_row + stride * i.unsqueeze(-1) - padding
             ordsj = ords_col + stride * j.unsqueeze(-1) - padding
 
-            # repeat each ch, i, j index for each contributor to that influential neuron
-            ch = ch.repeat_interleave(accept + 1)
-            i = i.repeat_interleave(accept + 1)
-            j = j.repeat_interleave(accept + 1)
-            # only take accepted indices
+            # grab accepted contributor values and (channel, row, col) indices
             ords_ch = ords_ch[bool_accept]
             ordsi = ordsi[bool_accept]
             ordsj = ordsj[bool_accept]
+            ordsmat_vals = ordsmat_vals[bool_accept]
 
-            # indices represents synapses as [ch_out,i_out,j_out,ch_in,i_in_j_in]
-            indices = torch.stack((ch, i, j, ords_ch, ordsi, ordsj))
-            # only take accepted values
-            values = ordsmat_vals[bool_accept]
-            size = ydims[1:] + xdims[1:]
+            # repeat each influential (channel, row, col) index once for each of its
+            # accepted contributors
+            ch = ch.repeat_interleave(accept + 1)
+            i = i.repeat_interleave(accept + 1)
+            j = j.repeat_interleave(accept + 1)
 
-            # identify and remove contributor indices that come from the padded margin
-            # padding indices have either row or col index outside of the range [0, #row/col)
-            # addition gives logical OR between boolean tensors
-            padding_idx = (
-                (indices[4] < 0)
-                + (indices[4] >= size[4])
-                + (indices[5] < 0)
-                + (indices[5] >= size[5])
+            # identify and remove padding indices, which have either row or col index
+            # outside of the range [0, #row/col)
+            if padding > 0:
+                valid_idx = (
+                    (ordsi >= 0) & (ordsi < h_in) & (ordsj >= 0) & (ordsj < w_in)
+                )
+                ords_ch = ords_ch[valid_idx]
+                ordsi = ordsi[valid_idx]
+                ordsj = ordsj[valid_idx]
+                ch = ch[valid_idx]
+                i = i[valid_idx]
+                j = j[valid_idx]
+                ordsmat_vals = ordsmat_vals[valid_idx]
+
+            # flatten all influential and contributor indices
+            infl_idx = np.ravel_multi_index((ch, i, j), (out_channels, h_out, w_out))
+            contrib_idx = np.ravel_multi_index(
+                (ords_ch, ordsi, ordsj), (in_channels, h_in, w_in)
             )
-            standard_idx = torch.logical_not(padding_idx)
 
-            # remove padding indices and values
-            indices = indices[:, standard_idx]
-            values = values[standard_idx]
+            # define shape of synapse counts/weights
+            shape = (out_channels * h_out * w_out, in_channels * h_in * w_in)
 
-            # take [ch_in,i_in,j_in] rows from synapse indices
-            ch_in = indices[3]
-            i_in = indices[4]
-            j_in = indices[5]
-            # construct neuron counts
-            neuron_counts = torch.zeros(xdims[1:], dtype=torch.int)
-            neuron_counts[ch_in, i_in, j_in] += 1
+            # construct synapse weights and counts
+            synapse_weights = sp.coo_matrix(
+                (ordsmat_vals, (infl_idx, contrib_idx)), shape=shape
+            )
+            synapse_weights.eliminate_zeros()
 
-            # construct sparse tensor counts and weights
-            synapse_counts = torch.sparse_coo_tensor(
-                indices, torch.ones(values.shape, dtype=torch.int), size
-            ).coalesce()
-            synapse_weights = torch.sparse_coo_tensor(indices, values, size).coalesce()
+            synapse_counts = sp.coo_matrix(
+                (
+                    np.ones(synapse_weights.data.shape),
+                    (synapse_weights.row, synapse_weights.col),
+                ),
+                shape=shape,
+                dtype=int,
+            )
 
-        return (
-            matrix_convert(neuron_counts),
-            matrix_convert(synapse_counts),
-            matrix_convert(synapse_weights),
-        )
+            # construct neuron counts by summing over columns of synapse counts
+            # and reshaping to in_channels x h_in * w_in
+            neuron_counts = sp.coo_matrix(
+                sp.csc_matrix(synapse_counts).sum(axis=0), dtype=int
+            ).reshape(in_channels, h_in * w_in)
+
+        return neuron_counts, synapse_counts, synapse_weights
 
     def contrib_max2d(
         self,
@@ -546,10 +573,11 @@ class ElementProfiler(TorchProfiler):
         y_out: Dict[int, torch.Tensor],
         infl_neurons: torch.Tensor,
         layer: List[str],
-        threshold: float = None,
+        threshold: Optional[float] = None,
     ) -> Tuple[sp.coo_matrix, sp.coo_matrix, sp.coo_matrix]:
         """
-        Return the contributing synapse for a torch.nn.Max2D layer
+        Draws synaptic connections between the given influential neurons in a 2D
+        max pooling layer and their contributors in a previous layer
 
         Parameters
         ----------
@@ -561,12 +589,11 @@ class ElementProfiler(TorchProfiler):
             dimensions: batchsize,channels,height,width
         infl_neurons : torch.Tensor
             tensor containing indices of influential neurons in y_out
-            dimensions: num_influential if channel-wise
-                        num_influential,3 if element-wise
+            dimensions: num_influential x 3 (channel, row, col)
         layer : List[str]
             list containing single key in self.model.available_modules() dictionary
-        threshold : None or float
-            not used, placeholder for uniformity in arguments.
+        threshold : float, optional
+            not used, placeholder for uniformity in arguments
 
         Returns
         -------
@@ -575,11 +602,9 @@ class ElementProfiler(TorchProfiler):
         synapse_weights : sp.coo_matrix
         """
 
-        # grab tensors from dictionaries
-        if len(y_out) > 1 or len(x_in) > 1:
+        if len(y_out) != 1 or len(x_in) != 1:
             raise NotImplementedError(
-                "contrib_max2d cannot handle more than one dict"
-                + "key for x_in or y_out"
+                "contrib_max2d requires x_in and y_out to have exactly one layer key each"
             )
 
         y_ldx = list(y_out.keys())[0]
@@ -588,59 +613,79 @@ class ElementProfiler(TorchProfiler):
         x_in = x_in[x_ldx]
 
         with torch.no_grad():
-            xdims = x_in.shape
-            ydims = y_out.shape
-
+            # grab max pooling module
             maxpool = self.model.available_modules()[layer[0]]
 
-            # Grab dimensions of maxpool from parameters
-            stride = maxpool.stride
+            # assumption is that kernel size, stride are equal in both dimensions
+            # and padding preserves input size
             kernel_size = maxpool.kernel_size
+            stride = maxpool.stride
             padding = maxpool.padding
 
-            # get number of influential neurons (batchsize)
-            num_infl = infl_neurons.shape[0]
-            # get channel, i, j indices (unravel if flat)
-            if len(infl_neurons.shape) == 1:
-                ch, i, j = get_index(infl_neurons, kernel_size)
-            else:
-                ch, i, j = infl_neurons.unbind(dim=1)
+            # define dimensions, in channels and out channels
+            in_channels, h_in, w_in = x_in[0].shape
+            out_channels, h_out, w_out = y_out[0].shape
 
-            # find submatrix/receptive field for each influential neuron
-            # xmat dimensions: num_infl x kernel_size x kernel_size
-            xmat = submatrix_generator(x_in, stride, kernel_size, padding)(i, j)[
+            # get number of influential neurons
+            num_infl = infl_neurons.shape[0]
+
+            # get channel, row, col indices of influential neurons
+            ch, i, j = infl_neurons.unbind(dim=1)
+
+            # find receptive fields for each influential neuron
+            # rfield dimensions: num_infl x kernel_size x kernel_size
+            rfield = submatrix_generator(x_in, stride, kernel_size, padding)(i, j)[
                 range(num_infl), ch
             ]
-            # find max. val. from each submatrix/receptive field
-            maxval, maxidx = torch.max(xmat.view(num_infl, kernel_size ** 2), dim=1)
+            # find max val from each receptive field
+            maxval, maxidx = torch.max(rfield.view(num_infl, kernel_size ** 2), dim=1)
 
-            assert torch.allclose(
-                maxval, y_out[0, ch, i, j], rtol=1e-04, atol=1e-4
-            ), f"maxpool failure: {maxval - y_out[0,ch,i,j]}"
-
-            # convert indices of max. vals. from submatrix to full index in x_in
+            # convert index of max vals in receptive field to full index in x_in
             maxi = (maxidx // kernel_size + stride * i) - padding
             maxj = (maxidx % kernel_size + stride * j) - padding
 
-            # construct neuron counts
-            neuron_counts = torch.zeros(xdims[1:], dtype=torch.int)
-            neuron_counts[ch, maxi, maxj] += 1
+            # identify and remove padding indices, which have either row or col index
+            # outside of the range [0, #row/col)
+            if padding > 0:
+                valid_idx = (maxi >= 0) & (maxi < h_in) & (maxj >= 0) & (maxj < w_in)
+                maxi = maxi[valid_idx]
+                maxj = maxj[valid_idx]
+                ch = ch[valid_idx]
+                i = i[valid_idx]
+                j = j[valid_idx]
+                maxval = maxval[valid_idx]
 
-            # construct sparse tensor synapse counts and weights
-            # sparse index represents synapse as [ch_out,i_out,j_out,ch_in,i_in_j_in] (ch_out == ch_in for maxpool)
-            indices = torch.stack((ch, i, j, ch, maxi, maxj))
-            values = torch.ones(num_infl)
-            size = ydims[1:] + xdims[1:]
-            synapse_counts = torch.sparse_coo_tensor(
-                indices, values, size, dtype=torch.int
-            ).coalesce()
-            synapse_weights = torch.sparse_coo_tensor(indices, values, size).coalesce()
+            # flatten all influential and contributor indices
+            infl_idx = np.ravel_multi_index((ch, i, j), (out_channels, h_out, w_out))
+            contrib_idx = np.ravel_multi_index(
+                (ch, maxi, maxj), (in_channels, h_in, w_in)
+            )
 
-        return (
-            matrix_convert(neuron_counts),
-            matrix_convert(synapse_counts),
-            matrix_convert(synapse_weights),
-        )
+            # define shape of synapse counts/weights
+            shape = (out_channels * h_out * w_out, in_channels * h_in * w_in)
+
+            # construct synapse weights and counts
+            synapse_weights = sp.coo_matrix(
+                (maxval, (infl_idx, contrib_idx)), shape=shape
+            )
+            synapse_weights.eliminate_zeros()
+
+            synapse_counts = sp.coo_matrix(
+                (
+                    np.ones(synapse_weights.data.shape),
+                    (synapse_weights.row, synapse_weights.col),
+                ),
+                shape=shape,
+                dtype=int,
+            )
+
+            # construct neuron counts by summing over columns of synapse counts
+            # and reshaping to in_channels x h_in * w_in
+            neuron_counts = sp.coo_matrix(
+                sp.csc_matrix(synapse_counts).sum(axis=0), dtype=int
+            ).reshape(in_channels, h_in * w_in)
+
+        return neuron_counts, synapse_counts, synapse_weights
 
     def contrib_adaptive_avg_pool2d(
         self,
@@ -651,7 +696,8 @@ class ElementProfiler(TorchProfiler):
         threshold: float = 0.1,
     ) -> Tuple[sp.coo_matrix, sp.coo_matrix, sp.coo_matrix]:
         """
-        Return the contributing synapses for a torch.nn.AdaptiveAveragePool layer
+        Draws synaptic connections between the given influential neurons in a 2D
+        adaptive average pooling layer and their contributors in a previous layer
 
         Parameters
         ----------
@@ -663,11 +709,10 @@ class ElementProfiler(TorchProfiler):
             dimensions: batchsize,channels,height,width
         infl_neurons : torch.Tensor
             tensor containing indices of influential neurons in y_out
-            dimensions: num_influential if channel-wise
-                        num_influential,3 if element-wise
+            dimensions: num_influential x 3 (channel, row, col)
         layer : List[str]
             list containing single key in self.model.available_modules() dictionary
-        threshold : float
+        threshold : float, default=0.1
 
         Returns
         -------
@@ -675,12 +720,11 @@ class ElementProfiler(TorchProfiler):
         synapse_counts : sp.coo_matrix
         synapse_weights : sp.coo_matrix
         """
-        # grab tensors from dictionaries
-        if len(y_out) > 1 or len(x_in) > 1:
+
+        if len(y_out) != 1 or len(x_in) != 1:
             raise NotImplementedError(
-                "contrib_adaptive_avg_pool2d cannot "
-                + "handle more than one dict "
-                + "key for x_in or y_out"
+                "contrib_adaptive_avg_pool2d requires x_in and y_out to have exactly "
+                + "one layer key each"
             )
 
         y_ldx = list(y_out.keys())[0]
@@ -689,106 +733,116 @@ class ElementProfiler(TorchProfiler):
         x_in = x_in[x_ldx]
 
         with torch.no_grad():
-            xdims = x_in.shape
-            ydims = y_out.shape
-
+            # grab adaptive average pooling module
             avgpool = self.model.available_modules()[layer[0]]
 
-            # Grab dimensions of avgpool from parameters
+            # define dimensions, in channels and out channels
+            in_channels, h_in, w_in = x_in[0].shape
+            out_channels, h_out, w_out = y_out[0].shape
+
+            # grab dimensions of avgpool from hyperparameters
             output_size = avgpool.output_size[0]
-            input_size = xdims[-1]
+            input_size = h_in
             stride = input_size // output_size
             kernel_size = input_size - (output_size - 1) * stride
 
-            # get number of influential neurons (batchsize)
+            # get number of influential neurons
             num_infl = infl_neurons.shape[0]
-            # get channel, i, j indices (unravel if flat)
-            if len(infl_neurons.shape) == 1:
-                ch, i, j = get_index(infl_neurons, kernel_size)
-            else:
-                ch, i, j = infl_neurons.unbind(dim=1)
 
-            # set multiplier for computing average
-            scalar = 1 / (kernel_size ** 2)
-            # set goal at thresholded percentage of influential neuron activations
-            goal = threshold * y_out[0, ch, i, j]
+            # get channel, row, col indices of influential neurons
+            ch, i, j = infl_neurons.unbind(dim=1)
 
-            # find submatrix/receptive field for each influential neuron
-            # xmat dimensions: num_infl x kernel_size x kernel_size
-            xmat = submatrix_generator(x_in, stride, kernel_size)(i, j)[
+            # find receptive field for each influential neuron
+            # rfield dimensions: num_infl x kernel_size x kernel_size
+            rfield = submatrix_generator(x_in, stride, kernel_size)(i, j)[
                 range(num_infl), ch
             ]
             # only consider values > 0
-            xmat = torch.where(xmat > 0, xmat, torch.zeros(xmat.shape))
+            rfield = torch.where(rfield > 0, rfield, torch.zeros(rfield.shape))
 
-            # order neurons in submatrix/receptive field by greatest value/contribution (times scalar multiplier)
+            # order neurons in receptive field by greatest normalized contribution
             ordsmat_vals, ordsmat_indices = torch.sort(
-                xmat.view(num_infl, kernel_size ** 2) * scalar,
+                rfield.view(num_infl, kernel_size ** 2) / kernel_size ** 2,
                 dim=1,
                 descending=True,
             )
-            # take cumulative sum of ordered values
+
+            # take the cumsum and normalize by the total sum to find the threshold goal
             cumsum = torch.cumsum(ordsmat_vals, dim=1)
+            totalsum = cumsum[:, -1].unsqueeze(-1)
+            goals = cumsum / totalsum
 
-            assert torch.allclose(
-                cumsum[:, -1], y_out[0, ch, i, j], rtol=1e-04, atol=1e-4
-            ), f"avgpool failure: {cumsum[-1] - y_out[0,ch,i,j]}"
-
-            # find the indices within the threshold goal, per dim
-            bool_accept = cumsum <= goal.unsqueeze(-1)
+            # find the indices within the threshold goal
+            bool_accept = goals <= threshold
             accept = torch.sum(bool_accept, dim=1)
             # if accept == kernel_size**2, all values taken as contributors
             # subtract 1 in this case to avoid IndexError when adding additional accept
             accept = torch.where(accept < kernel_size ** 2, accept, accept - 1)
 
             # add additional accept, ie accept + 1
-            bool_accept[range(len(accept)), accept] = True
-            # normalize values to get weights
-            ordsmat_vals /= cumsum[range(len(accept)), accept].unsqueeze(-1)
+            bool_accept[range(num_infl), accept] = True
 
-            # convert accepted contributor indices in submatrix to full index in x_in
+            # normalize by total sum of all accepted contributions
+            ordsmat_vals /= cumsum[range(num_infl), accept].unsqueeze(-1)
+
+            # convert contributor indices in receptive field to full index in x_in
             ordsi = ordsmat_indices // kernel_size + stride * i.unsqueeze(-1)
             ordsj = ordsmat_indices % kernel_size + stride * j.unsqueeze(-1)
 
-            # repeat each ch, i, j index for each contributor to that influential neuron
+            # grab accepted contributor values and (channel, row, col) indices
+            ordsi = ordsi[bool_accept]
+            ordsj = ordsj[bool_accept]
+            ordsmat_vals = ordsmat_vals[bool_accept]
+
+            # repeat each influential (channel, row, col) index once for each of its
+            # accepted contributors
             ch = ch.repeat_interleave(accept + 1)
             i = i.repeat_interleave(accept + 1)
             j = j.repeat_interleave(accept + 1)
 
-            # only take accepted indices
-            ordsi = ordsi[bool_accept]
-            ordsj = ordsj[bool_accept]
+            # flatten all influential and contributor indices
+            infl_idx = np.ravel_multi_index((ch, i, j), (out_channels, h_out, w_out))
+            contrib_idx = np.ravel_multi_index(
+                (ch, ordsi, ordsj), (in_channels, h_in, w_in)
+            )
 
-            # construct neuron counts
-            neuron_counts = torch.zeros(xdims[1:], dtype=torch.int)
-            neuron_counts[ch, ordsi, ordsj] += 1
+            # define shape of synapse counts/weights
+            shape = (out_channels * h_out * w_out, in_channels * h_in * w_in)
 
-            # construct sparse tensor synapse counts and weights
-            # sparse index represents synapse as [ch_out,i_out,j_out,ch_in,i_in_j_in] (ch_out == ch_in for avgpool)
-            indices = torch.stack((ch, i, j, ch, ordsi, ordsj))
-            # only take accepted values
-            values = ordsmat_vals[bool_accept]
-            size = ydims[1:] + xdims[1:]
-            synapse_counts = torch.sparse_coo_tensor(
-                indices, torch.ones(values.shape, dtype=torch.int), size
-            ).coalesce()
-            synapse_weights = torch.sparse_coo_tensor(indices, values, size).coalesce()
+            # construct synapse weights and counts
+            synapse_weights = sp.coo_matrix(
+                (ordsmat_vals, (infl_idx, contrib_idx)), shape=shape
+            )
+            synapse_weights.eliminate_zeros()
 
-        return (
-            matrix_convert(neuron_counts),
-            matrix_convert(synapse_counts),
-            matrix_convert(synapse_weights),
-        )
+            synapse_counts = sp.coo_matrix(
+                (
+                    np.ones(synapse_weights.data.shape),
+                    (synapse_weights.row, synapse_weights.col),
+                ),
+                shape=shape,
+                dtype=int,
+            )
+
+            # construct neuron counts by summing over columns of synapse counts
+            # and reshaping to in_channels x h_in * w_in
+            neuron_counts = sp.coo_matrix(
+                sp.csc_matrix(synapse_counts).sum(axis=0), dtype=int
+            ).reshape(in_channels, h_in * w_in)
+
+        return neuron_counts, synapse_counts, synapse_weights
 
     def contrib_resnetadd(
         self,
         x_in: Dict[int, torch.Tensor],
         y_out: Dict[int, torch.Tensor],
         infl_neurons: torch.Tensor,
-        layer: List[str] = None,
-        threshold: float = None,
+        layer: Optional[List[str]] = None,
+        threshold: Optional[float] = None,
     ) -> Tuple[Tuple[sp.coo_matrix, sp.coo_matrix], sp.coo_matrix, sp.coo_matrix]:
         """
+        Draws synaptic connections between the given influential neurons in a ResNet add
+        layer and their contributors in a previous layer
         Parameters
         ----------
         x_in : Dict[int, torch.Tensor]
@@ -799,11 +853,10 @@ class ElementProfiler(TorchProfiler):
             dimensions: batchsize,channels,height,width
         infl_neurons : torch.Tensor
             tensor containing indices of influential neurons in y_out
-            dimensions: num_influential if channel-wise
-                        num_influential,3 if element-wise
-        layer : None or List[str]
+            dimensions: num_influential x 3 (channel, row, col)
+        layer : List[str], optional
             not used, placeholder for uniformity in arguments
-        threshold : None or float
+        threshold : float, optional
             not used, placeholder for uniformity in arguments
 
         Returns
@@ -820,51 +873,47 @@ class ElementProfiler(TorchProfiler):
 
         if len(y_out) != 1 or len(x_in) != 2:
             raise NotImplementedError(
-                "contrib_resnetadd requires exactly one item "
-                + "in y_out and two in x_in "
+                "contrib_resnetadd requires y_out to have exactly one layer key and "
+                + "x_in to have exactly two layer keys"
             )
 
         y_ldx = list(y_out.keys())[0]
         y_out = y_out[y_ldx]
-        dims = y_out.shape
-
         x1_ldx, x2_ldx = sorted(x_in.keys())
-        x1_in = x_in[x1_ldx]
-        x2_in = x_in[x2_ldx]
 
-        neuron_counts = dict()
-        synapse_counts = dict()
-        synapse_weights = dict()
+        # define dimensions
+        num_channels, h, w = y_out[0].shape
 
         with torch.no_grad():
+            # combine activations from input layers along new dimension
+            x_in = torch.cat((x_in[x1_ldx], x_in[x2_ldx]))
+
+            # get number of influential neurons
+            num_infl = infl_neurons.shape[0]
+
+            # get channel, row, col indices
             ch, i, j = infl_neurons.unbind(dim=1)
-            vals = torch.stack((x1_in[0, ch, i, j], x2_in[0, ch, i, j]))
 
-            infl_x1 = infl_neurons[vals[0] > vals[1]]
-            infl_x2 = infl_neurons[vals[0] <= vals[1]]
+            # only take elements corresponding to influentials in y_out
+            vals = x_in[:,ch,i,j]
 
-            for i, infl in enumerate((infl_x1, infl_x2)):
-                neuron_counts[i] = torch.zeros(dims[1:], dtype=torch.int)
-                neuron_counts[i][infl[:, 0], infl[:, 1], infl[:, 2]] = 1
-
-                indices = torch.cat((infl, infl), dim=1).T
-                values = torch.ones(len(infl), dtype=torch.int)
-                size = dims[1:] + dims[1:]
-
-                synapse_counts[i] = torch.sparse_coo_tensor(
-                    indices, values, size
-                ).coalesce()
-                synapse_weights[i] = torch.sparse_coo_tensor(
-                    indices, values, size
-                ).coalesce()
-
-        neuron_counts = tuple(matrix_convert(neuron_counts[i]) for i in range(2))
-        synapse_counts = sp.block_diag(
-            [matrix_convert(synapse_counts[i]) for i in range(2)]
+        # construct neuron counts and synapse counts/weights for each input layer
+        # when the element val in the first input layer is greater than the second,
+        # fully attribute influence to the corresponding element in the first layer
+        nc1, sc1, sw1 = self.contrib_identity(
+            {x1_ldx: x_in[0].unsqueeze(0)}, {y_ldx: y_out}, infl_neurons[vals[0] > vals[1]]
         )
-        synapse_weights = sp.block_diag(
-            [matrix_convert(synapse_weights[i]) for i in range(2)]
+
+        # when the element val in the second input layer is greater than or equal to the
+        # first, fully attribute influence to the corresponding element in the second layer
+        nc2, sc2, sw2 = self.contrib_identity(
+            {x2_ldx: x_in[1].unsqueeze(0)}, {y_ldx: y_out}, infl_neurons[vals[0] <= vals[1]]
         )
+
+        # return neuron counts as tuple, synapse counts/weights as block diagonal matrices
+        neuron_counts = (nc1, nc2)
+        synapse_counts = sp.block_diag((sc1, sc2))
+        synapse_weights = sp.block_diag((sw1, sw2))
 
         return neuron_counts, synapse_counts, synapse_weights
 
@@ -874,7 +923,7 @@ class ElementProfiler(TorchProfiler):
         y_out: Dict[int, torch.Tensor],
         infl_neurons: torch.Tensor,
         layer: List[str] = None,
-        threshold: float = None,
+        threshold: Optional[float] = None,
     ) -> Tuple[sp.coo_matrix, sp.coo_matrix, sp.coo_matrix]:
         """
         Pass through to keep influential neurons from one layer fixed into the
@@ -890,11 +939,10 @@ class ElementProfiler(TorchProfiler):
             dimensions: batchsize,channels,height,width
         infl_neurons : torch.Tensor
             tensor containing indices of influential neurons in y_out
-            dimensions: num_influential if channel-wise
-                        num_influential,3 if element-wise
-        layer : None or List[str]
+            dimensions: num_influential x 3 (channel, row, col)
+        layer : List[str], optional
             not used, placeholder for uniformity in arguments
-        threshold : None or float
+        threshold : float, optional
             not used, placeholder for uniformity in arguments
 
 
@@ -906,7 +954,7 @@ class ElementProfiler(TorchProfiler):
         """
         if len(y_out) != 1 or len(x_in) != 1:
             raise NotImplementedError(
-                "contrib_identity requires x_in and y_out to have length 1"
+                "contrib_identity requires x_in and y_out to have exactly one layer key each"
             )
 
         y_ldx = list(y_out.keys())[0]
@@ -914,23 +962,41 @@ class ElementProfiler(TorchProfiler):
         x_ldx = list(x_in.keys())[0]
         x_in = x_in[x_ldx]
 
-        xdims = x_in.shape
-        ydims = y_out.shape
+        if y_out[0].shape != x_in[0].shape:
+            raise NotImplementedError(
+                "contrib_identity requires x_in and y_out to have the same shape"
+            )
 
-        ch, i, j = infl_neurons.unbind(dim=1)
-        neuron_counts = torch.zeros(xdims[1:], dtype=torch.int)
-        neuron_counts[ch, i, j] += 1
+        with torch.no_grad():
+            # define dimensions
+            num_channels, h, w = y_out[0].shape
 
-        indices = torch.stack((ch, i, j, ch, i, j))
-        values = torch.ones((len(infl_neurons)))
+            # get number of influential neurons
+            num_infl = infl_neurons.shape[0]
 
-        size = ydims[1:] + xdims[1:]
+            # get channel, row, col indices of influential neurons
+            ch, i, j = infl_neurons.unbind(dim=1)
 
-        synapse_counts = torch.sparse_coo_tensor(indices, values, size, dtype=torch.int)
-        synapse_weights = torch.sparse_coo_tensor(indices, values, size)
+            # flatten influential indices
+            infl_flat = np.ravel_multi_index((ch, i, j), (num_channels, h, w))
 
-        return (
-            matrix_convert(neuron_counts),
-            matrix_convert(synapse_counts),
-            matrix_convert(synapse_weights),
+        # define shape of synapse counts and weights
+        shape = (num_channels * h * w, num_channels * h * w)
+
+        # construct synapse weights and counts
+        synapse_weights = sp.coo_matrix(
+            (np.ones(num_infl), (infl_flat, infl_flat)), shape=shape
         )
+
+        synapse_counts = sp.coo_matrix(
+            (np.ones(num_infl), (infl_flat, infl_flat)), shape=shape, dtype=int
+        )
+
+        # construct neuron counts by summing over columns of synapse counts
+        # and reshaping to num_channels x h * w
+        neuron_counts = sp.coo_matrix(
+            sp.csc_matrix(synapse_counts).sum(axis=0),
+            dtype=int,
+        ).reshape(num_channels, h * w)
+
+        return neuron_counts, synapse_counts, synapse_weights
