@@ -19,6 +19,17 @@ def optimization_fv(
     objective: Callable[[torch.Tensor, str, Tuple[int]], torch.Tensor],
     threshold: int = 512,
 ) -> torch.Tensor:
+    """
+    Parameters
+    ----------
+    fv_object: InputFeature
+    model: TorchHook
+
+    Returns
+    -------
+    fv_object : torch.Tensor
+        The optimized feature.
+    """
     optimizer_fv = torch.optim.Adam([fv_object.fv_tensor], lr=5e-2)
 
     fvtransforms = transform.standard_transforms

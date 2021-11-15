@@ -5,8 +5,13 @@ from enum import Enum, auto
 
 class InputFeature:
     """
-    InputFeature is an ....
-
+    InputFeature is optimized in the feature visualization. It uses 
+        1. A type of feature visualization (currently, images parameterized either 
+            in the pixel or Fourier basis).
+        2. A torch Tensor, `fv_tensor`, that instantiates the feature, as well as initial parameters for 
+            the optimization.
+        3. A transformation. The transformation is used on the `fv_tensor`, and 
+            mainly enforces a transformational robustness prior.
     Attributes
     ----------
     fv_type : Enum
@@ -15,7 +20,7 @@ class InputFeature:
         The feature visualization object that is optimized
     transform : Optional[Callable[[torch.Tensor], torch.Tensor]]
         The transformation made on the fv_tensor during optimization, e.g.,
-        a transformation of basis for the image (e.g. with an Inverse Fourier Transform).
+        a scale transform.
     """
 
     def __init__(self, fv_type, dims=(1, 3, 224, 224), device=None):

@@ -1,5 +1,6 @@
 from deep_data_profiler.classes.profile import Profile
 import torch
+import torch.nn.functional as F
 from collections import OrderedDict
 from abc import ABC, abstractmethod
 from enum import Enum, auto
@@ -69,6 +70,20 @@ class FeatureObjective(ABC):
 class ChannelObjective(FeatureObjective):
     def __call__(self, activations: torch.Tensor) -> torch.Tensor:
         return -activations[self.layer][:, self.coord].mean()
+
+
+class Diversity(FeatureObjective):
+    '''Originally from https://distill.pub/2017/feature-visualization/. 
+    Uses a gram matrix to define style (see https://ieeexplore.ieee.org/document/7780634).'''
+    def __call__(self, activations: torch.Tensor) -> torch.Tensor:
+        layer_activations = activations[layer]
+        batch, c, h, w = layer_activations.shape
+        flattened = layer_activations.view(batch, c, -1)
+        grams = torch.matmul(flattened, torch.transpose(flattened, 1, 2))
+        grams = F.normalize(grams, p=2, dim=(1, 2))
+        return -sum([ sum([ (grams[i]*grams[j]).sum()
+               for j in range(batch) if j != i])
+               for i in range(batch)]) / batch
 
 
 def model_svd_dict(profiler: Profile) -> Dict[str, torch.Tensor]:
