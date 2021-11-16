@@ -1,9 +1,12 @@
 import torch
 from deep_data_profiler.classes.profile import Profile
+from typing import Dict, Callable
+from collections import OrderedDict
+from tqdm import tqdm
 
 
 def model_svd_dict(profiler: Profile) -> Dict[str, torch.Tensor]:
-    '''Creates a dictionary of the left-hand singular vectors 
+    '''Creates a dictionary of the left-hand singular vectors
     of the weights, keyed by layer'''
     svd_dict = OrderedDict()
     layer_dict = profiler.create_layers()
