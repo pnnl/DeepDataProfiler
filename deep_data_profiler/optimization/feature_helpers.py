@@ -8,7 +8,8 @@ from .feature_objective import (
     NeuronMultiLayerCoord,
     SVDNeuronMultiLayerCoord,
     SVDNeuronObjective,
-    SVDMultiLayerCoord
+    SVDMultiLayerCoord,
+    ChannelMultiLayerCoord,
 )
 
 

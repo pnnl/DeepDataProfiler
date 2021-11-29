@@ -51,7 +51,10 @@ def dictionary_optimization(
     layers = list(layer_neuron_weights.keys())
     model.add_hooks(layers)
 
-    svd_projection_model = project_svd(profiler)
+    if NeuronBasis.SVD:
+        svd_projection_model = project_svd(profiler)
+    else:
+        svd_projection_model = lambda x: x
 
     if neuron:
         objective = neurons_dictionary_objective(
