@@ -29,13 +29,17 @@ class FeatureObjective(ABC):
         layer: Union[str, List[str]],
         coord: Union[int, Tuple[int], List[int], List[Tuple[int]]],
         transform_activations: Optional[Callable[[torch.Tensor], torch.Tensor]] = None,
+        weights: Optional[List[float]] = None,
     ):
         self.layer = layer
         self.coord = coord
+        self.weights = weights
+
         if transform_activations:
             self.transform_activations = transform_activations
         else:
             self.transform_activations = lambda x: x
+
         super().__init__()
 
     def __add__(self, other):
@@ -73,17 +77,24 @@ class ChannelObjective(FeatureObjective):
 
 
 class Diversity(FeatureObjective):
-    '''Originally from https://distill.pub/2017/feature-visualization/. 
-    Uses a gram matrix to define style (see https://ieeexplore.ieee.org/document/7780634).'''
+    """Originally from https://distill.pub/2017/feature-visualization/. 
+    Uses a gram matrix to define style (see https://ieeexplore.ieee.org/document/7780634)."""
+
     def __call__(self, activations: torch.Tensor) -> torch.Tensor:
         layer_activations = activations[layer]
         batch, c, h, w = layer_activations.shape
         flattened = layer_activations.view(batch, c, -1)
         grams = torch.matmul(flattened, torch.transpose(flattened, 1, 2))
         grams = F.normalize(grams, p=2, dim=(1, 2))
-        return -sum([ sum([ (grams[i]*grams[j]).sum()
-               for j in range(batch) if j != i])
-               for i in range(batch)]) / batch
+        return (
+            -sum(
+                [
+                    sum([(grams[i] * grams[j]).sum() for j in range(batch) if j != i])
+                    for i in range(batch)
+                ]
+            )
+            / batch
+        )
 
 
 class SVDMean(FeatureObjective):
@@ -95,17 +106,31 @@ class SVDMean(FeatureObjective):
 class ChannelMultiLayerCoord(FeatureObjective):
     def __call__(self, activations: torch.Tensor):
         sum_channels_obj = 0.0
+
+        # if weights not passed, assign equal weight to all.
+        # Not the most efficient, but DRY.
+        if not self.weights:
+            self.weights = [1.0] * len(self.coord)
+        # check the type of the layer coordinate passed
         if isinstance(self.layer, list) and isinstance(self.coord, list):
+            # assert that the layer, coordinate, and weight lists have equal length
             assert len(self.layer) == len(
                 self.coord
             ), f"Length of layers ({len(self.layer)}) and coordinates ({len(self.coord)}) not equal"
+            assert len(self.layer) == len(
+                self.weights
+            ), f"Length of layers ({len(self.layer)}) and weights ({len(self.weights)}) not equal"
             for idx, lyr in enumerate(self.layer):
-                sum_channels_obj += -activations[lyr][:, self.coord[idx]].mean()
+                sum_channels_obj -= (
+                    self.weights[idx] * activations[lyr][:, self.coord[idx]].mean()
+                )
         elif isinstance(self.layer, list) and (
             isinstance(self.coord, int) or isinstance(self.coord, slice)
         ):
-            for _, lyr in enumerate(self.layer):
-                sum_channels_obj += -activations[lyr][:, self.coord].mean()
+            for idx, lyr in enumerate(self.layer):
+                sum_channels_obj -= (
+                    self.weights[idx] * activations[lyr][:, self.coord].mean()
+                )
         else:
             raise TypeError(
                 f"Expect layer and/or coord to be a list, received {type(self.layer)} and {type(self.coord)} respectively"
@@ -180,21 +205,32 @@ class SVDNeuronObjective(FeatureObjective):
 class SVDNeuronMultiLayerCoord(FeatureObjective):
     def __call__(self, activations: torch.Tensor):
         sum_svd_obj = 0.0
+
+        # if weights not passed, assign equal weight to all.
+        # Not the most efficient, but DRY.
+        if not self.weights:
+            self.weights = [1.0] * len(self.coord)
+
+        # check the type of the layer coordinate passed
         if isinstance(self.layer, list) and isinstance(self.coord, list):
+            # assert that the layer, coordinate, and weight lists have equal length
             assert len(self.layer) == len(
                 self.coord
             ), f"Length of layers ({len(self.layer)}) and coordinates ({len(self.coord)}) not equal"
+            assert len(self.layer) == len(
+                self.weights
+            ), f"Length of layers ({len(self.layer)}) and weights ({len(self.weights)}) not equal"
 
             for idx, lyr in enumerate(self.layer):
                 uprojy = self.transform_activations(activations, lyr)
                 chn, x, y = get_neuron_rf(self.coord[idx], uprojy)
-                sum_svd_obj += -uprojy[:, chn, x, y].mean()
+                sum_svd_obj -= self.weights[idx] * uprojy[:, chn, x, y].mean()
 
         elif isinstance(self.layer, list) and isinstance(self.coord, int):
-            for _, lyr in enumerate(self.layer):
+            for idx, lyr in enumerate(self.layer):
                 uprojy = self.transform_activations(activations, lyr)
                 chn, x, y = get_neuron_rf((self.coord,), uprojy)
-                sum_svd_obj += -uprojy[:, chn, x, y].mean()
+                sum_svd_obj -= self.weights[idx] * uprojy[:, chn, x, y].mean()
 
         else:
             raise TypeError(
@@ -206,90 +242,33 @@ class SVDNeuronMultiLayerCoord(FeatureObjective):
 class NeuronMultiLayerCoord(FeatureObjective):
     def __call__(self, activations: torch.Tensor):
         sum_neuron_obj = 0.0
+        # if weights not passed, assign equal weight to all.
+        # Not the most efficient, but DRY.
+        if not self.weights:
+            self.weights = [1.0] * len(self.coord)
+
         if isinstance(self.layer, list) and isinstance(self.coord, list):
+            # assert that the layer, coordinate, and weight lists have equal length
             assert len(self.layer) == len(
                 self.coord
             ), f"Length of layers ({len(self.layer)}) and coordinates ({len(self.coord)}) not equal"
+            assert len(self.layer) == len(
+                self.weights
+            ), f"Length of layers ({len(self.layer)}) and weights ({len(self.weights)}) not equal"
 
             for idx, lyr in enumerate(self.layer):
                 layer_acts = activations[lyr]
                 chn, x, y = get_neuron_rf(self.coord[idx], layer_acts)
-                sum_neuron_obj += -layer_acts[:, chn, x, y].mean()
+                sum_neuron_obj -= self.weights[idx] * layer_acts[:, chn, x, y].mean()
 
         elif isinstance(self.layer, list) and isinstance(self.coord, int):
-            for _, lyr in enumerate(self.layer):
+            for idx, lyr in enumerate(self.layer):
                 layer_acts = activations[lyr]
                 chn, x, y = get_neuron_rf((self.coord,), layer_acts)
-                sum_neuron_obj += -layer_acts[:, chn, x, y].mean()
+                sum_neuron_obj -= self.weights[idx] * layer_acts[:, chn, x, y].mean()
 
         else:
             raise TypeError(
                 f"Expect layer and/or coord to be a list, received {type(self.layer)} and {type(self.coord)} respectively"
             )
         return sum_neuron_obj
-
-
-class NeuronBasis(Enum):
-    ACTIVATION = auto()
-    SVD = auto()
-
-
-def neurons_dictionary_objective(
-    layer_neuron_weights: Dict[str, List[Tuple[int]]],
-    neuron_type: NeuronBasis,
-    transform_activations: Optional[Callable] = None,
-) -> FeatureObjective:
-    """Reads a dictionary of {layer : [neurons...]} and returns a single objective to optimize. Requires
-    a transform_activations function if neuron_type is NeuronBasis.SVD"""
-    layers = []
-    coords = []
-    for layer, neuron_coordinates in layer_neuron_weights.items():
-        for n_coord in neuron_coordinates:
-            layers.append(layer)
-            coords.append(n_coord)
-
-    if neuron_type == NeuronBasis.ACTIVATION:
-        neuron_multi_objective = NeuronMultiLayerCoord(layer=layers, coord=coords,)
-        return neuron_multi_objective
-    elif neuron_type == NeuronBasis.SVD:
-        if transform_activations:
-            svd_neuron_multi_objective = SVDNeuronMultiLayerCoord(
-                layer=layers, coord=coords, transform_activations=transform_activations,
-            )
-            return svd_neuron_multi_objective
-        else:
-            raise RuntimeError(
-                f"The SVD neuron basis requires a transform_activations function"
-            )
-    else:
-        raise TypeError(f"Unexpected neuron type {neuron_type}")
-
-def dictionary_objective(
-    layer_neuron_weights: Dict[str, List[Tuple[int]]],
-    neuron_type: NeuronBasis,
-    transform_activations: Optional[Callable] = None,
-) -> FeatureObjective:
-    """Reads a dictionary of {layer : [neurons...]} and returns a single objective to optimize. Requires
-    a transform_activations function if neuron_type is NeuronBasis.SVD"""
-    layers = []
-    coords = []
-    for layer, neuron_coordinates in layer_neuron_weights.items():
-        for n_coord in neuron_coordinates:
-            layers.append(layer)
-            coords.append(n_coord)
-
-    if neuron_type == NeuronBasis.ACTIVATION:
-        neuron_multi_objective = ChannelMultiLayerCoord(layer=layers, coord=coords,)
-        return neuron_multi_objective
-    elif neuron_type == NeuronBasis.SVD:
-        if transform_activations:
-            svd_neuron_multi_objective = SVDMultiLayerCoord(
-                layer=layers, coord=coords, transform_activations=transform_activations,
-            )
-            return svd_neuron_multi_objective
-        else:
-            raise RuntimeError(
-                f"The SVD neuron basis requires a transform_activations function"
-            )
-    else:
-        raise TypeError(f"Unexpected neuron type {neuron_type}")

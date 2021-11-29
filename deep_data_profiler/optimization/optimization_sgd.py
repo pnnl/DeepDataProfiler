@@ -1,16 +1,95 @@
 from .input_feature import InputFeature
 
 import torch
-import numpy as np
+import torch.nn.functional as F
 
+import numpy as np
 from lucent.misc.io import show
 from lucent.optvis.render import tensor_to_img_array
 import lucent.optvis.transform as transform
-
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Dict, Union, List
 from tqdm import tqdm
 
 from deep_data_profiler.utils import TorchHook
+from deep_data_profiler import ChannelProfiler
+from .svd_utils import project_svd
+from .feature_helpers import NeuronBasis, neurons_dictionary_objective, dictionary_objective
+from .input_feature import FeatureVizType
+
+
+def dictionary_optimization(
+    model: torch.nn.Module,
+    layer_neuron_weights: Union[Dict[str, List[Tuple[int]]], Dict[str, List[int]]],
+    threshold: int = 512,
+    neuron_type: NeuronBasis = NeuronBasis.SVD,
+    neuron: bool = True,
+) -> torch.Tensor:
+    """
+    A convenience function for the optimization. Accepts a model 
+    (to be wrapped with TorchHook and Profiler), a dictionary of layer weights,
+    the basis (namely, Euclidean or SVD), and whether to consider a single 
+    receptive field or the entire channel/signal.
+
+    Parameters
+    ----------
+    model: torch.nn.Module
+        PyTorch model.
+    layer_neuron_weights: Union[Dict[str, List[Tuple[int]]], Dict[str, List[int]]]
+        a dictionary of either {layer : [neurons...]} or 
+        {layer : [(neuron, weight), ...]}
+    threshold: int
+       Number of iterations in the optimization.
+    Returns
+    -------
+    fv_object : torch.Tensor
+        The optimized feature.
+    """
+    profiler = ChannelProfiler(model)
+    # hook model
+    model = TorchHook(model)
+    # layers passed in dictionary
+    layers = list(layer_neuron_weights.keys())
+    model.add_hooks(layers)
+
+    svd_projection_model = project_svd(profiler)
+
+    if neuron:
+        objective = neurons_dictionary_objective(
+            layer_neuron_weights, neuron_type, transform_activations=svd_projection_model,
+        )
+    else:
+        objective = dictionary_objective(
+            layer_neuron_weights, neuron_type, transform_activations=svd_projection_model,
+        )
+
+    fv_object = InputFeature(FeatureVizType.FFT_IMAGE, dims=(1, 3, 224, 224))
+
+    optimizer_fv = torch.optim.Adam([fv_object.fv_tensor], lr=5e-2)
+
+    fvtransforms = transform.standard_transforms
+    fvtransforms = fvtransforms.copy()
+
+    fvtransforms.append(transform.normalize())
+
+    transform_f = transform.compose(fvtransforms)
+
+    for i in tqdm(range(1, threshold + 1),):
+
+        # zero gradients
+        optimizer_fv.zero_grad()
+
+        # forward pass
+        img_in = transform_f(fv_object())
+        _, activations = model.forward(img_in)
+        loss1 = objective(activations)
+
+        loss1.backward()
+
+        optimizer_fv.step()
+
+    image = tensor_to_img_array(fv_object())
+    show(image)
+    return fv_object()
 
 
 def optimization_fv(
@@ -123,7 +202,6 @@ def optimization_fv_diversity(
         loss1.backward(retain_graph=True)
 
         ######### diversity term
-
         # grad used to weight diversity in direction of the objective
         steering_grad = torch.autograd.grad(loss1, image_activations)[0]
 
