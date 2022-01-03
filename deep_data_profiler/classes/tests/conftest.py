@@ -11,18 +11,26 @@ import numpy as np
 
 
 class TorchExample:
-    def __init__(self):
+    def __init__(self, proftype):
         torch.manual_seed(0)
         self.input = x = torch.randn(1, 3, 224, 224)
         self.model = vgg.vgg16(pretrained=True).to("cpu").eval()
-        self.profiler = ddp.TorchProfiler(self.model)
-        self.layerdict = self.profiler.create_layers()
+        if proftype == "element":
+            self.profiler = ddp.ElementProfiler(self.model)
+        elif proftype == "channel":
+            self.profiler = ddp.ChannelProfiler(self.model)
+        self.layerdict = self.profiler.layerdict
         self.output, self.actives = self.profiler.model.forward(x)
 
 
 @pytest.fixture
-def torch_example():
-    return TorchExample()
+def element_example():
+    return TorchExample("element")
+
+
+@pytest.fixture
+def channel_example():
+    return TorchExample("channel")
 
 
 class ProfileExample:

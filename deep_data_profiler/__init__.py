@@ -7,3 +7,4 @@ from deep_data_profiler.classes import *
 from deep_data_profiler.utils import *
 from deep_data_profiler.algorithms import *
 from deep_data_profiler.models import *
+from deep_data_profiler.optimization import *
