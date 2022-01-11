@@ -6,7 +6,7 @@ import inspect
 import networkx as nx
 import torch
 from torch.nn.modules import activation, dropout, batchnorm
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 
 class TorchProfiler(ABC):
@@ -224,9 +224,9 @@ class TorchProfiler(ABC):
     def build_dicts(
         self,
         x: torch.Tensor,
-        layers_to_profile: Union[List[int], Tuple[int]] = None,
-        infl_threshold: float = 0.1,
-        contrib_threshold: float = 0.1,
+        infl_threshold: float,
+        contrib_threshold: float,
+        layers_to_profile: Optional[Union[List[int], Tuple[int]]] = None,
         **kwargs,
     ) -> Tuple[dict, dict, dict, dict]:
         """
@@ -238,10 +238,10 @@ class TorchProfiler(ABC):
             input to model being profiled
         layers_to_profile : list or tuple
             list of specific layers to profile or tuple with first,last layers
-            (exclusive of last) to profile and all layers inbetween
+            (exclusive of last) to profile and all layers in between
         infl_threshold : float
             Parameter for influence
-        contrib_threshold : float, optional, default=0.1
+        contrib_threshold : float
             Parameter for contribution
 
         Returns
@@ -445,29 +445,3 @@ class TorchProfiler(ABC):
     @abstractmethod
     def create_profile(self):
         pass
-
-    ## Should we require implementation of the following?
-
-    # @abstractmethod
-    # def contrib_linear(self):
-    #     pass
-
-    # @abstractmethod
-    # def contrib_conv2d(self):
-    #     pass
-
-    # @abstractmethod
-    # def contrib_max2d(self):
-    #     pass
-
-    # @abstractmethod
-    # def contrib_adaptive_avg_pool2d(self):
-    #     pass
-
-    # @abstractmethod
-    # def contrib_resnetadd(self):
-    # 	pass
-
-    # @abstractmethod
-    # def contrib_identity(self):
-    # 	pass

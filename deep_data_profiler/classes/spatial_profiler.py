@@ -572,14 +572,9 @@ class SpatialProfiler(TorchProfiler):
                 ]
 
                 # add additional accept, ie accept + 1, and don't accept any further
-                bool_accept = torch.where(
-                    torch.arange(kernel_size ** 2, device=self.device)
-                    .unsqueeze(0)
-                    .repeat(num_infl, 1)
-                    <= accept.unsqueeze(-1),
-                    torch.ones((num_infl, kernel_size ** 2), device=self.device),
-                    torch.zeros((num_infl, kernel_size ** 2), device=self.device),
-                ).bool()
+                bool_accept = torch.arange(
+                    kernel_size ** 2, device=self.device
+                ).unsqueeze(0).repeat(num_infl, 1) <= accept.unsqueeze(-1)
 
                 # normalize magnitude of projection as a fraction of magnitude of output spatial
                 ordproj_vals /= y_norm.unsqueeze(-1)
