@@ -1,37 +1,64 @@
-import pytest
-import torch
-import torchvision.models.vgg as vgg
-import torchvision.models.resnet as resnet
 import deep_data_profiler as ddp
 from deep_data_profiler.algorithms import SpectralAnalysis
-from collections import Counter
-import scipy.sparse as sp
-from scipy import stats
 import numpy as np
+import pytest
+from scipy import stats
+import scipy.sparse as sp
+import torch
+import torchvision.models.resnet as resnet
+import torchvision.models.vgg as vgg
+
+
+class HookExample:
+    def __init__(self, model):
+        torch.manual_seed(0)
+        self.input = torch.randn(1, 3, 224, 224)
+        self.model = model
+        self.hooks = ddp.TorchHook(model)
+        self.hooks.add_hooks(self.hooks.module_dict.keys())
+        self.output, self.actives = self.hooks.forward(self.input)
+        self.actives_dims = {layer: act.shape for layer, act in self.actives.items()}
+
+
+@pytest.fixture
+def vgg16_hook():
+    model = vgg.vgg16(pretrained=True)
+    return HookExample(model)
+
+@pytest.fixture
+def resnet18_hook():
+    model = resnet.resnet18(pretrained=True)
+    return HookExample(model)
 
 
 class TorchExample:
-    def __init__(self, proftype):
+    def __init__(self, modelhooks, proftype):
         torch.manual_seed(0)
-        self.input = x = torch.randn(1, 3, 224, 224)
-        self.model = vgg.vgg16(pretrained=True).to("cpu").eval()
+        self.input = modelhooks.input
+        self.model = modelhooks.model
         if proftype == "element":
             self.profiler = ddp.ElementProfiler(self.model)
         elif proftype == "channel":
             self.profiler = ddp.ChannelProfiler(self.model)
+        elif proftype == "spatial":
+            self.profiler = ddp.SpatialProfiler(self.model)
         self.layerdict = self.profiler.layerdict
-        self.output, self.actives = self.profiler.model.forward(x)
+        self.output = modelhooks.output
+        self.actives = modelhooks.actives
 
 
 @pytest.fixture
-def element_example():
-    return TorchExample("element")
+def element_example(vgg16_hook):
+    return TorchExample(vgg16_hook, "element")
 
 
 @pytest.fixture
-def channel_example():
-    return TorchExample("channel")
+def channel_example(vgg16_hook):
+    return TorchExample(vgg16_hook, "channel")
 
+@pytest.fixture
+def spatial_example(vgg16_hook):
+    return TorchExample(vgg16_hook, "spatial")
 
 class ProfileExample:
     def __init__(self):
@@ -47,6 +74,77 @@ class ProfileExample:
 def profile_example():
     return ProfileExample()
 
+
+class LayerExample:
+    def __init__(self, module, in_shape, x_ldx, y_ldx, aloc=(20,5), bloc=(50,9)):
+        a_block = torch.Tensor(
+            [
+                [1, 2, 3, 4, 5],
+                [6, 7, 8, 9, 10],
+                [2, 4, 6, 8, 10],
+                [1, 3, 5, 7, 9],
+                [3, 5, 2, 4, 1],
+            ]
+        )
+        b_block = torch.Tensor(
+            [
+                [5, 4, 3, 2, 1],
+                [12, 8, 4, 0, 2],
+                [3, 3, 3, 3, 3],
+                [4, 5, 6, 4, 5],
+                [2, 3, 4, 8, 9],
+            ]
+        )
+
+        self.input = torch.zeros(in_shape)
+        self.input[:, aloc[0], : aloc[1], : aloc[1]] = a_block
+        self.input[:, bloc[0], bloc[1] :, bloc[1] :] = b_block
+        self.x_in = {x_ldx: self.input}
+        self.ldx = y_ldx
+        self.module = module
+
+
+@pytest.fixture
+def vgg16_linear(vgg16_hook):
+    model = vgg16_hook
+    return LayerExample(
+        model.hooks.module_dict["classifier.0"],
+        model.actives_dims["avgpool"],
+        19,
+        20,
+        bloc=(50, 2),
+    )
+
+@pytest.fixture
+def vgg16_adaptive_avg_pool2d(vgg16_hook):
+    model = vgg16_hook
+    dims = model.actives_dims["avgpool"]
+    return LayerExample(
+        model.hooks.module_dict["avgpool"],
+        dims[:2] + (dims[-1]*2,)*2,
+        18,
+        19,
+    )
+
+@pytest.fixture
+def vgg16_max2d(vgg16_hook):
+    model = vgg16_hook
+    return LayerExample(
+        model.hooks.module_dict["features.30"],
+        model.actives_dims["features.29"],
+        17,
+        18,
+    )
+
+@pytest.fixture
+def vgg16_conv2d(vgg16_hook):
+    model = vgg16_hook
+    return LayerExample(
+        model.hooks.module_dict["features.28"],
+        model.actives_dims["features.27"],
+        16,
+        17,
+    )
 
 class SpectralExample:
     def __init__(self, model):
