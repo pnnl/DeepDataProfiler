@@ -25,6 +25,7 @@ def vgg16_hook():
     model = vgg.vgg16(pretrained=True)
     return HookExample(model)
 
+
 @pytest.fixture
 def resnet18_hook():
     model = resnet.resnet18(pretrained=True)
@@ -56,9 +57,11 @@ def element_example(vgg16_hook):
 def channel_example(vgg16_hook):
     return TorchExample(vgg16_hook, "channel")
 
+
 @pytest.fixture
 def spatial_example(vgg16_hook):
     return TorchExample(vgg16_hook, "spatial")
+
 
 class ProfileExample:
     def __init__(self):
@@ -76,7 +79,7 @@ def profile_example():
 
 
 class LayerExample:
-    def __init__(self, module, in_shape, x_ldx, y_ldx, aloc=(20,5), bloc=(50,9)):
+    def __init__(self, module, in_shape, x_ldx, y_ldx, aloc=(20, 5), bloc=(50, 9)):
         a_block = torch.Tensor(
             [
                 [1, 2, 3, 4, 5],
@@ -115,16 +118,18 @@ def vgg16_linear(vgg16_hook):
         bloc=(50, 2),
     )
 
+
 @pytest.fixture
 def vgg16_adaptive_avg_pool2d(vgg16_hook):
     model = vgg16_hook
     dims = model.actives_dims["avgpool"]
     return LayerExample(
         model.hooks.module_dict["avgpool"],
-        dims[:2] + (dims[-1]*2,)*2,
+        dims[:2] + (dims[-1] * 2,) * 2,
         18,
         19,
     )
+
 
 @pytest.fixture
 def vgg16_max2d(vgg16_hook):
@@ -136,6 +141,7 @@ def vgg16_max2d(vgg16_hook):
         18,
     )
 
+
 @pytest.fixture
 def vgg16_conv2d(vgg16_hook):
     model = vgg16_hook
@@ -145,6 +151,7 @@ def vgg16_conv2d(vgg16_hook):
         16,
         17,
     )
+
 
 class SpectralExample:
     def __init__(self, model):
