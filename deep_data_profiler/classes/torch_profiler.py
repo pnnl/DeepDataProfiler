@@ -74,6 +74,10 @@ class TorchProfiler(ABC):
         self.SG = SG
         self.pos = pos
         self.sght = self.sgheadtail()
+        self.pred_dict = {
+            nd[0]: sorted([preds[0] for preds in self.SG.predecessors(nd)])
+            for nd in sorted(self.SG)
+        }
         self.layerdict = self.create_layers()
 
     def super_nodes_graph(self) -> Tuple[OrderedDict, nx.DiGraph, Dict]:
@@ -250,6 +254,7 @@ class TorchProfiler(ABC):
         neuron_weights
         synapse_counts
         synapse_weights
+        activation_shapes
 
         """
 
@@ -262,6 +267,10 @@ class TorchProfiler(ABC):
         ######## Step 1: Identify the Influential Neurons (Nodes) in the Activation Graph ########
         y, activations = self.model.forward(x)
         activations["x_in"] = x
+
+        activation_shapes = {
+            ldx: activations[self.layerdict[ldx][0][0]].shape for ldx in self.layerdict
+        }
 
         # Create an x-dependent function to identify the the highest valued neurons at each layer
         influential_neurons = self.influence_generator(activations, **kwargs)
@@ -328,110 +337,12 @@ class TorchProfiler(ABC):
                     else:
                         neuron_counts[xdx] = nc
 
-        return neuron_counts, neuron_weights, synapse_counts, synapse_weights
-
-    def dict_view(self, profile: Profile) -> Profile:
-        """
-        Creates a dictionary view of a sparse matrix formatted Profile
-        Parameters
-        ----------
-        profile : Profile
-            Profile to be reformatted
-
-        Returns
-        -------
-         : Profile
-            Profile with counts and weights formatted as dicts
-        """
-        nc_dict = dict()
-        nw_dict = dict()
-        sc_dict = dict()
-        sw_dict = dict()
-
-        for ldx in profile.neuron_counts:
-
-            if ldx in profile.neuron_weights:
-                if profile.neuron_weights[ldx].shape[0] == 1:
-                    channels = profile.neuron_weights[ldx].col
-                    weights = profile.neuron_weights[ldx].data
-                    nw_dict[ldx] = {
-                        (ldx, (ch,)): wt for ch, wt in zip(channels, weights)
-                    }
-                else:
-                    channels = profile.neuron_weights[ldx].row
-                    elements = profile.neuron_weights[ldx].col
-                    weights = profile.neuron_weights[ldx].data
-                    nw_dict[ldx] = {
-                        (ldx, (ch, el)): wt
-                        for ch, el, wt in zip(channels, elements, weights)
-                    }
-
-            if profile.neuron_counts[ldx].shape[0] == 1:
-                channels = profile.neuron_counts[ldx].col
-                counts = profile.neuron_counts[ldx].data
-                nc_dict[ldx] = {(ldx, (ch,)): ct for ch, ct in zip(channels, counts)}
-            else:
-                channels = profile.neuron_counts[ldx].row
-                elements = profile.neuron_counts[ldx].col
-                counts = profile.neuron_counts[ldx].data
-                nc_dict[ldx] = {
-                    (ldx, (ch, el)): ct
-                    for ch, el, ct in zip(channels, elements, counts)
-                }
-
-        for ldx in profile.synapse_counts:
-            nd = (ldx, self.layerdict[ldx][0][0])
-            pred_ldx = sorted([pd[0] for pd in self.SG.predecessors(nd)])
-            if ldx in profile.synapse_weights:
-                if len(pred_ldx) == 2:
-                    split = int(profile.synapse_weights[ldx].shape[0] / 2)
-                    synapse_weights = (
-                        profile.synapse_weights[ldx].tocsr()[:split, :split].tocoo(),
-                        profile.synapse_weights[ldx].tocsr()[split:, split:].tocoo(),
-                    )
-                else:
-                    synapse_weights = (profile.synapse_weights[ldx],)
-
-                sw_dict[ldx] = dict()
-                for pd, sw in zip(pred_ldx, synapse_weights):
-                    out_neurons = sw.row
-                    in_neurons = sw.col
-                    weights = sw.data
-                    sw_dict[ldx].update(
-                        {
-                            ((pd, (i,)), (ldx, (o,))): wt
-                            for i, o, wt in zip(in_neurons, out_neurons, weights)
-                        }
-                    )
-
-            if len(pred_ldx) == 2:
-                split = int(profile.synapse_counts[ldx].shape[0] / 2)
-                synapse_counts = (
-                    profile.synapse_counts[ldx].tocsr()[:split, :split].tocoo(),
-                    profile.synapse_counts[ldx].tocsr()[split:, split:].tocoo(),
-                )
-            else:
-                synapse_counts = (profile.synapse_counts[ldx],)
-
-            sc_dict[ldx] = dict()
-            for pd, sc in zip(pred_ldx, synapse_counts):
-                out_neurons = sc.row
-                in_neurons = sc.col
-                counts = sc.data
-                sc_dict[ldx].update(
-                    {
-                        ((pd, (i,)), (ldx, (o,))): wt
-                        for i, o, wt in zip(in_neurons, out_neurons, counts)
-                    }
-                )
-
-        return Profile(
-            neuron_counts=nc_dict,
-            neuron_weights=nw_dict,
-            synapse_counts=sc_dict,
-            synapse_weights=sw_dict,
-            num_inputs=profile.num_inputs,
-            neuron_type=f"{profile.neuron_type} (dictview)",
+        return (
+            neuron_counts,
+            neuron_weights,
+            synapse_counts,
+            synapse_weights,
+            activation_shapes,
         )
 
     @abstractmethod

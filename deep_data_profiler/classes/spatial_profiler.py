@@ -155,9 +155,9 @@ class SpatialProfiler(TorchProfiler):
     def create_profile(
         self,
         x: torch.Tensor,
-        layers_to_profile: Union[list, Tuple] = None,
         infl_threshold: float = 0.97,
         contrib_threshold: float = 0.1,
+        layers_to_profile: Union[list, Tuple] = None,
         use_quantile: bool = True,
         max_infl: int = 100,
         norm: int = 2,
@@ -202,11 +202,12 @@ class SpatialProfiler(TorchProfiler):
             neuron_weights,
             synapse_counts,
             synapse_weights,
+            activation_shapes,
         ) = self.build_dicts(
             x,
-            layers_to_profile,
             infl_threshold=infl_threshold,
             contrib_threshold=contrib_threshold,
+            layers_to_profile=layers_to_profile,
             use_quantile=use_quantile,
             max_infl=max_infl,
             norm=norm,
@@ -217,6 +218,8 @@ class SpatialProfiler(TorchProfiler):
             neuron_weights=neuron_weights,
             synapse_counts=synapse_counts,
             synapse_weights=synapse_weights,
+            activation_shapes=activation_shapes,
+            pred_dict=self.pred_dict,
             num_inputs=1,
             neuron_type="spatial",
         )
@@ -555,7 +558,9 @@ class SpatialProfiler(TorchProfiler):
                 # calculate strength of projected distance vector onto output spatial
                 dist_proj = torch.bmm(y_uvec.T.unsqueeze(1), cumsum_dist).squeeze()
                 # calculate the threshold distance goal (TH% of magnitude of output spatial)
-                goal = threshold * y_norm.unsqueeze(-1).repeat(1, kernel_size ** 2)
+                goal = (1 - threshold) * y_norm.unsqueeze(-1).repeat(
+                    1, kernel_size ** 2
+                )
 
                 # accept as few spatials as needed to bring projected strength of
                 # distance between partial sum vector and output spatial vector within the goal
@@ -876,7 +881,7 @@ class SpatialProfiler(TorchProfiler):
                 )
 
                 # normalize by strength of output spatial to find contribution percentages
-                wx_proj = wx_proj.squeeze() / y_norm
+                wx_proj = wx_proj / y_norm.unsqueeze(-1)
 
                 # get flat spatial indices of receptive field
                 flat_idx = np.tile(np.arange(kernel_size ** 2), (num_infl, 1))
@@ -891,7 +896,7 @@ class SpatialProfiler(TorchProfiler):
                 # convert row/col indices to flat indices
                 contrib_idx = np.ravel_multi_index(
                     (ordsi, ordsj), (h_in, w_in)
-                ).squeeze()
+                ).flatten()
 
                 ordproj_vals = wx_proj.view(-1)
 

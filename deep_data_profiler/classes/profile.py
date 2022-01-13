@@ -2,7 +2,8 @@ import scipy.sparse as sp
 import copy
 import torch
 import warnings
-from typing import Dict, Iterable, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
+import numpy as np
 
 SpMatData = Dict[int, sp.spmatrix]
 DictData = Dict[int, Dict[Tuple, float]]
@@ -14,20 +15,19 @@ class Profile:
 
     def __init__(
         self,
-        profile: "Profile" = None,
-        neuron_counts: Union[SpMatData, DictData] = None,
-        neuron_weights: Union[SpMatData, DictData] = None,
-        synapse_counts: Union[SpMatData, DictData] = None,
-        synapse_weights: Union[SpMatData, DictData] = None,
-        num_inputs: int = 0,
-        neuron_type: str = None,
+        neuron_counts: Optional[Union[SpMatData, DictData]] = None,
+        neuron_weights: Optional[Union[SpMatData, DictData]] = None,
+        synapse_counts: Optional[Union[SpMatData, DictData]] = None,
+        synapse_weights: Optional[Union[SpMatData, DictData]] = None,
+        activation_shapes: Optional[Union[SpMatData, DictData]] = None,
+        pred_dict: Optional[Dict[int, List[int]]] = None,
+        num_inputs: Optional[int] = 0,
+        neuron_type: Optional[str] = None,
     ) -> None:
         """Summary
 
         Parameters
         ----------
-        profile : Profile, optional
-            For instantiating a new Profile using a previous profile
         neuron_counts : dict, optional
             Dictionary representing profile neurons and their counts,
             i.e. how many synapses they were influential or contributing to
@@ -37,6 +37,10 @@ class Profile:
             Dictionary representing profile synapses and their counts
         synapse_weights : dict, optional
             Dictionary representing profile synapses and their weights
+        activation_shapes : dict, optional
+            Dictionary of the activation tensors shapes, keyed by layer
+        pred_dict : dict, optional
+            Dictionary giving the layer predecessor hierarchy by layer index
         num_inputs : int, optional
             Number of inputs represented by the profile
         neuron_type: str, optional
@@ -49,20 +53,15 @@ class Profile:
         input is not in the correct format, the metrics could fail or return inaccurate
         values.
         """
-        if profile is not None:
-            self._neuron_counts = copy.deepcopy(profile.neuron_counts)
-            self._neuron_weights = copy.deepcopy(profile.neuron_weights)
-            self._synapse_counts = copy.deepcopy(profile.synapse_counts)
-            self._synapse_weights = copy.deepcopy(profile.synapse_weights)
-            self._num_inputs = profile._num_inputs
-            self._neuron_type = profile._neuron_type
-        else:
-            self._neuron_counts = neuron_counts or dict()
-            self._neuron_weights = neuron_weights or dict()
-            self._synapse_counts = synapse_counts or dict()
-            self._synapse_weights = synapse_weights or dict()
-            self._num_inputs = num_inputs
-            self._neuron_type = neuron_type
+
+        self._neuron_counts = neuron_counts or dict()
+        self._neuron_weights = neuron_weights or dict()
+        self._synapse_counts = synapse_counts or dict()
+        self._synapse_weights = synapse_weights or dict()
+        self._activation_shapes = activation_shapes
+        self._pred_dict = pred_dict
+        self._num_inputs = num_inputs
+        self._neuron_type = neuron_type
 
     @property
     def neuron_counts(self) -> Union[SpMatData, DictData]:
@@ -108,6 +107,26 @@ class Profile:
             Dictionary representing profile synapses and their weights
         """
         return self._synapse_weights
+
+    @property
+    def activation_shapes(self) -> Dict[int, torch.Size]:
+        """
+        Returns
+        -------
+        activation_shapes: Dict of torch.Sizes
+            Dictionary of the activation tensors shapes, keyed by layer
+        """
+        return self._activation_shapes
+
+    @property
+    def pred_dict(self) -> Dict[int, List[int]]:
+        """
+        Returns
+        -------
+        pred_dict: Dict of list of ints
+            Dictionary giving the layer predecessor hierarchy by layer index
+        """
+        return self._pred_dict
 
     @property
     def num_inputs(self) -> int:
@@ -390,3 +409,118 @@ class Profile:
                         )
 
         return self
+
+    def dict_view(self) -> "Profile":
+        """
+        Returns
+        -------
+        A copy of the profile with neuron and synapse counts and weights
+        reformatted as dicts
+
+        """
+
+        if self._activation_shapes is None or self._pred_dict is None:
+            warnings.warn(
+                "activation_shapes and pred_dict must be known to generate dictionary view"
+            )
+            return None
+
+        # construct dicts for neuron counts and weights
+        neuron_stats = {"counts": self._neuron_counts, "weights": self._neuron_weights}
+        neuron_views = {stat: dict() for stat in neuron_stats}
+        for stat in neuron_stats:
+            neuron_spmat = neuron_stats[stat]
+            neuron_dict = neuron_views[stat]
+
+            for layer, spmat in neuron_spmat.items():
+                dims = self._activation_shapes[layer]
+                # list neurons and values from sparse matrix
+                neurons = list(spmat.todok().items())
+                flat_idx, values = zip(*neurons)
+                neuron_idx = tuple(idx[1] for idx in flat_idx)
+
+                # convert flat indices to full spatial or element indices if necessary
+                if len(dims) == 4 and self._neuron_type != "channel":
+                    spatial_idx = np.unravel_index(neuron_idx, dims[2:])
+                    if self._neuron_type == "element":
+                        channel_idx = np.array([int(idx[0]) for idx in flat_idx])
+                        neuron_idx = (channel_idx,) + spatial_idx
+                    elif self._neuron_type == "spatial":
+                        neuron_idx = spatial_idx
+                    neuron_idx = tuple(zip(*neuron_idx))
+                else:
+                    neuron_idx = tuple(zip(neuron_idx))
+
+                # add each neuron to the dict with its value
+                # neuron format: (layer index, (full neuron index,))
+                full_idx = tuple((layer, idx) for idx in neuron_idx)
+                neuron_dict[layer] = {idx: val for idx, val in zip(full_idx, values)}
+
+        # construct dicts for synapse counts and weights
+        synapse_stats = {
+            "counts": self._synapse_counts,
+            "weights": self._synapse_weights,
+        }
+        synapse_views = {stat: dict() for stat in synapse_stats}
+        for stat in synapse_stats:
+            synapse_spmat = synapse_stats[stat]
+            synapse_dict = synapse_views[stat]
+            for layer in synapse_spmat:
+                dims = self._activation_shapes[layer]
+
+                # list predecessors/input layers
+                pred_list = self._pred_dict[layer]
+                # split sparse matrix if there are two input layers (i.e. resnetadd)
+                if len(pred_list) == 2:
+                    pred_spmats = (
+                        synapse_spmat[layer].tocsr()[: dims[1], : dims[1]],
+                        synapse_spmat[layer].tocsr()[dims[1] :, dims[1] :],
+                    )
+                else:
+                    pred_spmats = (synapse_spmat[layer],)
+
+                synapse_dict[layer] = dict()
+
+                # add synapses from each input layer to the dict
+                for pred, spmat in zip(pred_list, pred_spmats):
+                    pdims = self._activation_shapes[pred]
+                    # list input neurons, output neurons, and values from sparse matrix
+                    synapses = [(*syn, val) for syn, val in spmat.todok().items()]
+                    out_idx, in_idx, values = zip(*synapses)
+                    full_idxs = []
+
+                    # convert flat indices of input and output neurons to full spatial
+                    # or element indices if necessary
+                    for ldx, ldims, neuron_idx in (
+                        (pred, pdims, in_idx),
+                        (layer, dims, out_idx),
+                    ):
+                        if len(ldims) == 4 and self._neuron_type != "channel":
+                            if self._neuron_type == "element":
+                                neuron_idx = np.unravel_index(neuron_idx, ldims[1:])
+                            elif self._neuron_type == "spatial":
+                                neuron_idx = np.unravel_index(neuron_idx, ldims[2:])
+                            neuron_idx = tuple(zip(*neuron_idx))
+                        else:
+                            neuron_idx = tuple(zip(neuron_idx))
+
+                        full_idxs += [tuple((ldx, idx) for idx in neuron_idx)]
+                    in_idx, out_idx = full_idxs
+
+                    # add each synapse to the dict with its value
+                    # synapse format: ((input layer index, (input neuron index,)),
+                    #                  (output layer index, (output neuron index,)))
+                    synapse_dict[layer].update(
+                        {(i, o): v for i, o, v in zip(in_idx, out_idx, values)}
+                    )
+
+        return Profile(
+            neuron_counts=neuron_views["counts"],
+            neuron_weights=neuron_views["weights"],
+            synapse_counts=synapse_views["counts"],
+            synapse_weights=synapse_views["weights"],
+            activation_shapes=self._activation_shapes,
+            pred_dict=self._pred_dict,
+            num_inputs=self._num_inputs,
+            neuron_type=f"{self._neuron_type} (dict)",
+        )

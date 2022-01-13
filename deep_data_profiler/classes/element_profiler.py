@@ -157,8 +157,8 @@ class ElementProfiler(TorchProfiler):
     def create_profile(
         self,
         x: torch.Tensor,
-        layers_to_profile: Union[list, Tuple] = None,
         threshold: float = 0.1,
+        layers_to_profile: Union[list, Tuple] = None,
         use_abs: bool = False,
     ) -> Profile:
 
@@ -190,11 +190,12 @@ class ElementProfiler(TorchProfiler):
             neuron_weights,
             synapse_counts,
             synapse_weights,
+            activation_shapes,
         ) = self.build_dicts(
             x,
-            layers_to_profile,
             infl_threshold=threshold,
             contrib_threshold=threshold,
+            layers_to_profile=layers_to_profile,
             use_abs=use_abs,
         )
 
@@ -203,6 +204,8 @@ class ElementProfiler(TorchProfiler):
             neuron_weights=neuron_weights,
             synapse_counts=synapse_counts,
             synapse_weights=synapse_weights,
+            activation_shapes=activation_shapes,
+            pred_dict=self.pred_dict,
             num_inputs=1,
             neuron_type="element",
         )
