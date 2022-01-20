@@ -9,6 +9,13 @@ import warnings
 
 
 class ElementProfiler(TorchProfiler):
+    """
+    ElementProfiler identifies influential elements of an activation tensor. Influential
+    element neurons are identified by their value or absolute value. Contributing
+    neurons in the previous layer are the elements in the receptive field with the 
+    greatest values whose sum reaches a specified threshold, or percentage of the 
+    value of the influential element.
+    """
     def influence_generator(
         self,
         activations: Dict[str, torch.Tensor],

@@ -10,6 +10,13 @@ import warnings
 
 
 class ChannelProfiler(TorchProfiler):
+    """
+    ChannelProfiler identifies influential channels of an activation tensor. Influential
+    channel neurons are identified by either maximum value or matrix norm. Contributing
+    neurons in the previous layer are the channels with the greatest maximum values
+    whose sum reaches a specified threshold, or percentage of the maximum value in the
+    influential channel.
+    """
     def influence_generator(
         self,
         activations: Dict[str, torch.Tensor],
