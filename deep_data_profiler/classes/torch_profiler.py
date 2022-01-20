@@ -12,9 +12,10 @@ from typing import Dict, List, Optional, Tuple, Union
 class TorchProfiler(ABC):
 
     """
-    Torch Profiler wraps a PyTorch model into a TorchHook model which can register
-    activations as it evaluates data. Using the activations, inputs to the model may be
-    profiled.
+    A TorchProfiler wraps a PyTorch model into a TorchHook model which can register
+    activations as it evaluates data. Subclasses of TorchProfiler profile model inputs
+    by tracing influential neurons through the layers of the network during classification.
+    Each subclass implementation defines neurons, influence, and contribution differently.
 
     Attributes
     ----------
@@ -268,9 +269,12 @@ class TorchProfiler(ABC):
         y, activations = self.model.forward(x)
         activations["x_in"] = x
 
-        activation_shapes = {
-            ldx: activations[self.layerdict[ldx][0][0]].shape for ldx in self.layerdict
-        }
+        activation_shapes = {}
+        for ldx, modules in self.layerdict.items():
+            if "resnetadd" in modules[1]:
+                activation_shapes[ldx] = activations[modules[0][1]].shape
+            else:
+                activation_shapes[ldx] = activations[modules[0][0]].shape
 
         # Create an x-dependent function to identify the the highest valued neurons at each layer
         influential_neurons = self.influence_generator(activations, **kwargs)

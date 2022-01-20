@@ -476,6 +476,11 @@ class Profile:
                         synapse_spmat[layer].tocsr()[: dims[1], : dims[1]],
                         synapse_spmat[layer].tocsr()[dims[1] :, dims[1] :],
                     )
+
+                    pred_nonzero = tuple(p.nnz > 0 for p in pred_spmats)
+                    if not all(pred_nonzero):
+                        pred_spmats = tuple(p for p, nz in zip(pred_spmats,pred_nonzero) if nz)
+                        pred_list = tuple(pdx for pdx, nz in zip(pred_list,pred_nonzero) if nz)
                 else:
                     pred_spmats = (synapse_spmat[layer],)
 
