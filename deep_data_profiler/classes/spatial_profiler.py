@@ -8,6 +8,13 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 
 class SpatialProfiler(TorchProfiler):
+    """
+    SpatialProfiler identifies influential "spatial neurons", or tube-like vector slices
+    through all channels of an activation tensor. Influential neurons are identified by
+    the strength of their vector norm. Contributing neurons in the previous layer are
+    the spatials in the receptive field that contribute the most in the direction of the
+    influential spatial vector that they are combined to produce.
+    """
     def influence_generator(
         self,
         activations: Dict[str, torch.Tensor],
@@ -88,8 +95,9 @@ class SpatialProfiler(TorchProfiler):
 
                     if use_quantile:
                         # accept neurons with value greater than the specified quantile
+                        # quantile of positive values only (avoid skew in linear layers)
                         bool_accept = ordsmat_vals >= torch.quantile(
-                            ordsmat_vals, threshold
+                            ordsmat_vals[ordsmat_vals > 0], threshold
                         )
 
                     else:
@@ -114,13 +122,12 @@ class SpatialProfiler(TorchProfiler):
                     # accept no more than the specified upper bound on infl. neurons
                     bool_accept[:, max_infl:] = False
 
-                    if not use_quantile:
-                        # normalize by final accepted cumsum
-                        ordsmat_vals /= cumsum[:, accept]
-
                     # grab accepted neuron values and indices
                     ordsmat_vals = ordsmat_vals[bool_accept]
                     ordsmat_indices = ordsmat_indices[bool_accept]
+
+                    # normalize
+                    ordsmat_vals /= ordsmat_vals.sum()
 
                     # send values and indices to cpu if necessary
                     if self.device != "cpu":
