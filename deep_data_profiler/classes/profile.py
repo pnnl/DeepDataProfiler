@@ -252,7 +252,7 @@ class Profile:
             if self.num_inputs == 0:
                 new_profile = Profile(profile=other)
             else:
-                new_profile = Profile(profile=self)
+                new_profile = copy.deepcopy(self)
                 if other.num_inputs > 0:
                     new_profile += other
 
