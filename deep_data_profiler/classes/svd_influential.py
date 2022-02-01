@@ -140,18 +140,19 @@ class SVDProfiler(TorchProfiler):
             else:
                 activations = activations
 
-        activation_shapes = {}
-        activations["x_in"] = x
-        for ldx, modules in self.layerdict.items():
-            if "resnetadd" in modules[1]:
-                activation_shapes[ldx] = activations[modules[0][1]].shape
-            else:
-                activation_shapes[ldx] = activations[modules[0][0]].shape
-
             # dictionary of SVDs of the weights per layer,
             # if not already pre-computed when SVDInfluential was defined
             if not self.svd_dict:
                 self.svd_dict = self.create_svd(layers_to_find=layers_to_find)
+
+            activation_shapes = {}
+            activations["x_in"] = x
+            for ldx, modules in self.svd_dict.items():
+                if "resnetadd" in modules[1]:
+                    activation_shapes[ldx] = activations[modules[0][1]].shape
+                else:
+                    activation_shapes[ldx] = activations[modules[0][0]].shape
+
 
             for k, (layer_name, svd) in self.svd_dict.items():
                 layer_name = layer_name[0]
