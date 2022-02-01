@@ -23,7 +23,7 @@ setup(
     context of a specific dataset. The library was inspired by the work of Qiu, et al. in Adversarial Defense Through
     Network Profiling Based Path Extraction (2019), arXiv:1904.08089. Full documentation may be found at https://pnnl.github.io/DeepDataProfiler/
     ''',
-    install_requires=['torch>=1.3.0', 'numpy>=1.14.3', 'networkx>=2.5', 'scipy', 'ripser>=0.6.0', 'powerlaw>=1.4.6'],
+    install_requires=['torch>=1.10.2', 'numpy>=1.14.3', 'networkx>=2.5', 'scipy', 'ripser>=0.6.0', 'powerlaw>=1.4.6', 'torchvision>=0.11.3'],
     extras_require={
         'testing': ['pytest>=4.0'],
         'documentation': ['sphinx>=1.8.2', 'nb2plots>=0.6', 'sphinx-rtd-theme>=0.4.2'],
