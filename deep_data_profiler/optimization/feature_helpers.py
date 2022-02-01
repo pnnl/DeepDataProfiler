@@ -14,6 +14,7 @@ from .feature_objective import (
 
 
 class NeuronBasis(Enum):
+    '''Enum for the different neuron basis types.'''
     ACTIVATION = auto()
     SVD = auto()
 
@@ -24,7 +25,17 @@ def neurons_dictionary_objective(
     transform_activations: Optional[Callable] = None,
 ) -> FeatureObjective:
     """Reads a dictionary of {layer : [neurons...]} and returns a single objective to optimize. Requires
-    a transform_activations function if neuron_type is NeuronBasis.SVD"""
+    a transform_activations function if neuron_type is NeuronBasis.SVD
+    
+    Parameters
+    ----------
+        layer_neuron_weights (Dict[str, List[Tuple[int]]]): A dictionary of {layer : [neurons...]}
+        neuron_type (NeuronBasis, optional): The neuron basis type. Defaults to NeuronBasis.ACTIVATION.
+        transform_activations (Optional[Callable], optional): A function to transform the activations. Defaults to None.
+    Returns
+    -------
+        FeatureObjective: The objective to optimize.
+    """
     layers = []
     coords = []
     weights = []
@@ -75,7 +86,18 @@ def dictionary_objective(
 ) -> FeatureObjective:
     """Reads a dictionary of either {layer : [neurons...]} or {layer : [(neuron, weight), ...]} 
     and returns a single objective to optimize. Requires a transform_activations function if neuron_type 
-    is NeuronBasis.SVD"""
+    is NeuronBasis.SVD
+
+    Parameters
+    ----------
+        layer_neuron_weights (Union[Dict[str, List[Tuple[int]]], Dict[str, List[int]]]): A dictionary of either
+            {layer : [neurons...]} or {layer : [(neuron, weight), ...]}
+        neuron_type (NeuronBasis, optional): The neuron basis type. Defaults to NeuronBasis.ACTIVATION.
+        transform_activations (Optional[Callable], optional): A function to transform the activations. Defaults to None.
+    Returns
+    -------
+        FeatureObjective: The objective to optimize.
+    """
 
     layers = []
     coords = []

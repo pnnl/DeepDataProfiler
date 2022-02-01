@@ -106,6 +106,8 @@ def optimization_fv(
     threshold: int = 512,
 ) -> torch.Tensor:
     """
+    A flexible function for the optimization. Accepts a model, an objective to optimize,
+    and a threshold for the number of iterations. Returns the optimized feature.
     Parameters
     ----------
     fv_object: InputFeature

@@ -1,3 +1,4 @@
+from typing import Tuple
 import torch
 import numpy as np
 from enum import Enum, auto
@@ -88,6 +89,7 @@ def rfft2d_freqs(h, w):
 
 
 def fft_transform(scale, dims=(1, 3, 224, 224)):
+    '''Returns a function that applies the FFT transform to a tensor.'''
     def fft_inner(tensor):
         batch, channels, h, w = dims
         tensor = scale * tensor
@@ -101,7 +103,8 @@ def fft_transform(scale, dims=(1, 3, 224, 224)):
     return fft_inner
 
 
-def initialize_fft_image(dims=(1, 3, 224, 224), device=None):
+def initialize_fft_image(dims=(1, 3, 224, 224), device=None) -> Tuple[torch.Tensor, float]:
+    '''Initializes a random Gaussian image in the Fourier domain.'''
     if not device:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     batch, channels, h, w = dims
@@ -120,6 +123,7 @@ def initialize_fft_image(dims=(1, 3, 224, 224), device=None):
     return tensor, scale
 
 
+# hard-coded color correlation matrix
 COLOR_CORRELATION_SVD_SQRT = np.asarray(
     [[0.26, 0.09, 0.02], [0.27, 0.00, -0.05], [0.27, -0.09, 0.03]]
 ).astype("float32")
@@ -127,7 +131,8 @@ MAX_NORM_SVD_SQRT = np.max(np.linalg.norm(COLOR_CORRELATION_SVD_SQRT, axis=0))
 COLOR_CORRELATION_NORMALIZED = COLOR_CORRELATION_SVD_SQRT / MAX_NORM_SVD_SQRT
 
 
-def linear_decorrelate(tensor, device=None):
+def linear_decorrelate(tensor, device=None) -> torch.Tensor:
+    '''Applies a linear decorrelation transform to a tensor.'''
     if not device:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     t_permute = tensor.permute(0, 2, 3, 1)
