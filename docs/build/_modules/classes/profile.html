@@ -1,79 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>classes.profile &mdash; Deep Data Profiler 1.2.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/copybutton.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> Deep Data Profiler
-          
-
-          
-            
             <img src="../../_static/Profilingicon.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
               <div class="version">
                 1.2
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -81,18 +38,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview/index.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../classes/modules.html">Profiling</a></li>
@@ -102,75 +48,37 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tableofcontents.html">Index</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Deep Data Profiler</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>classes.profile</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for classes.profile</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">sp</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="n">SpMatData</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">]</span>
 <span class="n">DictData</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>
@@ -182,29 +90,32 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">profile</span><span class="p">:</span> <span class="s2">&quot;Profile&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">neuron_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SpMatData</span><span class="p">,</span> <span class="n">DictData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">neuron_weights</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SpMatData</span><span class="p">,</span> <span class="n">DictData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">synapse_counts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SpMatData</span><span class="p">,</span> <span class="n">DictData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">synapse_weights</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SpMatData</span><span class="p">,</span> <span class="n">DictData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">num_inputs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">neuron_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">neuron_counts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SpMatData</span><span class="p">,</span> <span class="n">DictData</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">neuron_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SpMatData</span><span class="p">,</span> <span class="n">DictData</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">synapse_counts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SpMatData</span><span class="p">,</span> <span class="n">DictData</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">synapse_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SpMatData</span><span class="p">,</span> <span class="n">DictData</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">activation_shapes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SpMatData</span><span class="p">,</span> <span class="n">DictData</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pred_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_inputs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">neuron_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Summary</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        profile : Profile, optional</span>
-<span class="sd">            For instantiating a new Profile using a previous profile</span>
 <span class="sd">        neuron_counts : dict, optional</span>
-<span class="sd">            Dictionary representing profile neurons and their counts,</span>
-<span class="sd">            i.e. how many synapses they were influential or contributing to</span>
+<span class="sd">            Dictionary representing profile neurons and their counts, i.e. how many</span>
+<span class="sd">            synapses they were influential or contributing to</span>
 <span class="sd">        neuron_weights : dict, optional</span>
 <span class="sd">            Dictionary representing influential profile neurons and their weights</span>
 <span class="sd">        synapse_counts : dict, optional</span>
 <span class="sd">            Dictionary representing profile synapses and their counts</span>
 <span class="sd">        synapse_weights : dict, optional</span>
 <span class="sd">            Dictionary representing profile synapses and their weights</span>
+<span class="sd">        activation_shapes : dict, optional</span>
+<span class="sd">            Dictionary of the activation tensors shapes, keyed by layer</span>
+<span class="sd">        pred_dict : dict, optional</span>
+<span class="sd">            Dictionary giving the layer predecessor hierarchy by layer index</span>
 <span class="sd">        num_inputs : int, optional</span>
 <span class="sd">            Number of inputs represented by the profile</span>
 <span class="sd">        neuron_type: str, optional</span>
@@ -216,21 +127,17 @@
 <span class="sd">        the results of a profiling process but there is no type checking. If the</span>
 <span class="sd">        input is not in the correct format, the metrics could fail or return inaccurate</span>
 <span class="sd">        values.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">profile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_counts</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">neuron_counts</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_weights</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">neuron_weights</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_synapse_counts</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">synapse_counts</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_synapse_weights</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">synapse_weights</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_num_inputs</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">_num_inputs</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">_neuron_type</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_counts</span> <span class="o">=</span> <span class="n">neuron_counts</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_weights</span> <span class="o">=</span> <span class="n">neuron_weights</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_synapse_counts</span> <span class="o">=</span> <span class="n">synapse_counts</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_synapse_weights</span> <span class="o">=</span> <span class="n">synapse_weights</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_num_inputs</span> <span class="o">=</span> <span class="n">num_inputs</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">=</span> <span class="n">neuron_type</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_counts</span> <span class="o">=</span> <span class="n">neuron_counts</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_weights</span> <span class="o">=</span> <span class="n">neuron_weights</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_synapse_counts</span> <span class="o">=</span> <span class="n">synapse_counts</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_synapse_weights</span> <span class="o">=</span> <span class="n">synapse_weights</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_activation_shapes</span> <span class="o">=</span> <span class="n">activation_shapes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pred_dict</span> <span class="o">=</span> <span class="n">pred_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_inputs</span> <span class="o">=</span> <span class="n">num_inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">=</span> <span class="n">neuron_type</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">neuron_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">SpMatData</span><span class="p">,</span> <span class="n">DictData</span><span class="p">]:</span>
@@ -238,8 +145,8 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        neuron_counts : Dict of scipy.sparse matrices or Dict of dicts</span>
-<span class="sd">            Dictionary representing profile neurons and their counts,</span>
-<span class="sd">            i.e. how many synapses they were influential or contributing to</span>
+<span class="sd">            Dictionary representing profile neurons and their counts, i.e. how many \</span>
+<span class="sd">            synapses they were influential or contributing to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_counts</span>
 
@@ -278,6 +185,26 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_synapse_weights</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">activation_shapes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        activation_shapes: Dict of torch.Sizes</span>
+<span class="sd">            Dictionary of the activation tensors shapes, keyed by layer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation_shapes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pred_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pred_dict: Dict of list of ints</span>
+<span class="sd">            Dictionary giving the layer predecessor hierarchy by layer index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred_dict</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">num_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns</span>
@@ -297,8 +224,8 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        neuron_type : str</span>
-<span class="sd">            The type of neurons used in the profile,</span>
-<span class="sd">            i.e. &#39;element&#39;, &#39;channel&#39;, or &#39;mixed&#39; (aggregate of profiles with mismatched types)</span>
+<span class="sd">            The type of neurons used in the profile, i.e. &#39;element&#39;, &#39;channel&#39;, or \</span>
+<span class="sd">            &#39;mixed&#39; (aggregate of profiles with mismatched types)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span>
 
@@ -318,7 +245,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        int</span>
-<span class="sd">            Total number of neurons identified as influential or contributing</span>
+<span class="sd">            Total number of neurons identified as influential or contributing \</span>
 <span class="sd">            (neurons with nonzero neuron counts)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span>
@@ -401,7 +328,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_inputs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">new_profile</span> <span class="o">=</span> <span class="n">Profile</span><span class="p">(</span><span class="n">profile</span><span class="o">=</span><span class="n">other</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">new_profile</span> <span class="o">=</span> <span class="n">Profile</span><span class="p">(</span><span class="n">profile</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">new_profile</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">num_inputs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">new_profile</span> <span class="o">+=</span> <span class="n">other</span>
 
@@ -557,50 +484,166 @@
                             <span class="n">other</span><span class="o">.</span><span class="n">synapse_counts</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span>
                         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span></div>
+        <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="Profile.dict_view"><a class="viewcode-back" href="../../classes/classes.html#classes.profile.Profile.dict_view">[docs]</a>    <span class="k">def</span> <span class="nf">dict_view</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Profile&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        A copy of the profile with neuron and synapse counts and weights</span>
+<span class="sd">        reformatted as dicts</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation_shapes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;activation_shapes and pred_dict must be known to generate dictionary view&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># construct dicts for neuron counts and weights</span>
+        <span class="n">neuron_stats</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;counts&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_counts</span><span class="p">,</span> <span class="s2">&quot;weights&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_weights</span><span class="p">}</span>
+        <span class="n">neuron_views</span> <span class="o">=</span> <span class="p">{</span><span class="n">stat</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">neuron_stats</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">neuron_stats</span><span class="p">:</span>
+            <span class="n">neuron_spmat</span> <span class="o">=</span> <span class="n">neuron_stats</span><span class="p">[</span><span class="n">stat</span><span class="p">]</span>
+            <span class="n">neuron_dict</span> <span class="o">=</span> <span class="n">neuron_views</span><span class="p">[</span><span class="n">stat</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">layer</span><span class="p">,</span> <span class="n">spmat</span> <span class="ow">in</span> <span class="n">neuron_spmat</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation_shapes</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span>
+                <span class="c1"># list neurons and values from sparse matrix</span>
+                <span class="n">neurons</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spmat</span><span class="o">.</span><span class="n">todok</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+                <span class="n">flat_idx</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">neurons</span><span class="p">)</span>
+                <span class="n">neuron_idx</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">flat_idx</span><span class="p">)</span>
+
+                <span class="c1"># convert flat indices to full spatial or element indices if necessary</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">!=</span> <span class="s2">&quot;channel&quot;</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">!=</span> <span class="s2">&quot;svd&quot;</span>
+                <span class="p">):</span>
+                    <span class="n">spatial_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">neuron_idx</span><span class="p">,</span> <span class="n">dims</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">==</span> <span class="s2">&quot;element&quot;</span><span class="p">:</span>
+                        <span class="n">channel_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">flat_idx</span><span class="p">])</span>
+                        <span class="n">neuron_idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">channel_idx</span><span class="p">,)</span> <span class="o">+</span> <span class="n">spatial_idx</span>
+                    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">==</span> <span class="s2">&quot;spatial&quot;</span><span class="p">:</span>
+                        <span class="n">neuron_idx</span> <span class="o">=</span> <span class="n">spatial_idx</span>
+                        <span class="n">neuron_idx</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">neuron_idx</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">neuron_idx</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">neuron_idx</span><span class="p">))</span>
+
+                <span class="c1"># add each neuron to the dict with its value</span>
+                <span class="c1"># neuron format: (layer index, (full neuron index,))</span>
+                <span class="n">full_idx</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">layer</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">neuron_idx</span><span class="p">)</span>
+                <span class="n">neuron_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">idx</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">full_idx</span><span class="p">,</span> <span class="n">values</span><span class="p">)}</span>
+
+        <span class="c1"># construct dicts for synapse counts and weights</span>
+        <span class="n">synapse_stats</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;counts&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_synapse_counts</span><span class="p">,</span>
+            <span class="s2">&quot;weights&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_synapse_weights</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">synapse_views</span> <span class="o">=</span> <span class="p">{</span><span class="n">stat</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">synapse_stats</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">synapse_stats</span><span class="p">:</span>
+            <span class="n">synapse_spmat</span> <span class="o">=</span> <span class="n">synapse_stats</span><span class="p">[</span><span class="n">stat</span><span class="p">]</span>
+            <span class="n">synapse_dict</span> <span class="o">=</span> <span class="n">synapse_views</span><span class="p">[</span><span class="n">stat</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">synapse_spmat</span><span class="p">:</span>
+                <span class="n">dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation_shapes</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span>
+
+                <span class="c1"># list predecessors/input layers</span>
+                <span class="n">pred_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span>
+                <span class="c1"># split sparse matrix if there are two input layers (i.e. resnetadd)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pred_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">pred_spmats</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">synapse_spmat</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">tocsr</span><span class="p">()[:</span> <span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:</span> <span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                        <span class="n">synapse_spmat</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">tocsr</span><span class="p">()[</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:,</span> <span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:],</span>
+                    <span class="p">)</span>
+
+                    <span class="n">pred_nonzero</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">nnz</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pred_spmats</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">pred_nonzero</span><span class="p">):</span>
+                        <span class="n">pred_spmats</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                            <span class="n">p</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">nz</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pred_spmats</span><span class="p">,</span> <span class="n">pred_nonzero</span><span class="p">)</span> <span class="k">if</span> <span class="n">nz</span>
+                        <span class="p">)</span>
+                        <span class="n">pred_list</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                            <span class="n">pdx</span> <span class="k">for</span> <span class="n">pdx</span><span class="p">,</span> <span class="n">nz</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pred_list</span><span class="p">,</span> <span class="n">pred_nonzero</span><span class="p">)</span> <span class="k">if</span> <span class="n">nz</span>
+                        <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pred_spmats</span> <span class="o">=</span> <span class="p">(</span><span class="n">synapse_spmat</span><span class="p">[</span><span class="n">layer</span><span class="p">],)</span>
+
+                <span class="n">synapse_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+                <span class="c1"># add synapses from each input layer to the dict</span>
+                <span class="k">for</span> <span class="n">pred</span><span class="p">,</span> <span class="n">spmat</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pred_list</span><span class="p">,</span> <span class="n">pred_spmats</span><span class="p">):</span>
+                    <span class="n">pdims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation_shapes</span><span class="p">[</span><span class="n">pred</span><span class="p">]</span>
+                    <span class="c1"># list input neurons, output neurons, and values from sparse matrix</span>
+                    <span class="n">synapses</span> <span class="o">=</span> <span class="p">[(</span><span class="o">*</span><span class="n">syn</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">syn</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">spmat</span><span class="o">.</span><span class="n">todok</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+                    <span class="n">out_idx</span><span class="p">,</span> <span class="n">in_idx</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">synapses</span><span class="p">)</span>
+                    <span class="n">full_idxs</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="c1"># convert flat indices of input and output neurons to full spatial</span>
+                    <span class="c1"># or element indices if necessary</span>
+                    <span class="k">for</span> <span class="n">ldx</span><span class="p">,</span> <span class="n">ldims</span><span class="p">,</span> <span class="n">neuron_idx</span> <span class="ow">in</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">pdims</span><span class="p">,</span> <span class="n">in_idx</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">out_idx</span><span class="p">),</span>
+                    <span class="p">):</span>
+                        <span class="k">if</span> <span class="p">(</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">ldims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span>
+                            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">!=</span> <span class="s2">&quot;channel&quot;</span>
+                            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">!=</span> <span class="s2">&quot;svd&quot;</span>
+                        <span class="p">):</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">==</span> <span class="s2">&quot;element&quot;</span><span class="p">:</span>
+                                <span class="n">neuron_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">neuron_idx</span><span class="p">,</span> <span class="n">ldims</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span> <span class="o">==</span> <span class="s2">&quot;spatial&quot;</span><span class="p">:</span>
+                                <span class="n">neuron_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">neuron_idx</span><span class="p">,</span> <span class="n">ldims</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+                                <span class="n">neuron_idx</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">neuron_idx</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">neuron_idx</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">neuron_idx</span><span class="p">))</span>
+
+                        <span class="n">full_idxs</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">((</span><span class="n">ldx</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">neuron_idx</span><span class="p">)]</span>
+                    <span class="n">in_idx</span><span class="p">,</span> <span class="n">out_idx</span> <span class="o">=</span> <span class="n">full_idxs</span>
+
+                    <span class="c1"># add each synapse to the dict with its value</span>
+                    <span class="c1"># synapse format: ((input layer index, (input neuron index,)),</span>
+                    <span class="c1">#                  (output layer index, (output neuron index,)))</span>
+                    <span class="n">synapse_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="p">{(</span><span class="n">i</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">in_idx</span><span class="p">,</span> <span class="n">out_idx</span><span class="p">,</span> <span class="n">values</span><span class="p">)}</span>
+                    <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Profile</span><span class="p">(</span>
+            <span class="n">neuron_counts</span><span class="o">=</span><span class="n">neuron_views</span><span class="p">[</span><span class="s2">&quot;counts&quot;</span><span class="p">],</span>
+            <span class="n">neuron_weights</span><span class="o">=</span><span class="n">neuron_views</span><span class="p">[</span><span class="s2">&quot;weights&quot;</span><span class="p">],</span>
+            <span class="n">synapse_counts</span><span class="o">=</span><span class="n">synapse_views</span><span class="p">[</span><span class="s2">&quot;counts&quot;</span><span class="p">],</span>
+            <span class="n">synapse_weights</span><span class="o">=</span><span class="n">synapse_views</span><span class="p">[</span><span class="s2">&quot;weights&quot;</span><span class="p">],</span>
+            <span class="n">activation_shapes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_activation_shapes</span><span class="p">,</span>
+            <span class="n">pred_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pred_dict</span><span class="p">,</span>
+            <span class="n">num_inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_inputs</span><span class="p">,</span>
+            <span class="n">neuron_type</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_neuron_type</span><span class="si">}</span><span class="s2"> (dict)&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020 Battelle Memorial Institute.
-
-    </p>
+    <p>&#169; Copyright 2020 Battelle Memorial Institute.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
