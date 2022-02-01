@@ -25,7 +25,7 @@ def test_optimization_dict(resnet18_example):
 
     # take two gradient steps with the dictionary optimization helper module
     output = dictionary_optimization(
-        model, signals_receptive_fields_weights, threshold=2
+        model, signals_receptive_fields_weights, threshold=2, device=resnet18_example.device
     )
 
     assert output.shape == torch.Size([1, 3, 224, 224])
@@ -44,6 +44,7 @@ def test_optimization_dict_activation(resnet18_example):
     output = dictionary_optimization(
         model,
         signals_receptive_fields_weights,
+        device=resnet18_example.device,
         threshold=2,
         neuron_type=NeuronBasis.ACTIVATION,
     )
@@ -59,7 +60,7 @@ def test_optimization_dict_channel(resnet18_example):
     # take two gradient steps with the dictionary optimization helper module
     # set neuron to false to use channel objective
     output = dictionary_optimization(
-        model, signals_receptive_fields_weights, threshold=2, neuron=False
+        model, signals_receptive_fields_weights, threshold=2, neuron=False, device=resnet18_example.device
     )
 
     assert output.shape == torch.Size([1, 3, 224, 224])
@@ -75,6 +76,7 @@ def test_optimization_dict_channel(resnet18_example):
     output = dictionary_optimization(
         model,
         signals_receptive_fields_weights,
+        device=resnet18_example.device,
         threshold=2,
         neuron_type=NeuronBasis.ACTIVATION,
         neuron=False,
