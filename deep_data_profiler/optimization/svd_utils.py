@@ -1,6 +1,6 @@
 import torch
 from deep_data_profiler.classes.profile import Profile
-from typing import Dict, Callable
+from typing import Dict, Callable, Optional
 from collections import OrderedDict
 from tqdm import tqdm
 
@@ -34,7 +34,11 @@ def model_svd_dict(profiler: Profile) -> Dict[str, torch.Tensor]:
     return svd_dict
 
 
-def project_svd(profiler: Profile) -> Callable:
+def project_svd(profiler: Profile, device: Optional[torch.device] = None) -> Callable:
+    '''A helper function that projects a 4d matrix of activations onto the U-vec weight tensor SVD of the layer.'''
+    if not device:
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     svd_dict = model_svd_dict(profiler)
 
     def inner(activations: Dict[str, torch.Tensor], layer: str) -> torch.Tensor:
@@ -43,7 +47,7 @@ def project_svd(profiler: Profile) -> Callable:
         b, c, h, w = layer_activations.shape
         layer_reshape = layer_activations.view(b, c, -1)
         # take SVD projection
-        uprojy = torch.matmul(u_vec.T, layer_reshape)
+        uprojy = torch.matmul(u_vec.T.to(device), layer_reshape.to(device))
         return uprojy.reshape(b, c, h, w)
 
     return inner
