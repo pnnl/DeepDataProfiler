@@ -440,14 +440,14 @@ class Profile:
                 neuron_idx = tuple(idx[1] for idx in flat_idx)
 
                 # convert flat indices to full spatial or element indices if necessary
-                if len(dims) == 4 and self._neuron_type != "channel":
+                if len(dims) == 4 and self._neuron_type != "channel" and self._neuron_type != "svd":
                     spatial_idx = np.unravel_index(neuron_idx, dims[2:])
                     if self._neuron_type == "element":
                         channel_idx = np.array([int(idx[0]) for idx in flat_idx])
                         neuron_idx = (channel_idx,) + spatial_idx
                     elif self._neuron_type == "spatial":
                         neuron_idx = spatial_idx
-                    neuron_idx = tuple(zip(*neuron_idx))
+                        neuron_idx = tuple(zip(*neuron_idx))
                 else:
                     neuron_idx = tuple(zip(neuron_idx))
 
@@ -500,12 +500,12 @@ class Profile:
                         (pred, pdims, in_idx),
                         (layer, dims, out_idx),
                     ):
-                        if len(ldims) == 4 and self._neuron_type != "channel":
+                        if len(ldims) == 4 and self._neuron_type != "channel" and self._neuron_type != "svd":
                             if self._neuron_type == "element":
                                 neuron_idx = np.unravel_index(neuron_idx, ldims[1:])
                             elif self._neuron_type == "spatial":
                                 neuron_idx = np.unravel_index(neuron_idx, ldims[2:])
-                            neuron_idx = tuple(zip(*neuron_idx))
+                                neuron_idx = tuple(zip(*neuron_idx))
                         else:
                             neuron_idx = tuple(zip(neuron_idx))
 
