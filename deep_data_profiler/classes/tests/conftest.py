@@ -64,12 +64,13 @@ def channel_example(vgg16_hook):
 def spatial_example(vgg16_hook):
     return TorchExample(vgg16_hook, "spatial")
 
+
 @pytest.fixture
 def svd_example(vgg16_hook):
     return TorchExample(vgg16_hook, "svd")
 
 
-class ProfileExample:
+class ProfileToyExample:
     def __init__(self):
         self.neuron_counts = {1: sp.coo_matrix([[2], [1], [1], [1]])}
         self.synapse_counts = {1: sp.coo_matrix([[1, 1], [1, 0], [1, 0], [1, 0]])}
@@ -80,8 +81,30 @@ class ProfileExample:
 
 
 @pytest.fixture
-def profile_example():
-    return ProfileExample()
+def profile_toy_example():
+    return ProfileToyExample()
+
+
+class ProfileExample:
+    def __init__(self, profiler_example):
+        self.input = profiler_example.input
+        self.profiler = profiler_example.profiler
+        self.profile = self.profiler.create_profile(self.input)
+
+
+@pytest.fixture
+def element_profile(element_example):
+    return ProfileExample(element_example)
+
+
+@pytest.fixture
+def channel_profile(channel_example):
+    return ProfileExample(channel_example)
+
+
+@pytest.fixture
+def spatial_profile(spatial_example):
+    return ProfileExample(spatial_example)
 
 
 class LayerExample:
