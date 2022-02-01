@@ -43,6 +43,8 @@ class TorchExample:
             self.profiler = ddp.ChannelProfiler(self.model)
         elif proftype == "spatial":
             self.profiler = ddp.SpatialProfiler(self.model)
+        elif proftype == "svd":
+            self.profiler = ddp.SVDProfiler(self.model)
         self.layerdict = self.profiler.layerdict
         self.output = modelhooks.output
         self.actives = modelhooks.actives
@@ -61,6 +63,10 @@ def channel_example(vgg16_hook):
 @pytest.fixture
 def spatial_example(vgg16_hook):
     return TorchExample(vgg16_hook, "spatial")
+
+@pytest.fixture
+def svd_example(vgg16_hook):
+    return TorchExample(vgg16_hook, "svd")
 
 
 class ProfileExample:
