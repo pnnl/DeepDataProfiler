@@ -6,8 +6,8 @@ from tqdm import tqdm
 
 
 def model_svd_dict(profiler: Profile) -> Dict[str, torch.Tensor]:
-    '''Creates a dictionary of the left-hand singular vectors
-    of the weights, keyed by layer'''
+    """Creates a dictionary of the left-hand singular vectors
+    of the weights, keyed by layer"""
     svd_dict = OrderedDict()
     layer_dict = profiler.create_layers()
     layer_ops = profiler.hooks
@@ -35,7 +35,7 @@ def model_svd_dict(profiler: Profile) -> Dict[str, torch.Tensor]:
 
 
 def project_svd(profiler: Profile, device: Optional[torch.device] = None) -> Callable:
-    '''A helper function that projects a 4d matrix of activations onto the U-vec weight tensor SVD of the layer.'''
+    """A helper function that projects a 4d matrix of activations onto the U-vec weight tensor SVD of the layer."""
     if not device:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -51,4 +51,3 @@ def project_svd(profiler: Profile, device: Optional[torch.device] = None) -> Cal
         return uprojy.reshape(b, c, h, w)
 
     return inner
-

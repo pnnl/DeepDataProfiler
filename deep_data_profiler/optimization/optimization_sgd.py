@@ -13,7 +13,11 @@ from tqdm import tqdm
 from deep_data_profiler.utils import TorchHook
 from deep_data_profiler import ChannelProfiler
 from .svd_utils import project_svd
-from .feature_helpers import NeuronBasis, neurons_dictionary_objective, dictionary_objective
+from .feature_helpers import (
+    NeuronBasis,
+    neurons_dictionary_objective,
+    dictionary_objective,
+)
 from .input_feature import FeatureVizType
 
 
@@ -62,11 +66,15 @@ def dictionary_optimization(
 
     if neuron:
         objective = neurons_dictionary_objective(
-            layer_neuron_weights, neuron_type, transform_activations=svd_projection_model,
+            layer_neuron_weights,
+            neuron_type,
+            transform_activations=svd_projection_model,
         )
     else:
         objective = dictionary_objective(
-            layer_neuron_weights, neuron_type, transform_activations=svd_projection_model,
+            layer_neuron_weights,
+            neuron_type,
+            transform_activations=svd_projection_model,
         )
 
     fv_object = InputFeature(FeatureVizType.FFT_IMAGE, dims=(1, 3, 224, 224))
@@ -80,7 +88,9 @@ def dictionary_optimization(
 
     transform_f = transform.compose(fvtransforms)
 
-    for i in tqdm(range(1, threshold + 1),):
+    for i in tqdm(
+        range(1, threshold + 1),
+    ):
 
         # zero gradients
         optimizer_fv.zero_grad()
@@ -133,7 +143,9 @@ def optimization_fv(
 
     transform_f = transform.compose(fvtransforms)
 
-    for i in tqdm(range(1, threshold + 1),):
+    for i in tqdm(
+        range(1, threshold + 1),
+    ):
 
         # zero gradients
         optimizer_fv.zero_grad()
@@ -196,7 +208,9 @@ def optimization_fv_diversity(
 
     transform_f = transform.compose(fvtransforms)
 
-    for i in tqdm(range(1, threshold + 1),):
+    for i in tqdm(
+        range(1, threshold + 1),
+    ):
 
         # zero gradients
         optimizer_fv.zero_grad()

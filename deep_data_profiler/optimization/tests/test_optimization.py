@@ -25,7 +25,10 @@ def test_optimization_dict(resnet18_example):
 
     # take two gradient steps with the dictionary optimization helper module
     output = dictionary_optimization(
-        model, signals_receptive_fields_weights, threshold=2, device=resnet18_example.device
+        model,
+        signals_receptive_fields_weights,
+        threshold=2,
+        device=resnet18_example.device,
     )
 
     assert output.shape == torch.Size([1, 3, 224, 224])
@@ -60,7 +63,11 @@ def test_optimization_dict_channel(resnet18_example):
     # take two gradient steps with the dictionary optimization helper module
     # set neuron to false to use channel objective
     output = dictionary_optimization(
-        model, signals_receptive_fields_weights, threshold=2, neuron=False, device=resnet18_example.device
+        model,
+        signals_receptive_fields_weights,
+        threshold=2,
+        neuron=False,
+        device=resnet18_example.device,
     )
 
     assert output.shape == torch.Size([1, 3, 224, 224])
@@ -147,6 +154,7 @@ def test_optimization_svd_mean_fft(resnet18_example):
 
     assert output1.shape == torch.Size([1, 3, 224, 224])
     assert output2.shape == torch.Size([1, 3, 224, 224])
+
 
 def test_optimization_svd_mean_fft(resnet18_example):
     """Test for channel optimization with the image in the Fourier basis, in the SVD hidden layer basis"""
