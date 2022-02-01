@@ -14,6 +14,20 @@ class SVDProfiler(TorchProfiler):
     register activations as it evaluates data. Using the activations,
     inputs to the model may be profiled.
 
+    The function call to generate an influenial SVD profile is slightly different
+    than that for SpatialProfiler/ChannelProfiler. Here is how to create a profile:
+    .. highlight:: python
+    .. code-block:: python
+        import deep_data_profiler as ddp
+        # define the profiler
+        influential_profiler = ddp.SVDProfiler(model)
+        # profile a tensor x
+        profile = influential_profiler.create_influential(x)
+        # view neuron weights dictionary
+        print(profile.neuron_weights)
+        # view the neuron weights for a specific layer
+        print(profile.neuron_weights[22].todense())
+        ...
     Attributes
     ----------
     implemented_classes : list
