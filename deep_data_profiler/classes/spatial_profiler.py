@@ -15,6 +15,7 @@ class SpatialProfiler(TorchProfiler):
     the spatials in the receptive field that contribute the most in the direction of the
     influential spatial vector that they are combined to produce.
     """
+
     def influence_generator(
         self,
         activations: Dict[str, torch.Tensor],
@@ -566,7 +567,7 @@ class SpatialProfiler(TorchProfiler):
                 dist_proj = torch.bmm(y_uvec.T.unsqueeze(1), cumsum_dist).squeeze()
                 # calculate the threshold distance goal (TH% of magnitude of output spatial)
                 goal = (1 - threshold) * y_norm.unsqueeze(-1).repeat(
-                    1, kernel_size ** 2
+                    1, kernel_size**2
                 )
 
                 # accept as few spatials as needed to bring projected strength of
@@ -575,7 +576,7 @@ class SpatialProfiler(TorchProfiler):
                 accept = torch.sum(bool_accept, dim=-1)
                 # if accept == kernel_size**2, all values taken as contributors
                 # subtract 1 in this case to avoid IndexError when adding additional accept
-                accept = torch.where(accept < kernel_size ** 2, accept, accept - 1)
+                accept = torch.where(accept < kernel_size**2, accept, accept - 1)
                 # update accept to be index of the first False (the distances between the
                 # partial sum vectors and the output spatial are not always monotonically
                 # decreasing so the following code handles this special case)
@@ -585,7 +586,7 @@ class SpatialProfiler(TorchProfiler):
 
                 # add additional accept, ie accept + 1, and don't accept any further
                 bool_accept = torch.arange(
-                    kernel_size ** 2, device=self.device
+                    kernel_size**2, device=self.device
                 ).unsqueeze(0).repeat(num_infl, 1) <= accept.unsqueeze(-1)
 
                 # normalize magnitude of projection as a fraction of magnitude of output spatial
@@ -732,7 +733,7 @@ class SpatialProfiler(TorchProfiler):
             # standard case: take all spatials in receptive field as equal contributors
             else:
                 # get flat spatial indices of receptive field
-                flat_idx = np.tile(np.arange(kernel_size ** 2), (num_infl, 1))
+                flat_idx = np.tile(np.arange(kernel_size**2), (num_infl, 1))
 
                 # convert flattened receptive field indices to full indices in x_in
                 ordsi = (
@@ -743,7 +744,7 @@ class SpatialProfiler(TorchProfiler):
                 )
 
                 # repeat each influential neuron once for each of its accepted contributors
-                infl_idx = np.repeat(infl_neurons, kernel_size ** 2)
+                infl_idx = np.repeat(infl_neurons, kernel_size**2)
 
                 # identify and remove padding indices, which have either row or col index
                 # outside of the range [0, #row/col)
@@ -764,7 +765,7 @@ class SpatialProfiler(TorchProfiler):
             # construct synapse counts and weights
             synapse_weights = sp.coo_matrix(
                 (
-                    np.ones(contrib_idx.shape) / (kernel_size ** 2),
+                    np.ones(contrib_idx.shape) / (kernel_size**2),
                     (infl_idx, contrib_idx),
                 ),
                 shape=(h_out * w_out, h_in * w_in),
@@ -872,8 +873,8 @@ class SpatialProfiler(TorchProfiler):
                 rfield = submatrix_generator(x_in, stride, kernel_size)(i, j)
 
                 # reshape and normalize
-                wx = rfield.view(num_infl, in_channels, kernel_size ** 2) / (
-                    kernel_size ** 2
+                wx = rfield.view(num_infl, in_channels, kernel_size**2) / (
+                    kernel_size**2
                 )
 
                 # calculate sum of normalized spatials (equal to y_out averaged spatial activation)
@@ -891,14 +892,14 @@ class SpatialProfiler(TorchProfiler):
                 wx_proj = wx_proj / y_norm.unsqueeze(-1)
 
                 # get flat spatial indices of receptive field
-                flat_idx = np.tile(np.arange(kernel_size ** 2), (num_infl, 1))
+                flat_idx = np.tile(np.arange(kernel_size**2), (num_infl, 1))
 
                 # convert flattened receptive field indices to full indices in x_in
                 ordsi = flat_idx // kernel_size + stride * np.expand_dims(i, -1)
                 ordsj = flat_idx % kernel_size + stride * np.expand_dims(j, -1)
 
                 # repeat each influential neuron once for each of its accepted contributors
-                infl_idx = np.repeat(infl_neurons, kernel_size ** 2)
+                infl_idx = np.repeat(infl_neurons, kernel_size**2)
 
                 # convert row/col indices to flat indices
                 contrib_idx = np.ravel_multi_index(
@@ -944,6 +945,7 @@ class SpatialProfiler(TorchProfiler):
         """
         Draws synaptic connections between the given influential neurons in a ResNet add
         layer and their contributors in a previous layer
+
         Parameters
         ----------
         x_in : Dict[int, torch.Tensor]

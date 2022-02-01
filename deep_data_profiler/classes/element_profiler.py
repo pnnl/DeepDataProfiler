@@ -12,10 +12,11 @@ class ElementProfiler(TorchProfiler):
     """
     ElementProfiler identifies influential elements of an activation tensor. Influential
     element neurons are identified by their value or absolute value. Contributing
-    neurons in the previous layer are the elements in the receptive field with the 
-    greatest values whose sum reaches a specified threshold, or percentage of the 
+    neurons in the previous layer are the elements in the receptive field with the
+    greatest values whose sum reaches a specified threshold, or percentage of the
     value of the influential element.
     """
+
     def influence_generator(
         self,
         activations: Dict[str, torch.Tensor],
@@ -508,7 +509,7 @@ class ElementProfiler(TorchProfiler):
             # order neurons in receptive field by greatest contribution
             # ordsmat dimensions: num_infl x in_channels*kernel_size^2
             ordsmat_vals, ordsmat_indices = torch.sort(
-                z.view(num_infl, in_channels * kernel_size ** 2),
+                z.view(num_infl, in_channels * kernel_size**2),
                 dim=1,
                 descending=True,
             )
@@ -523,7 +524,7 @@ class ElementProfiler(TorchProfiler):
             accept = torch.sum(bool_accept, dim=1)
             # if accept == kernel_size**2, all values taken as contributors
             # subtract 1 in this case to avoid IndexError when adding additional accept
-            accept = torch.where(accept < kernel_size ** 2, accept, accept - 1)
+            accept = torch.where(accept < kernel_size**2, accept, accept - 1)
 
             # add additional accept, ie accept + 1
             bool_accept[range(len(accept)), accept] = True
@@ -677,7 +678,7 @@ class ElementProfiler(TorchProfiler):
                 range(num_infl), ch
             ]
             # find max val from each receptive field
-            maxval, maxidx = torch.max(rfield.view(num_infl, kernel_size ** 2), dim=1)
+            maxval, maxidx = torch.max(rfield.view(num_infl, kernel_size**2), dim=1)
 
             # convert index of max vals in receptive field to full index in x_in
             maxi = (maxidx // kernel_size + stride * i) - padding
@@ -812,7 +813,7 @@ class ElementProfiler(TorchProfiler):
 
             # order neurons in receptive field by greatest normalized contribution
             ordsmat_vals, ordsmat_indices = torch.sort(
-                rfield.view(num_infl, kernel_size ** 2) / kernel_size ** 2,
+                rfield.view(num_infl, kernel_size**2) / kernel_size**2,
                 dim=1,
                 descending=True,
             )
@@ -827,7 +828,7 @@ class ElementProfiler(TorchProfiler):
             accept = torch.sum(bool_accept, dim=1)
             # if accept == kernel_size**2, all values taken as contributors
             # subtract 1 in this case to avoid IndexError when adding additional accept
-            accept = torch.where(accept < kernel_size ** 2, accept, accept - 1)
+            accept = torch.where(accept < kernel_size**2, accept, accept - 1)
 
             # add additional accept, ie accept + 1
             bool_accept[range(num_infl), accept] = True
@@ -903,6 +904,7 @@ class ElementProfiler(TorchProfiler):
         """
         Draws synaptic connections between the given influential neurons in a ResNet add
         layer and their contributors in a previous layer
+
         Parameters
         ----------
         x_in : Dict[int, torch.Tensor]
