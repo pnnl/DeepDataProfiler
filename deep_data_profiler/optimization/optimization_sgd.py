@@ -7,7 +7,7 @@ import numpy as np
 from lucent.misc.io import show
 from lucent.optvis.render import tensor_to_img_array
 import lucent.optvis.transform as transform
-from typing import Callable, Tuple, Dict, Union, List
+from typing import Callable, Tuple, Dict, Union, List, Optional
 from tqdm import tqdm
 
 from deep_data_profiler.utils import TorchHook
@@ -20,14 +20,15 @@ from .input_feature import FeatureVizType
 def dictionary_optimization(
     model: torch.nn.Module,
     layer_neuron_weights: Union[Dict[str, List[Tuple[int]]], Dict[str, List[int]]],
+    device: Optional[torch.device] = None,
     threshold: int = 512,
     neuron_type: NeuronBasis = NeuronBasis.SVD,
     neuron: bool = True,
 ) -> torch.Tensor:
     """
-    A convenience function for the optimization. Accepts a model 
+    A convenience function for the optimization. Accepts a model
     (to be wrapped with TorchHook and Profiler), a dictionary of layer weights,
-    the basis (namely, Euclidean or SVD), and whether to consider a single 
+    the basis (namely, Euclidean or SVD), and whether to consider a single
     receptive field or the entire channel/signal.
 
     Parameters
@@ -35,7 +36,7 @@ def dictionary_optimization(
     model: torch.nn.Module
         PyTorch model.
     layer_neuron_weights: Union[Dict[str, List[Tuple[int]]], Dict[str, List[int]]]
-        a dictionary of either {layer : [neurons...]} or 
+        a dictionary of either {layer : [neurons...]} or
         {layer : [(neuron, weight), ...]}
     threshold: int
        Number of iterations in the optimization.
@@ -45,8 +46,11 @@ def dictionary_optimization(
         The optimized feature.
     """
     profiler = ChannelProfiler(model)
+    if not device:
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     # hook model
-    model = TorchHook(model)
+    model = TorchHook(model, device=device)
     # layers passed in dictionary
     layers = list(layer_neuron_weights.keys())
     model.add_hooks(layers)
@@ -174,7 +178,7 @@ def optimization_fv_diversity(
     diversity_term_weight: float
        Amount to weight the diversity objective in the optimization.
     steering_grad_weight: float
-       Absolute amount to add to the gradient used to weight the 
+       Absolute amount to add to the gradient used to weight the
        diversity activations.
     Returns
     -------
