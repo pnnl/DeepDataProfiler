@@ -49,6 +49,10 @@ class SVDProfiler(TorchProfiler):
             torch.nn.Linear,
             torch.nn.Conv2d,
         ]
+        self.pred_dict = {
+            nd[0]: sorted([preds[0] for preds in self.SG.predecessors(nd)])
+            for nd in sorted(self.SG)
+        }
 
         if compute_svd:
             self.svd_dict = self.create_svd()
@@ -136,6 +140,14 @@ class SVDProfiler(TorchProfiler):
             else:
                 activations = activations
 
+        activation_shapes = {}
+        activations["x_in"] = x
+        for ldx, modules in self.layerdict.items():
+            if "resnetadd" in modules[1]:
+                activation_shapes[ldx] = activations[modules[0][1]].shape
+            else:
+                activation_shapes[ldx] = activations[modules[0][0]].shape
+
             # dictionary of SVDs of the weights per layer,
             # if not already pre-computed when SVDInfluential was defined
             if not self.svd_dict:
@@ -187,6 +199,9 @@ class SVDProfiler(TorchProfiler):
                 neuron_counts=neuron_counts,
                 neuron_weights=neuron_weights,
                 num_inputs=1,
+                activation_shapes=activation_shapes,
+                pred_dict=self.pred_dict,
+                neuron_type="svd",
             )
 
     def create_projections(
@@ -263,42 +278,43 @@ class SVDProfiler(TorchProfiler):
             Matrix assigning weights to each influential neuron according to its
             contribution to the threshold
         """
-        m = torch.linalg.norm(agg.view((agg.shape[0], -1)), ord=norm, dim=1).unsqueeze(
-            0
-        )
+        with torch.no_grad():
+            m = torch.linalg.norm(agg.view((agg.shape[0], -1)), ord=norm, dim=1).unsqueeze(
+                0
+            )
 
-        # sort
-        ordsmat_vals, ordsmat_indices = torch.sort(m, descending=True)
+            # sort
+            ordsmat_vals, ordsmat_indices = torch.sort(m, descending=True)
 
-        # take the cumsum and normalize by total contribution per dim
-        cumsum = torch.cumsum(ordsmat_vals, dim=1)
-        totalsum = cumsum[:, -1].detach()
+            # take the cumsum and normalize by total contribution per dim
+            cumsum = torch.cumsum(ordsmat_vals, dim=1)
+            totalsum = cumsum[:, -1].detach()
 
-        # find the indices within the threshold goal, per dim
-        bool_accept = (cumsum / totalsum.unsqueeze(-1)) <= threshold
-        accept = torch.sum(bool_accept, dim=1)
+            # find the indices within the threshold goal, per dim
+            bool_accept = (cumsum / totalsum.unsqueeze(-1)) <= threshold
+            accept = torch.sum(bool_accept, dim=1)
 
-        # normalize by final accepted cumsum
-        ordsmat_vals /= cumsum[:, accept - 1]
+            # normalize by final accepted cumsum
+            ordsmat_vals /= cumsum[:, accept - 1]
 
-        # add additional accept, ie accept + 1
-        try:
-            # use range to enumerate over batch size entries of accept
-            bool_accept[range(len(accept)), accept] = True
-        except IndexError:
-            print("taking all values as influential")
+            # add additional accept, ie accept + 1
+            try:
+                # use range to enumerate over batch size entries of accept
+                bool_accept[range(len(accept)), accept] = True
+            except IndexError:
+                print("taking all values as influential")
 
-        # find accepted synapses, all other values zero.
-        # note: it is ordered by largest norm value
-        unordered_weights = torch.where(
-            bool_accept, ordsmat_vals, torch.zeros(ordsmat_vals.shape, device=device)
-        )
-        # re-order to mantain proper neuron ordering
-        influential_weights = unordered_weights.gather(1, ordsmat_indices.argsort(1))
+            # find accepted synapses, all other values zero.
+            # note: it is ordered by largest norm value
+            unordered_weights = torch.where(
+                bool_accept, ordsmat_vals, torch.zeros(ordsmat_vals.shape, device=device)
+            )
+            # re-order to mantain proper neuron ordering
+            influential_weights = unordered_weights.gather(1, ordsmat_indices.argsort(1))
 
-        influential_neurons = influential_weights.bool().int()
+            influential_neurons = influential_weights.bool().int()
 
-        return matrix_convert(influential_neurons), matrix_convert(influential_weights)
+            return matrix_convert(influential_neurons), matrix_convert(influential_weights)
 
     # final three methods are defined so the method plays nicely
     # with the newest ddp version
