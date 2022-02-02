@@ -44,8 +44,14 @@ def project_svd(profiler: Profile, device: Optional[torch.device] = None) -> Cal
     def inner(activations: Dict[str, torch.Tensor], layer: str) -> torch.Tensor:
         u_vec = svd_dict[layer]
         layer_activations = activations[layer]
-        b, c, h, w = layer_activations.shape
-        layer_reshape = layer_activations.view(b, c, -1)
+        act_shape = layer_activations.shape
+        if len(act_shape) == 4:
+            b, c, h, w = act_shape
+            layer_reshape = layer_activations.view(b, c, -1)
+        elif len(act_shape) == 2:
+            layer_reshape = layer_activations
+        else:
+            raise Exception("Activations not implemented for SVD")
         # take SVD projection
         uprojy = torch.matmul(u_vec.T.to(device), layer_reshape.to(device))
         return uprojy.reshape(b, c, h, w)
