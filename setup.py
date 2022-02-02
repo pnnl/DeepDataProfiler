@@ -14,7 +14,6 @@ setup(
         "deep_data_profiler.classes",
         "deep_data_profiler.utils",
         "deep_data_profiler.algorithms",
-        "deep_data_profiler.models",
         "deep_data_profiler.optimization",
     ],
     version=__version__,
