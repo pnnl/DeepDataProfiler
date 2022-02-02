@@ -164,7 +164,7 @@ def optimization_fv_diversity(
     """
     Feature visualization with diversity. Expects the fv_object to be a batch of features.
     For the original formulation, see https://distill.pub/2017/feature-visualization/.
-    For the re-weighting with diversity, see [our upcoming paper? / for now PP slides].
+    For the re-weighting with diversity, see [our upcoming paper / for now PP slides].
 
     Parameters
     ----------
