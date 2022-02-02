@@ -82,8 +82,62 @@ of the model's linear operators.
 
 Jupyter notebooks for the library with illustrative examples are available in the tutorials directory.
 
+-----------------
+
+Profiling Methods
+-----------------
+The goal of DeepDataProfiler is to analyze activations to identify neurons that are key
+to the classification of an input, but there are many ways to define a neuron and
+measure its importance. DDP supports analysis on four different types of neurons:
+Element neurons, Channel neurons, Spatial neurons, and SVD neurons.
+
+Convolutional layers of a CNN produce 3-dimensional *tensors* of activations, and we can
+slice that tensor into neuron units in a few different ways.
+
+.. image:: /images/tensor_slices.png
+   :align: right
+
+In a $c\times m\times m$ activation tensor, there are:
+
+ - $c$ **channels**, which are the $m\times m$ matrices, or planes of 
+   the tensor,
+ - $m^2$ **spatials**, which are the $c$-vectors through all channels of the
+   tensor at a fixed spatial (row and column) position,
+ - and $cm^2$ **elements**, which are the individual cells of the tensor at a fixed channel
+   and spatial position.
+
+See the documentation for :code:`ddp.ElementProfiler`, :code:`ddp.ChannelProfiler`, and 
+:code:`ddp.SpatialProfiler` for more information on how each of these profiling methods, and
+visit Tutorial 1 for an interactive overview.
 
 
+SVD Profiles
+============
+
+Each convolutional layer has a learned weight tensor $\text W$ with dimensions $d\times c\times 
+k\times k$. We can unfold that tensor into a $d\times ck^2$ matrix $\overline W$, and take its
+singular value decomposition (SVD) to find a basis of singular directions.
+
+.. image:: /images/w_unfold.png
+   :align: right
+
+These SVD directions expose the core dynamics of the linear transformation that occurs when an
+input tensor is convolved with the weight tensor for this layer. We can identify
+the most important singular directions, or SVD neurons, by projecting the raw
+activations onto the SVD basis and measuring their *signals*, or strength in the
+direction of each singular direction. See the documentation for :code:`ddp.SVDProfiler`
+for more information.
+
++-------------------------------+---------------------------+
+|   Standard Activation Basis   |        SVD Basis          |
++===============================+===========================+
+| | :code:`ddp.ElementProfiler` | | :code:`ddp.SVDProfiler` |
+| | :code:`ddp.ChannelProfiler` | |                         |
+| | :code:`ddp.SpatialProfiler` | |                         |
++-------------------------------+---------------------------+
+
+
+-------------
 
 Deep Data Profiler builds a profile of a model-data pairing by
 identifying key neurons and the synapses that connect them. This data

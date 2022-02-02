@@ -47,6 +47,10 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#related-work">Related Work</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#profiling-methods">Profiling Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#svd-profiles">SVD Profiles</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#profile-graphs">Profile Graphs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#topological-data-analysis">Topological Data Analysis</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#metric-space">Metric Space</a></li>
@@ -151,6 +155,70 @@ generated from profile graphs and for
 exploring the empirical spectral decomposition
 of the model’s linear operators.</p>
 <p>Jupyter notebooks for the library with illustrative examples are available in the tutorials directory.</p>
+</section>
+<hr class="docutils" />
+<section id="profiling-methods">
+<h2>Profiling Methods<a class="headerlink" href="#profiling-methods" title="Permalink to this headline"></a></h2>
+<p>The goal of DeepDataProfiler is to analyze activations to identify neurons that are key
+to the classification of an input, but there are many ways to define a neuron and
+measure its importance. DDP supports analysis on four different types of neurons:
+Element neurons, Channel neurons, Spatial neurons, and SVD neurons.</p>
+<p>Convolutional layers of a CNN produce 3-dimensional <em>tensors</em> of activations, and we can
+slice that tensor into neuron units in a few different ways.</p>
+<img alt="../_images/tensor_slices.png" class="align-right" src="../_images/tensor_slices.png" />
+<p>In a <span class="math notranslate nohighlight">\(c\times m\times m\)</span> activation tensor, there are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(c\)</span> <strong>channels</strong>, which are the <span class="math notranslate nohighlight">\(m\times m\)</span> matrices, or planes of
+the tensor,</p></li>
+<li><p><span class="math notranslate nohighlight">\(m^2\)</span> <strong>spatials</strong>, which are the <span class="math notranslate nohighlight">\(c\)</span>-vectors through all channels of the
+tensor at a fixed spatial (row and column) position,</p></li>
+<li><p>and <span class="math notranslate nohighlight">\(cm^2\)</span> <strong>elements</strong>, which are the individual cells of the tensor at a fixed channel
+and spatial position.</p></li>
+</ul>
+</div></blockquote>
+<p>See the documentation for <code class="code docutils literal notranslate"><span class="pre">ddp.ElementProfiler</span></code>, <code class="code docutils literal notranslate"><span class="pre">ddp.ChannelProfiler</span></code>, and
+<code class="code docutils literal notranslate"><span class="pre">ddp.SpatialProfiler</span></code> for more information on how each of these profiling methods, and
+visit Tutorial 1 for an interactive overview.</p>
+<section id="svd-profiles">
+<h3>SVD Profiles<a class="headerlink" href="#svd-profiles" title="Permalink to this headline"></a></h3>
+<p>Each convolutional layer has a learned weight tensor <span class="math notranslate nohighlight">\(\text W\)</span> with dimensions <span class="math notranslate nohighlight">\(d\times c\times
+k\times k\)</span>. We can unfold that tensor into a <span class="math notranslate nohighlight">\(d\times ck^2\)</span> matrix <span class="math notranslate nohighlight">\(\overline W\)</span>, and take its
+singular value decomposition (SVD) to find a basis of singular directions.</p>
+<img alt="../_images/w_unfold.png" class="align-right" src="../_images/w_unfold.png" />
+<p>These SVD directions expose the core dynamics of the linear transformation that occurs when an
+input tensor is convolved with the weight tensor for this layer. We can identify
+the most important singular directions, or SVD neurons, by projecting the raw
+activations onto the SVD basis and measuring their <em>signals</em>, or strength in the
+direction of each singular direction. See the documentation for <code class="code docutils literal notranslate"><span class="pre">ddp.SVDProfiler</span></code>
+for more information.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Standard Activation Basis</p></th>
+<th class="head"><p>SVD Basis</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="line-block">
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">ddp.ElementProfiler</span></code></div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">ddp.ChannelProfiler</span></code></div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">ddp.SpatialProfiler</span></code></div>
+</div>
+</td>
+<td><div class="line-block">
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">ddp.SVDProfiler</span></code></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<hr class="docutils" />
 <p>Deep Data Profiler builds a profile of a model-data pairing by
 identifying key neurons and the synapses that connect them. This data
 naturally lends itself to representation as a directed bipartite graph,
@@ -158,6 +226,7 @@ allowing us to take advantage of the rich field of graph theoretical
 analysis tools. Visit <a class="reference external" href="https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/master/tutorials/Tutorial%202%20-%20DDPAlgorithms.ipynb">Tutorial 2 - Topological Data
 Analysis</a>
 for an interactive walkthrough of some of the content on this page.</p>
+</section>
 </section>
 <section id="profile-graphs">
 <h2>Profile Graphs<a class="headerlink" href="#profile-graphs" title="Permalink to this headline"></a></h2>
