@@ -17,6 +17,7 @@ class ChannelProfiler(TorchProfiler):
     whose sum reaches a specified threshold, or percentage of the maximum value in the
     influential channel.
     """
+
     def influence_generator(
         self,
         activations: Dict[str, torch.Tensor],
@@ -678,6 +679,7 @@ class ChannelProfiler(TorchProfiler):
         """
         Draws synaptic connections between the given influential neurons in a ResNet add
         layer and their contributors in a previous layer
+
         Parameters
         ----------
         x_in : Dict[int, torch.Tensor]
@@ -696,14 +698,15 @@ class ChannelProfiler(TorchProfiler):
 
         Returns
         -------
-        neuron_counts
-        synapse_counts
-        synapse_weights
+        neuron_counts :
+        synapse_counts :
+        synapse_weights :
 
         Raises
         ------
         NotImplementedError
             Raises error if len(x_in) != 2 or len(y_out) != 1
+
         """
 
         if len(y_out) != 1 or len(x_in) != 2:
@@ -779,9 +782,10 @@ class ChannelProfiler(TorchProfiler):
 
         Returns
         -------
-        neuron_counts
-        synapse_counts
-        synapse_weights
+        neuron_counts :
+        synapse_counts :
+        synapse_weights :
+
         """
         if len(y_out) != 1 or len(x_in) != 1:
             raise NotImplementedError(

@@ -14,7 +14,8 @@ from .feature_objective import (
 
 
 class NeuronBasis(Enum):
-    '''Enum for the different neuron basis types.'''
+    """Enum for the different neuron basis types."""
+
     ACTIVATION = auto()
     SVD = auto()
 
@@ -26,7 +27,7 @@ def neurons_dictionary_objective(
 ) -> FeatureObjective:
     """Reads a dictionary of {layer : [neurons...]} and returns a single objective to optimize. Requires
     a transform_activations function if neuron_type is NeuronBasis.SVD
-    
+
     Parameters
     ----------
         layer_neuron_weights (Dict[str, List[Tuple[int]]]): A dictionary of {layer : [neurons...]}
@@ -84,8 +85,8 @@ def dictionary_objective(
     neuron_type: NeuronBasis = NeuronBasis.ACTIVATION,
     transform_activations: Optional[Callable] = None,
 ) -> FeatureObjective:
-    """Reads a dictionary of either {layer : [neurons...]} or {layer : [(neuron, weight), ...]} 
-    and returns a single objective to optimize. Requires a transform_activations function if neuron_type 
+    """Reads a dictionary of either {layer : [neurons...]} or {layer : [(neuron, weight), ...]}
+    and returns a single objective to optimize. Requires a transform_activations function if neuron_type
     is NeuronBasis.SVD
 
     Parameters

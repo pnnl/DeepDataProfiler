@@ -6,12 +6,12 @@ from enum import Enum, auto
 
 class InputFeature:
     """
-    InputFeature is optimized in the feature visualization. It uses 
-        1. A type of feature visualization (currently, images parameterized either 
+    InputFeature is optimized in the feature visualization. It uses
+        1. A type of feature visualization (currently, images parameterized either
             in the pixel or Fourier basis).
-        2. A torch Tensor, `fv_tensor`, that instantiates the feature, as well as initial parameters for 
+        2. A torch Tensor, `fv_tensor`, that instantiates the feature, as well as initial parameters for
             the optimization.
-        3. A transformation. The transformation is used on the `fv_tensor`, and 
+        3. A transformation. The transformation is used on the `fv_tensor`, and
             mainly enforces a transformational robustness prior.
     Attributes
     ----------
@@ -33,9 +33,7 @@ class InputFeature:
         if fv_type == FeatureVizType.FFT_IMAGE:
             self.fv_type = FeatureVizType.FFT_IMAGE
             tensor, scale = initialize_fft_image(dims, device=self.device)
-            self.transform = compose(
-                linear_decorrelate, fft_transform(scale, dims)
-            )
+            self.transform = compose(linear_decorrelate, fft_transform(scale, dims))
             self.fv_tensor = tensor
 
         elif fv_type == FeatureVizType.RGB_IMAGE:
@@ -89,7 +87,8 @@ def rfft2d_freqs(h, w):
 
 
 def fft_transform(scale, dims=(1, 3, 224, 224)):
-    '''Returns a function that applies the FFT transform to a tensor.'''
+    """Returns a function that applies the FFT transform to a tensor."""
+
     def fft_inner(tensor):
         batch, channels, h, w = dims
         tensor = scale * tensor
@@ -103,8 +102,10 @@ def fft_transform(scale, dims=(1, 3, 224, 224)):
     return fft_inner
 
 
-def initialize_fft_image(dims=(1, 3, 224, 224), device=None) -> Tuple[torch.Tensor, float]:
-    '''Initializes a random Gaussian image in the Fourier domain.'''
+def initialize_fft_image(
+    dims=(1, 3, 224, 224), device=None
+) -> Tuple[torch.Tensor, float]:
+    """Initializes a random Gaussian image in the Fourier domain."""
     if not device:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     batch, channels, h, w = dims
@@ -113,9 +114,7 @@ def initialize_fft_image(dims=(1, 3, 224, 224), device=None) -> Tuple[torch.Tens
         (batch, channels) + freqs.shape + (2,)
     )  # 2 for imaginary and real components
 
-    tensor = (
-        (torch.randn(*init_val_size) * 0.01).to(device).requires_grad_(True)
-    )
+    tensor = (torch.randn(*init_val_size) * 0.01).to(device).requires_grad_(True)
 
     scale = 1.0 / np.maximum(freqs, 1.0 / max(w, h))
     scale = torch.tensor(scale).float()[None, None, ..., None].to(device)
@@ -132,7 +131,7 @@ COLOR_CORRELATION_NORMALIZED = COLOR_CORRELATION_SVD_SQRT / MAX_NORM_SVD_SQRT
 
 
 def linear_decorrelate(tensor, device=None) -> torch.Tensor:
-    '''Applies a linear decorrelation transform to a tensor.'''
+    """Applies a linear decorrelation transform to a tensor."""
     if not device:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     t_permute = tensor.permute(0, 2, 3, 1)

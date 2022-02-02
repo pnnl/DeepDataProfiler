@@ -24,13 +24,13 @@ class Profile:
         num_inputs: Optional[int] = 0,
         neuron_type: Optional[str] = None,
     ) -> None:
-        """Summary
+        """
 
         Parameters
         ----------
         neuron_counts : dict, optional
-            Dictionary representing profile neurons and their counts,
-            i.e. how many synapses they were influential or contributing to
+            Dictionary representing profile neurons and their counts, i.e. how many
+            synapses they were influential or contributing to
         neuron_weights : dict, optional
             Dictionary representing influential profile neurons and their weights
         synapse_counts : dict, optional
@@ -52,6 +52,7 @@ class Profile:
         the results of a profiling process but there is no type checking. If the
         input is not in the correct format, the metrics could fail or return inaccurate
         values.
+
         """
 
         self._neuron_counts = neuron_counts or dict()
@@ -69,8 +70,8 @@ class Profile:
         Returns
         -------
         neuron_counts : Dict of scipy.sparse matrices or Dict of dicts
-            Dictionary representing profile neurons and their counts,
-            i.e. how many synapses they were influential or contributing to
+            Dictionary representing profile neurons and their counts, i.e. how many \
+            synapses they were influential or contributing to
         """
         return self._neuron_counts
 
@@ -148,8 +149,8 @@ class Profile:
         Returns
         -------
         neuron_type : str
-            The type of neurons used in the profile,
-            i.e. 'element', 'channel', or 'mixed' (aggregate of profiles with mismatched types)
+            The type of neurons used in the profile, i.e. 'element', 'channel', or \
+            'mixed' (aggregate of profiles with mismatched types)
         """
         return self._neuron_type
 
@@ -169,7 +170,7 @@ class Profile:
         Returns
         -------
         int
-            Total number of neurons identified as influential or contributing
+            Total number of neurons identified as influential or contributing \
             (neurons with nonzero neuron counts)
         """
         return sum(
@@ -440,7 +441,11 @@ class Profile:
                 neuron_idx = tuple(idx[1] for idx in flat_idx)
 
                 # convert flat indices to full spatial or element indices if necessary
-                if len(dims) == 4 and self._neuron_type != "channel" and self._neuron_type != "svd":
+                if (
+                    len(dims) == 4
+                    and self._neuron_type != "channel"
+                    and self._neuron_type != "svd"
+                ):
                     spatial_idx = np.unravel_index(neuron_idx, dims[2:])
                     if self._neuron_type == "element":
                         channel_idx = np.array([int(idx[0]) for idx in flat_idx])
@@ -479,8 +484,12 @@ class Profile:
 
                     pred_nonzero = tuple(p.nnz > 0 for p in pred_spmats)
                     if not all(pred_nonzero):
-                        pred_spmats = tuple(p for p, nz in zip(pred_spmats,pred_nonzero) if nz)
-                        pred_list = tuple(pdx for pdx, nz in zip(pred_list,pred_nonzero) if nz)
+                        pred_spmats = tuple(
+                            p for p, nz in zip(pred_spmats, pred_nonzero) if nz
+                        )
+                        pred_list = tuple(
+                            pdx for pdx, nz in zip(pred_list, pred_nonzero) if nz
+                        )
                 else:
                     pred_spmats = (synapse_spmat[layer],)
 
@@ -500,7 +509,11 @@ class Profile:
                         (pred, pdims, in_idx),
                         (layer, dims, out_idx),
                     ):
-                        if len(ldims) == 4 and self._neuron_type != "channel" and self._neuron_type != "svd":
+                        if (
+                            len(ldims) == 4
+                            and self._neuron_type != "channel"
+                            and self._neuron_type != "svd"
+                        ):
                             if self._neuron_type == "element":
                                 neuron_idx = np.unravel_index(neuron_idx, ldims[1:])
                             elif self._neuron_type == "spatial":

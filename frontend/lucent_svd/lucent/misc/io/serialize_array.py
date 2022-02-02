@@ -18,6 +18,7 @@
 from __future__ import absolute_import, division, print_function
 
 import base64
+
 # import logging
 import numpy as np
 import PIL.Image
@@ -78,7 +79,7 @@ def _normalize_array(array, domain=(0, 1)):
     return array.clip(min_value, max_value).astype(np.uint8)
 
 
-def _serialize_normalized_array(array, fmt='png', quality=70):
+def _serialize_normalized_array(array, fmt="png", quality=70):
     """Given a normalized array, returns byte representation of image encoding.
 
     Args:
@@ -102,7 +103,7 @@ def _serialize_normalized_array(array, fmt='png', quality=70):
     return image_data
 
 
-def serialize_array(array, domain=(0, 1), fmt='png', quality=70):
+def serialize_array(array, domain=(0, 1), fmt="png", quality=70):
     """Given an arbitrary rank-3 NumPy array,
     returns the byte representation of the encoded image.
 
@@ -120,7 +121,14 @@ def serialize_array(array, domain=(0, 1), fmt='png', quality=70):
 
 
 JS_ARRAY_TYPES = {
-        'int8', 'int16', 'int32', 'uint8', 'uint16', 'uint32', 'float32', 'float64'
+    "int8",
+    "int16",
+    "int32",
+    "uint8",
+    "uint16",
+    "uint32",
+    "float32",
+    "float64",
 }
 
 
@@ -140,11 +148,11 @@ def array_to_jsbuffer(array):
         TypeError: if array dtype or shape not supported.
     """
     if array.ndim != 1:
-        raise TypeError('Only 1d arrays can be converted JS TypedArray.')
+        raise TypeError("Only 1d arrays can be converted JS TypedArray.")
     if array.dtype.name not in JS_ARRAY_TYPES:
-        raise TypeError('Array dtype not supported by JS TypedArray.')
-    js_type_name = array.dtype.name.capitalize() + 'Array'
-    data_base64 = base64.b64encode(array.tobytes()).decode('ascii')
+        raise TypeError("Array dtype not supported by JS TypedArray.")
+    js_type_name = array.dtype.name.capitalize() + "Array"
+    data_base64 = base64.b64encode(array.tobytes()).decode("ascii")
     code = """
         (function() {
             const data = atob("%s");
@@ -158,5 +166,8 @@ def array_to_jsbuffer(array):
             }
             return new array_type(buf.buffer);
         })()
-    """ % (data_base64, js_type_name)
+    """ % (
+        data_base64,
+        js_type_name,
+    )
     return code

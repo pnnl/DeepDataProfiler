@@ -18,6 +18,7 @@ class SVDProfiler(TorchProfiler):
     than that for SpatialProfiler/ChannelProfiler. Here is how to create a profile:
     .. highlight:: python
     .. code-block:: python
+
         import deep_data_profiler as ddp
         # define the profiler
         influential_profiler = ddp.SVDProfiler(model)
@@ -28,6 +29,7 @@ class SVDProfiler(TorchProfiler):
         # view the neuron weights for a specific layer
         print(profile.neuron_weights[22].todense())
         ...
+
     Attributes
     ----------
     implemented_classes : list
@@ -65,9 +67,11 @@ class SVDProfiler(TorchProfiler):
         """
         Create a dictionary of the Singular Value Decomposition
         of a layer's weights.
-        Args:
-            layers_to_find (list, optional): Optional list of layers
-                to find influential SVD neurons for.
+
+        Parameters
+        ----------
+        layers_to_find : list, optional
+            Optional list of layers to find influential SVD neurons for.
 
         Returns
         -------
@@ -152,7 +156,6 @@ class SVDProfiler(TorchProfiler):
                     activation_shapes[ldx] = activations[modules[0][1]].shape
                 else:
                     activation_shapes[ldx] = activations[modules[0][0]].shape
-
 
             for k, (layer_name, svd) in self.svd_dict.items():
                 layer_name = layer_name[0]
@@ -261,6 +264,7 @@ class SVDProfiler(TorchProfiler):
         """
         Returns a dictionary of relative contributions keyed by influential
         SVD neurons for layer up to some threshold
+
         Parameters
         ----------
         agg : torch.Tensor
@@ -280,9 +284,9 @@ class SVDProfiler(TorchProfiler):
             contribution to the threshold
         """
         with torch.no_grad():
-            m = torch.linalg.norm(agg.view((agg.shape[0], -1)), ord=norm, dim=1).unsqueeze(
-                0
-            )
+            m = torch.linalg.norm(
+                agg.view((agg.shape[0], -1)), ord=norm, dim=1
+            ).unsqueeze(0)
 
             # sort
             ordsmat_vals, ordsmat_indices = torch.sort(m, descending=True)
@@ -308,14 +312,20 @@ class SVDProfiler(TorchProfiler):
             # find accepted synapses, all other values zero.
             # note: it is ordered by largest norm value
             unordered_weights = torch.where(
-                bool_accept, ordsmat_vals, torch.zeros(ordsmat_vals.shape, device=device)
+                bool_accept,
+                ordsmat_vals,
+                torch.zeros(ordsmat_vals.shape, device=device),
             )
             # re-order to mantain proper neuron ordering
-            influential_weights = unordered_weights.gather(1, ordsmat_indices.argsort(1))
+            influential_weights = unordered_weights.gather(
+                1, ordsmat_indices.argsort(1)
+            )
 
             influential_neurons = influential_weights.bool().int()
 
-            return matrix_convert(influential_neurons), matrix_convert(influential_weights)
+            return matrix_convert(influential_neurons), matrix_convert(
+                influential_weights
+            )
 
     # final three methods are defined so the method plays nicely
     # with the newest ddp version

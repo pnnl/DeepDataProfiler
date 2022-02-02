@@ -72,13 +72,14 @@ class FeatureObjective(ABC):
 
 
 class ChannelObjective(FeatureObjective):
-    '''Objective for feature visualization of a single channel, or multiple channels'''
+    """Objective for feature visualization of a single channel, or multiple channels"""
+
     def __call__(self, activations: torch.Tensor) -> torch.Tensor:
         return -activations[self.layer][:, self.coord].mean()
 
 
 class Diversity(FeatureObjective):
-    """Originally from https://distill.pub/2017/feature-visualization/. 
+    """Originally from https://distill.pub/2017/feature-visualization/.
     Uses a gram matrix to define style (see https://ieeexplore.ieee.org/document/7780634)."""
 
     def __call__(self, activations: torch.Tensor) -> torch.Tensor:
@@ -99,14 +100,16 @@ class Diversity(FeatureObjective):
 
 
 class SVDMean(FeatureObjective):
-    '''Objective for feature visualization for a single SVD signal, or multiple SVD signals'''
+    """Objective for feature visualization for a single SVD signal, or multiple SVD signals"""
+
     def __call__(self, activations: torch.Tensor):
         uprojy = self.transform_activations(activations, self.layer)
         return -uprojy[:, self.coord].mean()
 
 
 class ChannelMultiLayerCoord(FeatureObjective):
-    '''Objective for feature visualization for channel(s) across multiple layers'''
+    """Objective for feature visualization for channel(s) across multiple layers"""
+
     def __call__(self, activations: torch.Tensor):
         sum_channels_obj = 0.0
 
@@ -142,7 +145,8 @@ class ChannelMultiLayerCoord(FeatureObjective):
 
 
 class SVDMultiLayerCoord(FeatureObjective):
-    '''Objective for feature visualization for SVD signal(s) across multiple layers'''
+    """Objective for feature visualization for SVD signal(s) across multiple layers"""
+
     def __call__(self, activations: torch.Tensor):
         sum_svd_obj = 0.0
         if isinstance(self.layer, list) and isinstance(self.coord, list):
@@ -166,7 +170,8 @@ class SVDMultiLayerCoord(FeatureObjective):
 
 
 class NeuronObjective(FeatureObjective):
-    '''Objective for feature visualization for a single neuron, or multiple neurons'''
+    """Objective for feature visualization for a single neuron, or multiple neurons"""
+
     def __call__(self, activations: torch.Tensor):
         layer_activations = activations[self.layer]
         if len(self.coord) == 3:
@@ -185,7 +190,7 @@ class NeuronObjective(FeatureObjective):
 
 
 def get_neuron_rf(coord: Tuple[int], acts: torch.Tensor) -> Tuple[int]:
-    '''Get receptive field of a neuron.
+    """Get receptive field of a neuron.
     Parameters
     ----------
     coord : tuple
@@ -195,7 +200,7 @@ def get_neuron_rf(coord: Tuple[int], acts: torch.Tensor) -> Tuple[int]:
     Returns
     -------
     tuple
-        Receptive field of neuron.'''
+        Receptive field of neuron."""
     if len(coord) == 3:
         chn, x, y = coord
     # take center neuron if only channel
@@ -212,7 +217,8 @@ def get_neuron_rf(coord: Tuple[int], acts: torch.Tensor) -> Tuple[int]:
 
 
 class SVDNeuronObjective(FeatureObjective):
-    '''Objective for feature visualization for a single SVD spatial, or multiple SVD spatials'''
+    """Objective for feature visualization for a single SVD spatial, or multiple SVD spatials"""
+
     def __call__(self, activations: torch.Tensor):
         uprojy = self.transform_activations(activations, self.layer)
         chn, x, y = get_neuron_rf(self.coord, uprojy)
@@ -220,7 +226,8 @@ class SVDNeuronObjective(FeatureObjective):
 
 
 class SVDNeuronMultiLayerCoord(FeatureObjective):
-    '''Objective for feature visualization for SVD spatial(s) across multiple layers'''
+    """Objective for feature visualization for SVD spatial(s) across multiple layers"""
+
     def __call__(self, activations: torch.Tensor):
         sum_svd_obj = 0.0
 
@@ -258,7 +265,8 @@ class SVDNeuronMultiLayerCoord(FeatureObjective):
 
 
 class NeuronMultiLayerCoord(FeatureObjective):
-    '''Objective for feature visualization for neuron(s) across multiple layers'''
+    """Objective for feature visualization for neuron(s) across multiple layers"""
+
     def __call__(self, activations: torch.Tensor):
         sum_neuron_obj = 0.0
         # if weights not passed, assign equal weight to all.

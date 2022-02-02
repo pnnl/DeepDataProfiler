@@ -31,7 +31,9 @@ def inceptionv1_model():
 
 def test_render_vis(inceptionv1_model):
     thresholds = (1, 2)
-    imgs = render.render_vis(inceptionv1_model, "mixed4a:0", thresholds=thresholds, show_image=False)
+    imgs = render.render_vis(
+        inceptionv1_model, "mixed4a:0", thresholds=thresholds, show_image=False
+    )
     assert len(imgs) == len(thresholds)
     assert imgs[0].shape == (1, 128, 128, 3)
 
