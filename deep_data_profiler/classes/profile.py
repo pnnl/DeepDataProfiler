@@ -452,7 +452,7 @@ class Profile:
                         neuron_idx = (channel_idx,) + spatial_idx
                     elif self._neuron_type == "spatial":
                         neuron_idx = spatial_idx
-                        neuron_idx = tuple(zip(*neuron_idx))
+                    neuron_idx = tuple(zip(*neuron_idx))
                 else:
                     neuron_idx = tuple(zip(neuron_idx))
 
@@ -518,7 +518,7 @@ class Profile:
                                 neuron_idx = np.unravel_index(neuron_idx, ldims[1:])
                             elif self._neuron_type == "spatial":
                                 neuron_idx = np.unravel_index(neuron_idx, ldims[2:])
-                                neuron_idx = tuple(zip(*neuron_idx))
+                            neuron_idx = tuple(zip(*neuron_idx))
                         else:
                             neuron_idx = tuple(zip(neuron_idx))
 
