@@ -59,7 +59,7 @@ def test_optimization_dict_channel(resnet18_example):
     """Test for channel optimization with a dictionary of signals, in the default basis"""
     model = resnet18_example.model
     # define signals dictionary
-    signals_receptive_fields_weights = {"conv1": [0, 20], "layer1.0.conv2": [50, 13]}
+    signals_receptive_fields_weights = {"conv1": [0, 20], "layer1.0.conv2": [50, 13], "fc": [0]}
     # take two gradient steps with the dictionary optimization helper module
     # set neuron to false to use channel objective
     output = dictionary_optimization(
