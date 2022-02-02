@@ -1030,21 +1030,19 @@ dimensions: batchsize,channels,height,width</p></li>
 register activations as it evaluates data. Using the activations,
 inputs to the model may be profiled.</p>
 <p>The function call to generate an influenial SVD profile is slightly different
-than that for SpatialProfiler/ChannelProfiler. Here is how to create a profile:
-.. highlight:: python
-.. code-block:: python</p>
-<blockquote>
-<div><p>import deep_data_profiler as ddp
-# define the profiler
-influential_profiler = ddp.SVDProfiler(model)
-# profile a tensor x
-profile = influential_profiler.create_influential(x)
-# view neuron weights dictionary
-print(profile.neuron_weights)
-# view the neuron weights for a specific layer
-print(profile.neuron_weights[22].todense())
-…</p>
-</div></blockquote>
+than that for SpatialProfiler/ChannelProfiler. Here is how to create a profile:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">deep_data_profiler</span> <span class="k">as</span> <span class="nn">ddp</span>
+<span class="c1"># define the profiler</span>
+<span class="n">influential_profiler</span> <span class="o">=</span> <span class="n">ddp</span><span class="o">.</span><span class="n">SVDProfiler</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="c1"># profile a tensor x</span>
+<span class="n">profile</span> <span class="o">=</span> <span class="n">influential_profiler</span><span class="o">.</span><span class="n">create_influential</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="c1"># view neuron weights dictionary</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">neuron_weights</span><span class="p">)</span>
+<span class="c1"># view the neuron weights for a specific layer</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">neuron_weights</span><span class="p">[</span><span class="mi">22</span><span class="p">]</span><span class="o">.</span><span class="n">todense</span><span class="p">())</span>
+<span class="o">...</span>
+</pre></div>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="classes.svd_influential.SVDProfiler.implemented_classes">
 <span class="sig-name descname"><span class="pre">implemented_classes</span></span><a class="headerlink" href="#classes.svd_influential.SVDProfiler.implemented_classes" title="Permalink to this definition"></a></dt>

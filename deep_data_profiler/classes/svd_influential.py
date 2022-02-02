@@ -16,6 +16,7 @@ class SVDProfiler(TorchProfiler):
 
     The function call to generate an influenial SVD profile is slightly different
     than that for SpatialProfiler/ChannelProfiler. Here is how to create a profile:
+
     .. highlight:: python
     .. code-block:: python
 
