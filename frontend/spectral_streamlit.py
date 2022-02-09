@@ -184,7 +184,7 @@ def show_svd():
             "**Univeral capacity metric of a random model**: ",
             universal_random,
         )
-    with st.beta_expander("Get metrics per-layer"):
+    with st.expander("Get metrics per-layer"):
         st.write(
             r"Metrics on the covariance metrics of the weights for each layer, i.e. $X = W W^T$. Fits with a powerlaw distribution $\rho(\lambda) \sim \lambda^{-\alpha}$ using the MLE from https://arxiv.org/abs/0706.1062."
         )
