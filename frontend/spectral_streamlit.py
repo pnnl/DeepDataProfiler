@@ -43,7 +43,8 @@ def show_svd():
         "Background for this tool",
     ):
         st.write(about)
-        st.image("data/new_spectral_plot.png", width=None)
+        path = os.path.dirname(__file__)
+        st.image(os.path.join(path, "data/new_spectral_plot.png"), width=None)
 
     ignore_set = {
         "alexnet",
@@ -141,7 +142,9 @@ def show_svd():
                 random_model = get_LeNet()
             else:
                 model = models.__dict__[model_str](pretrained=True).eval()
-                random_model = models.__dict__[model_str](pretrained=False).eval()
+                random_model = models.__dict__[model_str](
+                    pretrained=False
+                ).eval()
 
             try:
                 with st.spinner("Computing spectral statistics..."):
@@ -150,11 +153,15 @@ def show_svd():
 
                     # compute the SVD of X for each layer, return in dict
                     eigenvalue_dict = analysis.spectral_analysis()
-                    eigenvalue_dict_random = analysis_random.spectral_analysis()
+                    eigenvalue_dict_random = (
+                        analysis_random.spectral_analysis()
+                    )
 
                     # fit a power law distribution for spectral distribution
                     # computed, per layer
-                    alpha_dict = analysis.fit_power_law(eig_dict=eigenvalue_dict)
+                    alpha_dict = analysis.fit_power_law(
+                        eig_dict=eigenvalue_dict
+                    )
                     alpha_dict_random = analysis_random.fit_power_law(
                         eig_dict=eigenvalue_dict_random
                     )
@@ -170,9 +177,14 @@ def show_svd():
         universal_random = analysis_random.universal_metric(
             alpha_dict=alpha_dict_random
         )
-        st.write("**Univeral capacity metric of the uploaded model**: ", universal)
-        st.write("**Univeral capacity metric of a random model**: ", universal_random)
-    with st.expander("Get metrics per-layer"):
+        st.write(
+            "**Univeral capacity metric of the uploaded model**: ", universal
+        )
+        st.write(
+            "**Univeral capacity metric of a random model**: ",
+            universal_random,
+        )
+    with st.beta_expander("Get metrics per-layer"):
         st.write(
             r"Metrics on the covariance metrics of the weights for each layer, i.e. $X = W W^T$. Fits with a powerlaw distribution $\rho(\lambda) \sim \lambda^{-\alpha}$ using the MLE from https://arxiv.org/abs/0706.1062."
         )
@@ -241,7 +253,9 @@ def show_svd():
                 eigenvalues, _ = eigenvalue_dict[layer]
                 # power law alphas
                 alpha, _ = alpha_dict[layer]
-                axs[0].hist(eigenvalues, bins="auto", density=True, color="red")
+                axs[0].hist(
+                    eigenvalues, bins="auto", density=True, color="red"
+                )
                 axs[0].set_title(
                     "Uploaded Network \n power-law fit"
                     + rf" $\alpha$ = {round(alpha, 1)}",
