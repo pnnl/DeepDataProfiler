@@ -39,7 +39,7 @@ def show_svd():
     - Mahoney, Michael, and Charles Martin. "Traditional and heavy tailed self regularization in neural network models." International Conference on Machine Learning. PMLR, 2019.
     """
 
-    with st.beta_expander(
+    with st.expander(
         "Background for this tool",
     ):
         st.write(about)
@@ -98,7 +98,7 @@ def show_svd():
     model_list.append("LeNet")
 
     model_options = [model for model in model_list if model not in ignore_set]
-    with st.beta_expander("Select model", expanded=True):
+    with st.expander("Select model", expanded=True):
         with st.form(key="my_form"):
             model_str = st.selectbox(
                 "Choose a PyTorch torchvision model architecture",
@@ -162,7 +162,7 @@ def show_svd():
             except Exception as e:
                 st.write(e)
 
-    with st.beta_expander("'Universal' capacity metric"):
+    with st.expander("'Universal' capacity metric"):
         st.write(
             r"Returns the capacity metric defined by $\widehat{\alpha}=\frac{1}{L} \sum_{l} \alpha_{l} \log \lambda_{\max , l}$"
         )
@@ -172,7 +172,7 @@ def show_svd():
         )
         st.write("**Univeral capacity metric of the uploaded model**: ", universal)
         st.write("**Univeral capacity metric of a random model**: ", universal_random)
-    with st.beta_expander("Get metrics per-layer"):
+    with st.expander("Get metrics per-layer"):
         st.write(
             r"Metrics on the covariance metrics of the weights for each layer, i.e. $X = W W^T$. Fits with a powerlaw distribution $\rho(\lambda) \sim \lambda^{-\alpha}$ using the MLE from https://arxiv.org/abs/0706.1062."
         )
@@ -266,7 +266,7 @@ def show_svd():
                 fig.suptitle(f"Layer {layer} spectral distribution", fontsize=16)
                 st.pyplot(fig)
 
-    # with st.beta_expander("Plot metric during training"):
+    # with st.expander("Plot metric during training"):
     #     if model_str == "LeNet":
 
     #         training_error = [0.56, 0.5, 0.46, 0.43, 0.41, 0.39, 0.37, 0.36, 0.34, 0.32]

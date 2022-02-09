@@ -1,5 +1,6 @@
 import streamlit as st
 import boto3
+import os
 
 from PIL import Image
 from io import BytesIO
@@ -8,7 +9,6 @@ from botocore.exceptions import ClientError
 import pickle as pkl
 from pathlib import Path
 from itertools import zip_longest
-import sys
 import torchvision.models as tvmodels
 import torch
 
@@ -18,7 +18,6 @@ from collections import OrderedDict
 from lucent_svd.lucent.optvis import render, objectives
 
 from persim import plot_diagrams
-import os
 
 from streamlit_tda import load_class_labels_dicts
 from streamlit_svd import TorchProfilerSpectral
@@ -36,7 +35,10 @@ def grouper(iterable, n, fillvalue=None):
 def load_paths():
     """Loads the dict keyed by features, with values of dicts of
     singular values and the relative image paths that maximize these singular values."""
-    img_paths = pkl.load(open("data/light_paths.pkl", "rb"))
+    path = os.path.dirname(__file__)
+    img_paths = pkl.load(
+        open(os.path.join(path, "data/light_paths.pkl"), "rb")
+    )
 
     return img_paths
 
@@ -52,7 +54,9 @@ def load_model():
     """Loads a model"""
     model_str = "vgg16"
 
-    model_pre = tvmodels.__dict__[model_str](pretrained=True).eval()  # .to(device)
+    model_pre = tvmodels.__dict__[model_str](
+        pretrained=True
+    ).eval()  # .to(device)
     return model_pre
 
 
@@ -109,7 +113,12 @@ def read_image_file(filename):
         aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"],
     )
     my_image = Image.open(
-        BytesIO(s3.Bucket("ddp-streamlit-data").Object(filename).get()["Body"].read())
+        BytesIO(
+            s3.Bucket("ddp-streamlit-data")
+            .Object(filename)
+            .get()["Body"]
+            .read()
+        )
     )
     return my_image
 
@@ -130,56 +139,20 @@ if __name__ == "__main__":
         page_title="DDP Visualization Demo",
         page_icon=":lower_left_crayon:",  # layout="wide",
     )
-    st.markdown(
-        '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">',
+
+    tabs = ["About", "Feature Visualization", "TDA", "Spectral Analysis"]
+    active_tab = st.radio("Navigate to a page", options=tabs)
+    st.write(
+        "<style>div.row-widget.stRadio > div{flex-direction:row;}</style>",
         unsafe_allow_html=True,
     )
-    query_params = st.experimental_get_query_params()
-    tabs = ["About", "Feature Visualization", "TDA", "Spectral Analysis"]
-    if "tab" in query_params:
-        active_tab = query_params["tab"][0]
-    else:
-        active_tab = "Feature Visualization"
 
-    if active_tab not in tabs:
-        st.experimental_set_query_params(tab="About")
-        active_tab = "About"
-
-    li_items = "".join(
-        f"""
-        <li class="nav-item">
-            <a class="nav-link{' active' if t==active_tab else ''}" href="/?tab={t}">{t}</a>
-        </li>
-        """
-        for t in tabs
-    )
-    tabs_html = f"""
-        <ul class="nav nav-tabs">
-        {li_items}
-        </ul>
-    """
-
-    st.markdown(tabs_html, unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # an html hack to hide the top bar
-    hide_streamlit_style = """
-        <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        </style>
-        """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-    # NOTE: in future, allow user to supply relative path
     if active_tab == "About":
         st.header("About this tool")
         header = """
         This is a visualization tool for the [DeepDataProfiler](https://pnnl.github.io/DeepDataProfiler/build/index.html) library. For now, it consists of two separate components:
-
         1. Visualizations that link what we are calling the "SVD neurons" in a VGG-16 network with dataset examples from ImageNet.
-
         2. The persistence diagrams for DDP pofiler graphs for ImageNet images with VGG-16.
-
         Use the tabs above to navigate between these visualizations, or read more below.
         """
         st.write(header)
@@ -187,15 +160,14 @@ if __name__ == "__main__":
         ## 1 Feature Visualization
         ### Feature Visualization
         Feature visualization is an interpretability technique that optimizes an image so that it highly activates a neuron in a deep neural network (DNN). Feature visualizations have been used to gain a better understanding of how individual neurons in DNNs represent features.
-
         A prominent tool using feature visualizations is [OpenAI's Microscope](https://microscope.openai.com/models), which pairs visualizations of neurons with the dataset examples that also highly activate the neuron. Our SVD feature visualizations is a similar tool. However, our definition of "neurons," the basic unit of analysis for defining features that we are visualizing, differs from existing approaches.
         ### SVD Neuron
         Why do we want to represent the activations in a new basis? Performing interpretability analysis on only the activations is sometimes misleading. [Polysemantic neurons](https://distill.pub/2020/circuits/zoom-in/), neurons that respond to many unrelated inputs, are one prominent problem for feature visualization.
-
         The approach we have taken is to project the activations of a hidden layer onto the basis of eigenvectors of the weights for the layer.
         """
         st.write(body_svd)
-        neuron_img = Image.open("data/svd_neuron_viz.png")
+        path = os.path.dirname(__file__)
+        neuron_img = Image.open(os.path.join(path, "data/svd_neuron_viz.png"))
         st.image(
             neuron_img,
         )
@@ -203,26 +175,23 @@ if __name__ == "__main__":
         ## 2 TDA Visualizations
         ### Topological Data Analysis
         Topological Data Analysis (TDA) is a powerful tool for the analysis of large metrizable spaces of data. We explore the use of TDA to analyze the structure of profile graphs and uncover meaning behind the interconnection of the synapses, independent of labels on nodes and synapses. To accomplish this, we define a metric space on the vertices of a profile graph, which we can then analyze using persistent homology.
-
         """
         st.write(body_tda1)
-        pipeline_img = Image.open("data/pipelineimg.png")
+        pipeline_img = Image.open(os.path.join(path, "data/pipelineimg.png"))
         st.image(pipeline_img)
 
         body_tda2 = """
         #### Metric Space
         The vertices of the profile graph can be represented in a metric space by constructing the distance matrix using the shortest path distance. Optionally, some kernel function can then be applied to the distances to produce a desired effect on the metric space. One example that we have explored is the Gaussian kernel, given by $g(x) = 1 - e^{-x/2\sigma}$, where $\sigma$ is the standard deviation of the finite shortest path distances. The Gaussian kernel is an increasing function that spreads out low distances and contracts high distances. When the edge weights of a profile graph are defined according to an inverted weighting scheme, the low distances correspond to the most influential connections. In this case, spreading out the low distances can reveal more nuanced structures that emerge at those distance thresholds.
-
         #### Persistent Homology
         Persistent homology allows us to summarize the "shape" of profile graph data based on the appearance of topological features at different distance thresholds. We calculate the persistent homology of a metric space, and then study its persistence diagram to identify topological features of the corresponding profile graph. Persistence diagrams allow us to visualize the persistence of features by plotting a point for each topological feature, whose coordinates are $(birth, death)$. The  $birth$ of a feature, such as an open loop, represents the distance threshold when the loop was formed, and the  $death$ represents the distance threshold when the loop was closed or triangulated.  For a more in depth introduction to persistent homology, [A User’s Guide to Topological Data Analysis](https://learning-analytics.info/index.php/JLA/article/view/5196) by Elizabeth Munch gives an overview of modern TDA methods, including persistent homology (Section 3).
-
         #### Persistence Images
-
         Persistence images are finite-dimensional vector representations of persistence diagrams, proposed by Adams et. al. in [Persistence Images: A Stable Vector Representation of
         Persistent Homology](https://www.jmlr.org/papers/volume18/16-337/16-337.pdf). We have used persistence images as part of our initial exploration of the topological features of profile graphs, since they provide alternative visualizations that can be compared by Euclidean distances (a metric that is much more computationally efficient than the current standard methods for comparing persistence diagrams).
         """
         st.write(body_tda2)
-        pd_pi_img = Image.open("data/PDtoPI.png")
+        path = os.path.dirname(__file__)
+        pd_pi_img = Image.open(os.path.join(path, "data/PDtoPI.png"))
         st.image(pd_pi_img)
         body_tda3 = """
         ### TDA Visualization Tool
@@ -251,39 +220,25 @@ if __name__ == "__main__":
         st.sidebar.subheader("SVD feature visualization")
         feature_viz = st.sidebar.empty()
 
-        feature_option = st.sidebar.selectbox(
-            label="Use pre-computed or compute on the fly",
-            options=("Pre-computed", "Compute"),
-        )
-
         # NOTE: in future, allow user to supply relative path
         feature_array = np.array([])
-        if feature_option == "Pre-computed":
-            relative_feature_root = Path("vgg16_imagenet_svd_average/")
+        relative_feature_root = Path("vgg16_imagenet_svd_average/")
 
-            feature_name_path = Path(layer_selectbox) / Path(
-                str(layer_selectbox) + "_" + str(feature_selectbox) + "th_singular.pkl"
+        feature_name_path = Path(layer_selectbox) / Path(
+            str(layer_selectbox)
+            + "_"
+            + str(feature_selectbox)
+            + "th_singular.pkl"
+        )
+        feature_path = relative_feature_root / feature_name_path
+        try:
+            # feature_array = pkl.load(open(feature_path, "rb"))
+            feature_array = read_pickle_file(str(feature_path))
+        except (FileNotFoundError, ClientError):
+            st.header("SVD feature visualization")
+            st.write(
+                "Singular value feature visualizations not yet computed for the final two classification layers"
             )
-            feature_path = relative_feature_root / feature_name_path
-            try:
-                # feature_array = pkl.load(open(feature_path, "rb"))
-                feature_array = read_pickle_file(str(feature_path))
-            except (FileNotFoundError, ClientError):
-                st.header("SVD feature visualization")
-                st.write(
-                    "Singular value feature visualizations not yet computed for the final two classification layers"
-                )
-        else:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            model = load_model().to(device)
-            svd_dict_visualization = load_svd_dicts(model)
-            with st.spinner("Computing feature visualization..."):
-                feature_array = svd_visualization(
-                    model,
-                    svd_dict_visualization,
-                    str(layer_selectbox),
-                    feature_selectbox,
-                )
 
         if feature_array.any():
             feature_viz.image(feature_array, width=256)
@@ -296,7 +251,7 @@ if __name__ == "__main__":
         # relative_path = Path(path_str)
         relative_path = Path("imagenet/validation")
 
-        col_slider, _ = st.beta_columns((2, 1))
+        col_slider, _ = st.columns((2, 1))
         topimages = col_slider.slider(
             "Number of top activated images to display",
             min_value=0,
@@ -310,7 +265,7 @@ if __name__ == "__main__":
         st.subheader("Top activated images")
 
         # Top image columns
-        col1, col2, col3 = st.beta_columns(3)
+        col1, col2, col3 = st.columns(3)
         for (
             (img_path1, score1),
             (img_path2, score2),
@@ -333,7 +288,9 @@ if __name__ == "__main__":
 
     elif active_tab == "TDA":
         st.subheader("Persistent homology visualizations")
-        neurons = st.sidebar.radio("Neuron type", options=("elements", "channels"))
+        neurons = st.sidebar.selectbox(
+            "Neuron type", ("elements", "channels"), index=0
+        )
         model = "vgg16"  # hard-coded for now
 
         names_to_numbers, numbers_to_folders = load_class_labels_dicts()
@@ -343,7 +300,7 @@ if __name__ == "__main__":
             list(names_to_numbers.keys()),
             default=["tench, Tinca tinca", "volcano"],
         )
-        # col_slider, _ = st.beta_columns((2, 1))
+        # col_slider, _ = st.columns((2, 1))
         num_images = st.slider(
             "Number of images to display per class",
             min_value=1,
@@ -367,7 +324,7 @@ if __name__ == "__main__":
 
             img_paths = relative_path / Path(cls)
             imgnames = list_image_files(str(img_paths))
-            col_tda_image, col_tda_pers, col_tda_pers_heat = st.beta_columns(3)
+            col_tda_image, col_tda_pers, col_tda_pers_heat = st.columns(3)
             col_tda_image.subheader(f"Image \n class: {cls_name}")
             col_tda_pers.subheader("Persistence Diagram")
             col_tda_pers_heat.subheader("Persistence Image")
@@ -380,7 +337,7 @@ if __name__ == "__main__":
                     col_tda_image,
                     col_tda_pers,
                     col_tda_pers_heat,
-                ) = st.beta_columns(3)
+                ) = st.columns(3)
 
                 tda_img1 = read_image_file(imgname).convert("RGB")
                 col_tda_image.image(
