@@ -33,11 +33,7 @@ class TorchProfilerSpectral(ddp.TorchProfiler):
         if layers_to_find is None:
             ltf = range(1, len(SGnodes))
         elif isinstance(layers_to_find, list):
-            ltf = [
-                lyr
-                for lyr in layers_to_find
-                if lyr >= 1 or lyr <= len(SGnodes) - 1
-            ]
+            ltf = [lyr for lyr in layers_to_find if lyr >= 1 or lyr <= len(SGnodes) - 1]
         else:  # a tuple is expected
             start = max(1, layers_to_find[0])
             end = min(len(SGnodes), layers_to_find[1])

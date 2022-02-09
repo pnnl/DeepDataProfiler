@@ -44,7 +44,7 @@ def get_index(
         otherwise output will be row,column,channel tuple
 
     """
-    s = k ** 2
+    s = k**2
     ch = b // s
     r = (b % s) // k
     c = (b % s) % k

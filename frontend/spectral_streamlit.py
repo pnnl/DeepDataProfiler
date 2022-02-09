@@ -130,9 +130,7 @@ def show_svd():
                     model = models.__dict__[model_str](pretrained=True)
                     model.load_state_dict(loaded_dict)
                     model.eval()
-                    random_model = models.__dict__[model_str](
-                        pretrained=False
-                    ).eval()
+                    random_model = models.__dict__[model_str](pretrained=False).eval()
                     # try:
                     #     model = models.__dict__[model_str](pretrained=False).load_state_dict(loaded_dict)
                     #     model.eval()
@@ -167,9 +165,7 @@ def show_svd():
                     alpha_dict_random = analysis_random.fit_power_law(
                         eig_dict=eigenvalue_dict_random
                     )
-                st.form_submit_button(
-                    label="Re-compute and plot spectral statistics"
-                )
+                st.form_submit_button(label="Re-compute and plot spectral statistics")
             except Exception as e:
                 st.write(e)
 
@@ -203,18 +199,14 @@ def show_svd():
         df = pd.DataFrame(
             {
                 "Per layer alpha metrics trained": alphas,
-                f"Layer of {model_str}": np.array(
-                    [layer for (layer, _) in layers]
-                ),
+                f"Layer of {model_str}": np.array([layer for (layer, _) in layers]),
                 f"Uploaded model": len(alphas) * ["Uploaded model"],
             }
         )
         df_random = pd.DataFrame(
             {
                 "Per layer alpha metrics random": alphas_random,
-                f"Layer of {model_str}": np.array(
-                    [layer for (layer, _) in layers]
-                ),
+                f"Layer of {model_str}": np.array([layer for (layer, _) in layers]),
                 f"Random model": len(alphas) * ["Random model"],
             }
         )
@@ -229,17 +221,13 @@ def show_svd():
                 ),
                 color=alt.value("red"),
                 opacity="Uploaded model",
-                tooltip=alt.Tooltip(
-                    "Per layer alpha metrics trained", format=",.2f"
-                ),
+                tooltip=alt.Tooltip("Per layer alpha metrics trained", format=",.2f"),
             )
             .interactive()
         )
 
         chart_random = (
-            alt.Chart(
-                df_random, title=f"Per layer alpha metrics of {model_str}"
-            )
+            alt.Chart(df_random, title=f"Per layer alpha metrics of {model_str}")
             .mark_point()
             .encode(
                 x=alt.X(f"Layer of {model_str}", title="Layer of model"),
@@ -249,9 +237,7 @@ def show_svd():
                 ),
                 color=alt.value("blue"),
                 shape="Random model",
-                tooltip=alt.Tooltip(
-                    "Per layer alpha metrics random", format=",.2f"
-                ),
+                tooltip=alt.Tooltip("Per layer alpha metrics random", format=",.2f"),
             )
             .interactive()
         )
@@ -262,9 +248,7 @@ def show_svd():
         if per_layer:
             for idx, (layer, _) in enumerate(layers):
 
-                fig, axs = plt.subplots(
-                    1, 2, constrained_layout=True, figsize=(15, 4)
-                )
+                fig, axs = plt.subplots(1, 2, constrained_layout=True, figsize=(15, 4))
                 # grab eigenvalues from the trained
                 eigenvalues, _ = eigenvalue_dict[layer]
                 # power law alphas
@@ -274,7 +258,7 @@ def show_svd():
                 )
                 axs[0].set_title(
                     "Uploaded Network \n power-law fit"
-                    + fr" $\alpha$ = {round(alpha, 1)}",
+                    + rf" $\alpha$ = {round(alpha, 1)}",
                     fontsize=14,
                 )
                 axs[0].set_xlabel("Eigenvalues of $X$", fontsize=14)
@@ -287,15 +271,13 @@ def show_svd():
                 axs[1].hist(eigenvalues_random, bins="auto", density=True)
                 axs[1].set_title(
                     "Random Network \n power-law fit"
-                    + fr" $\alpha$ = {round(alpha_random, 1)}",
+                    + rf" $\alpha$ = {round(alpha_random, 1)}",
                     fontsize=14,
                 )
                 axs[1].set_xlabel("Eigenvalues of $X$", fontsize=14)
                 axs[1].set_ylabel("ESD", fontsize=14)
 
-                fig.suptitle(
-                    f"Layer {layer} spectral distribution", fontsize=16
-                )
+                fig.suptitle(f"Layer {layer} spectral distribution", fontsize=16)
                 st.pyplot(fig)
 
     # with st.beta_expander("Plot metric during training"):

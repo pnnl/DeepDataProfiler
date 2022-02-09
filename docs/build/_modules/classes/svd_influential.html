@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>classes.svd_influential &mdash; Deep Data Profiler 1.2.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Deep Data Profiler
+            <img src="../../_static/Profilingicon.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview/index.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes/modules.html">Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/modules.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installing Deep Data Profiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tableofcontents.html">Index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Deep Data Profiler</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>classes.svd_influential</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for classes.svd_influential</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span><span class="p">,</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">deep_data_profiler.classes.torch_profiler</span> <span class="kn">import</span> <span class="n">TorchProfiler</span>
+<span class="kn">from</span> <span class="nn">deep_data_profiler.utils</span> <span class="kn">import</span> <span class="n">matrix_convert</span>
+<span class="kn">from</span> <span class="nn">deep_data_profiler.classes.profile</span> <span class="kn">import</span> <span class="n">Profile</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+
+<div class="viewcode-block" id="SVDProfiler"><a class="viewcode-back" href="../../classes/classes.html#classes.svd_influential.SVDProfiler">[docs]</a><span class="k">class</span> <span class="nc">SVDProfiler</span><span class="p">(</span><span class="n">TorchProfiler</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Torch Profiler wraps a PyTorch model into a TorchHook model which can</span>
+<span class="sd">    register activations as it evaluates data. Using the activations,</span>
+<span class="sd">    inputs to the model may be profiled.</span>
+
+<span class="sd">    The function call to generate an influenial SVD profile is slightly different</span>
+<span class="sd">    than that for SpatialProfiler/ChannelProfiler. Here is how to create a profile:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        import deep_data_profiler as ddp</span>
+<span class="sd">        # define the profiler</span>
+<span class="sd">        influential_profiler = ddp.SVDProfiler(model)</span>
+<span class="sd">        # profile a tensor x</span>
+<span class="sd">        profile = influential_profiler.create_influential(x)</span>
+<span class="sd">        # view neuron weights dictionary</span>
+<span class="sd">        print(profile.neuron_weights)</span>
+<span class="sd">        # view the neuron weights for a specific layer</span>
+<span class="sd">        print(profile.neuron_weights[22].todense())</span>
+<span class="sd">        ...</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    implemented_classes : list</span>
+<span class="sd">        Set of classes in PyTorch which we can find influential for</span>
+<span class="sd">    model : torch.nn.Sequential()</span>
+<span class="sd">        Model to be profiled</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span>
+        <span class="n">compute_svd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">implemented_classes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">,</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pred_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">nd</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">preds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">preds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SG</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">nd</span><span class="p">)])</span>
+            <span class="k">for</span> <span class="n">nd</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SG</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">compute_svd</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">svd_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_svd</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">svd_dict</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="SVDProfiler.create_svd"><a class="viewcode-back" href="../../classes/classes.html#classes.svd_influential.SVDProfiler.create_svd">[docs]</a>    <span class="k">def</span> <span class="nf">create_svd</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">layers_to_find</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">svd</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a dictionary of the Singular Value Decomposition</span>
+<span class="sd">        of a layer&#39;s weights.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        layers_to_find : list, optional</span>
+<span class="sd">            Optional list of layers to find influential SVD neurons for.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        svd_dict : dict</span>
+<span class="sd">            A dictionary of SVD of weights, keyed by their position from</span>
+<span class="sd">            the beginning of the model, according to the order the layers</span>
+<span class="sd">            of the model are listed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># ordered dictionary to feed to influential profiler</span>
+        <span class="n">svd_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="n">SGnodes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SG</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">nd</span><span class="p">:</span> <span class="n">nd</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">layers_to_find</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ltf</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">SGnodes</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layers_to_find</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">ltf</span> <span class="o">=</span> <span class="p">[</span><span class="n">lyr</span> <span class="k">for</span> <span class="n">lyr</span> <span class="ow">in</span> <span class="n">layers_to_find</span> <span class="k">if</span> <span class="n">lyr</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">lyr</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">SGnodes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># a tuple is expected</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">layers_to_find</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">SGnodes</span><span class="p">),</span> <span class="n">layers_to_find</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ltf</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ndx</span> <span class="ow">in</span> <span class="n">ltf</span><span class="p">:</span>
+            <span class="n">nd</span> <span class="o">=</span> <span class="n">SGnodes</span><span class="p">[</span><span class="n">ndx</span><span class="p">]</span>
+            <span class="n">layertype</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">available_modules</span><span class="p">()[</span><span class="n">nd</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+            <span class="k">if</span> <span class="n">layertype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">implemented_classes</span><span class="p">:</span>
+                <span class="c1"># grab the weights for the layer</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="p">[</span><span class="n">nd</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                <span class="c1"># if a Cond2d layer, &#39;unfold&#39;</span>
+                <span class="k">if</span> <span class="n">layertype</span> <span class="ow">is</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">:</span>
+                    <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">start_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">end_dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="c1"># take SVD and put into dict</span>
+                <span class="n">svd</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">compute_uv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">svd_dict</span><span class="p">[</span><span class="n">nd</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">supernodes</span><span class="p">[</span><span class="n">nd</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">svd</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">svd_dict</span></div>
+
+<div class="viewcode-block" id="SVDProfiler.create_influential"><a class="viewcode-back" href="../../classes/classes.html#classes.svd_influential.SVDProfiler.create_influential">[docs]</a>    <span class="k">def</span> <span class="nf">create_influential</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">layers_to_find</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">activations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Profile</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate an influential profile for a single input data x.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : torch.Tensor</span>
+<span class="sd">            input to model being profiled</span>
+<span class="sd">        layers_to_find : list, optional</span>
+<span class="sd">            Optional list of layers to find influential SVD neurons for.</span>
+<span class="sd">        threshold : float, optional, default=0.1</span>
+<span class="sd">            Percentage of contribution to track in a profile.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        profile.Profile</span>
+<span class="sd">            profile contains neuron_counts, neuron_weights across layers.</span>
+<span class="sd">            Corresponding number of images = 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create empty dictionaries for storing neurons</span>
+        <span class="n">neuron_counts</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span>
+        <span class="n">neuron_weights</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">activations</span><span class="p">:</span>
+                <span class="n">y</span><span class="p">,</span> <span class="n">activations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">activations</span> <span class="o">=</span> <span class="n">activations</span>
+
+            <span class="c1"># dictionary of SVDs of the weights per layer,</span>
+            <span class="c1"># if not already pre-computed when SVDInfluential was defined</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">svd_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">svd_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_svd</span><span class="p">(</span><span class="n">layers_to_find</span><span class="o">=</span><span class="n">layers_to_find</span><span class="p">)</span>
+
+            <span class="n">activation_shapes</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">activations</span><span class="p">[</span><span class="s2">&quot;x_in&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+            <span class="k">for</span> <span class="n">ldx</span><span class="p">,</span> <span class="n">modules</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">svd_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="s2">&quot;resnetadd&quot;</span> <span class="ow">in</span> <span class="n">modules</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">activation_shapes</span><span class="p">[</span><span class="n">ldx</span><span class="p">]</span> <span class="o">=</span> <span class="n">activations</span><span class="p">[</span><span class="n">modules</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">activation_shapes</span><span class="p">[</span><span class="n">ldx</span><span class="p">]</span> <span class="o">=</span> <span class="n">activations</span><span class="p">[</span><span class="n">modules</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">layer_name</span><span class="p">,</span> <span class="n">svd</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">svd_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">layer_name</span> <span class="o">=</span> <span class="n">layer_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">layer_activations</span> <span class="o">=</span> <span class="n">activations</span><span class="p">[</span><span class="n">layer_name</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span>
+                    <span class="mi">0</span>
+                <span class="p">)</span>  <span class="c1"># noqa remove batch dimension</span>
+                <span class="n">layer_reshape</span> <span class="o">=</span> <span class="n">layer_activations</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">layer_activations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1"># get bias term, check it&#39;s not None</span>
+                <span class="n">bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="p">[</span><span class="n">layer_name</span><span class="p">]</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;bias&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">layer_reshape</span> <span class="o">=</span> <span class="n">layer_reshape</span> <span class="o">-</span> <span class="n">bias</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1"># take SVD projection</span>
+                <span class="n">uprojy</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span>
+                    <span class="n">svd</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">layer_reshape</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="c1"># average over the spatial dimensions</span>
+                <span class="k">if</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;sum&quot;</span><span class="p">:</span>
+                    <span class="n">agg</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">uprojy</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">uprojy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="p">)</span>  <span class="c1"># noqa torch.max(uprojy, axis=1).values</span>
+                    <span class="c1"># calculate influential neurons</span>
+                    <span class="p">(</span>
+                        <span class="n">neuron_counts</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
+                        <span class="n">neuron_weights</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
+                    <span class="p">)</span> <span class="o">=</span> <span class="n">SVDProfiler</span><span class="o">.</span><span class="n">influential_svd_neurons</span><span class="p">(</span>
+                        <span class="n">agg</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+                    <span class="n">agg</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">uprojy</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+                    <span class="p">(</span><span class="n">neuron_counts</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">neuron_weights</span><span class="p">[</span><span class="n">k</span><span class="p">],)</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">matrix_convert</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">)),</span>
+                        <span class="n">matrix_convert</span><span class="p">(</span><span class="n">agg</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span>
+                    <span class="n">agg</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">uprojy</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+                    <span class="p">(</span><span class="n">neuron_counts</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">neuron_weights</span><span class="p">[</span><span class="n">k</span><span class="p">],)</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">matrix_convert</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">)),</span>
+                        <span class="n">matrix_convert</span><span class="p">(</span><span class="n">agg</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Do not recognize aggregation </span><span class="si">{</span><span class="n">agg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Profile</span><span class="p">(</span>
+                <span class="n">neuron_counts</span><span class="o">=</span><span class="n">neuron_counts</span><span class="p">,</span>
+                <span class="n">neuron_weights</span><span class="o">=</span><span class="n">neuron_weights</span><span class="p">,</span>
+                <span class="n">num_inputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">activation_shapes</span><span class="o">=</span><span class="n">activation_shapes</span><span class="p">,</span>
+                <span class="n">pred_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pred_dict</span><span class="p">,</span>
+                <span class="n">neuron_type</span><span class="o">=</span><span class="s2">&quot;svd&quot;</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SVDProfiler.create_projections"><a class="viewcode-back" href="../../classes/classes.html#classes.svd_influential.SVDProfiler.create_projections">[docs]</a>    <span class="k">def</span> <span class="nf">create_projections</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">layers_to_find</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate SVD projections for a single input data x.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : torch.Tensor</span>
+<span class="sd">            input to model being profiled</span>
+<span class="sd">        layers_to_find : list, optional</span>
+<span class="sd">            Optional list of layers to find influential SVD neurons for.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        projections: dict</span>
+<span class="sd">            SVD projections keyed by layer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create empty dictionaries for storing neurons</span>
+        <span class="n">projections</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">y</span><span class="p">,</span> <span class="n">activations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="c1"># dictionary of SVDs of the weights per layer,</span>
+            <span class="c1"># if not already pre-computed when SVDInfluential was defined</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">svd_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">svd_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_svd</span><span class="p">(</span><span class="n">layers_to_find</span><span class="o">=</span><span class="n">layers_to_find</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">layer_name</span><span class="p">,</span> <span class="n">svd</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">svd_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">layer_name</span> <span class="o">=</span> <span class="n">layer_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">layer_activations</span> <span class="o">=</span> <span class="n">activations</span><span class="p">[</span><span class="n">layer_name</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span>
+                <span class="mi">0</span>
+            <span class="p">)</span>  <span class="c1"># noqa remove batch dimension</span>
+            <span class="n">layer_reshape</span> <span class="o">=</span> <span class="n">layer_activations</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">layer_activations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># get bias term, check it&#39;s not None</span>
+            <span class="n">bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span><span class="p">[</span><span class="n">layer_name</span><span class="p">]</span><span class="o">.</span><span class="n">_parameters</span><span class="p">[</span><span class="s2">&quot;bias&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">layer_reshape</span> <span class="o">=</span> <span class="n">layer_reshape</span> <span class="o">-</span> <span class="n">bias</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># take SVD projection</span>
+            <span class="n">uprojy</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">svd</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">layer_reshape</span><span class="p">)</span>
+            <span class="n">projections</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">uprojy</span>
+
+        <span class="k">return</span> <span class="n">projections</span></div>
+
+<div class="viewcode-block" id="SVDProfiler.influential_svd_neurons"><a class="viewcode-back" href="../../classes/classes.html#classes.svd_influential.SVDProfiler.influential_svd_neurons">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">influential_svd_neurons</span><span class="p">(</span>
+        <span class="n">agg</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dictionary of relative contributions keyed by influential</span>
+<span class="sd">        SVD neurons for layer up to some threshold</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        agg : torch.Tensor</span>
+<span class="sd">            The SVD projections tensor, with some aggregation</span>
+<span class="sd">            applied. Expected to be 1-D.</span>
+
+<span class="sd">        ord (int, float, +/-inf, &#39;fro&#39;, &#39;nuc&#39;, optional)</span>
+<span class="sd">            order of norm. See</span>
+<span class="sd">            https://pytorch.org/docs/stable/linalg.html#torch.linalg.norm</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        influential_neurons : sp.coo_matrix</span>
+<span class="sd">            Matrix representing the influential neurons within the threshold</span>
+<span class="sd">        influential_weights : sp.coo_matrix</span>
+<span class="sd">            Matrix assigning weights to each influential neuron according to its</span>
+<span class="sd">            contribution to the threshold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+                <span class="n">agg</span><span class="o">.</span><span class="n">view</span><span class="p">((</span><span class="n">agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">ord</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1"># sort</span>
+            <span class="n">ordsmat_vals</span><span class="p">,</span> <span class="n">ordsmat_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># take the cumsum and normalize by total contribution per dim</span>
+            <span class="n">cumsum</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">ordsmat_vals</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">totalsum</span> <span class="o">=</span> <span class="n">cumsum</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+
+            <span class="c1"># find the indices within the threshold goal, per dim</span>
+            <span class="n">bool_accept</span> <span class="o">=</span> <span class="p">(</span><span class="n">cumsum</span> <span class="o">/</span> <span class="n">totalsum</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">threshold</span>
+            <span class="n">accept</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bool_accept</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># normalize by final accepted cumsum</span>
+            <span class="n">ordsmat_vals</span> <span class="o">/=</span> <span class="n">cumsum</span><span class="p">[:,</span> <span class="n">accept</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># add additional accept, ie accept + 1</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># use range to enumerate over batch size entries of accept</span>
+                <span class="n">bool_accept</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">accept</span><span class="p">)),</span> <span class="n">accept</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;taking all values as influential&quot;</span><span class="p">)</span>
+
+            <span class="c1"># find accepted synapses, all other values zero.</span>
+            <span class="c1"># note: it is ordered by largest norm value</span>
+            <span class="n">unordered_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="n">bool_accept</span><span class="p">,</span>
+                <span class="n">ordsmat_vals</span><span class="p">,</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ordsmat_vals</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="c1"># re-order to mantain proper neuron ordering</span>
+            <span class="n">influential_weights</span> <span class="o">=</span> <span class="n">unordered_weights</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+                <span class="mi">1</span><span class="p">,</span> <span class="n">ordsmat_indices</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">influential_neurons</span> <span class="o">=</span> <span class="n">influential_weights</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">matrix_convert</span><span class="p">(</span><span class="n">influential_neurons</span><span class="p">),</span> <span class="n">matrix_convert</span><span class="p">(</span>
+                <span class="n">influential_weights</span>
+            <span class="p">)</span></div>
+
+    <span class="c1"># final three methods are defined so the method plays nicely</span>
+    <span class="c1"># with the newest ddp version</span>
+<div class="viewcode-block" id="SVDProfiler.influence_generator"><a class="viewcode-back" href="../../classes/classes.html#classes.svd_influential.SVDProfiler.influence_generator">[docs]</a>    <span class="k">def</span> <span class="nf">influence_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="SVDProfiler.single_profile"><a class="viewcode-back" href="../../classes/classes.html#classes.svd_influential.SVDProfiler.single_profile">[docs]</a>    <span class="k">def</span> <span class="nf">single_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="SVDProfiler.create_profile"><a class="viewcode-back" href="../../classes/classes.html#classes.svd_influential.SVDProfiler.create_profile">[docs]</a>    <span class="k">def</span> <span class="nf">create_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020 Battelle Memorial Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

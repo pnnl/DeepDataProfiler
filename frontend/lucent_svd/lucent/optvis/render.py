@@ -91,6 +91,7 @@ def render_vis(
     images = []
     try:
         for i in tqdm(range(1, max(thresholds) + 1), disable=(not progress)):
+
             def closure():
                 optimizer.zero_grad()
                 try:
@@ -109,7 +110,7 @@ def render_vis(
                 loss = objective_f(hook)
                 loss.backward()
                 return loss
-                
+
             optimizer.step(closure)
             if i in thresholds:
                 image = tensor_to_img_array(image_f())
@@ -201,9 +202,13 @@ def hook_model(model, image_f):
         elif layer == "labels":
             out = list(features.values())[-1].features
         else:
-            assert layer in features, f"Invalid layer {layer}. Retrieve the list of layers with `lucent.modelzoo.util.get_model_layers(model)`."
+            assert (
+                layer in features
+            ), f"Invalid layer {layer}. Retrieve the list of layers with `lucent.modelzoo.util.get_model_layers(model)`."
             out = features[layer].features
-        assert out is not None, "There are no saved feature maps. Make sure to put the model in eval mode, like so: `model.to(device).eval()`. See README for example."
+        assert (
+            out is not None
+        ), "There are no saved feature maps. Make sure to put the model in eval mode, like so: `model.to(device).eval()`. See README for example."
         return out
 
     return hook
