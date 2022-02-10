@@ -19,7 +19,7 @@ import sys
 import os
 import shlex
 
-__version__ = "1.2.0"
+__version__ = "2.0.0"
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -31,7 +31,7 @@ sys.path.append(os.path.join(os.path.dirname(__name__), "deep_data_profiler"))
 # -- Project information -----------------------------------------------------
 
 project = "Deep Data Profiler"
-copyright = "2020 Battelle Memorial Institute"
+copyright = "2020, 2022, Battelle Memorial Institute"
 author = "Brenda Praggastis, Davis Brown, Madelyn Shapiro"
 
 # The short X.Y version
