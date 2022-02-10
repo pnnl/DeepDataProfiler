@@ -42,7 +42,12 @@ def pad(w, mode="reflect", constant_value=0.5):
         constant_value = 0
 
     def inner(image_t):
-        return F.pad(image_t, [w] * 4, mode=mode, value=constant_value,)
+        return F.pad(
+            image_t,
+            [w] * 4,
+            mode=mode,
+            value=constant_value,
+        )
 
     return inner
 

@@ -25,6 +25,6 @@ class Net(nn.Module):
 
 
 def get_LeNet():
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     net = Net().to(device)
     return net

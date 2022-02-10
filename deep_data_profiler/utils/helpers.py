@@ -44,7 +44,7 @@ def get_index(
         otherwise output will be row,column,channel tuple
 
     """
-    s = k ** 2
+    s = k**2
     ch = b // s
     r = (b % s) // k
     c = (b % s) % k
@@ -92,41 +92,17 @@ def submatrix_generator(
             )
             return None
 
-        def submat(i: torch.Tensor, j: torch.Tensor) -> torch.Tensor:
+        def submat(i, j):
+            s = stride * i
+            t = stride * j
+            return temp[:, s : s + kernel, t : t + kernel]
 
-            num_idxs = len(i)
-            num_ch = temp.shape[0]
-
-            # vector with repeating entries 0 through kernel-1
-            # we add this to i and j to index each element in the kernel x kernel submatrix
-            k = torch.arange(kernel).repeat(num_idxs)
-
-            # vector with kernel*kernel entries of each channel, repeated num_idxs times
-            # used to take a tubelike slice through all channels for each submatrix
-            ch = (
-                torch.arange(num_ch).repeat_interleave(kernel * kernel).repeat(num_idxs)
+        def batched_submat(i, j):
+            return torch.stack(
+                [submat(idx.item(), jdx.item()) for idx, jdx in zip(i, j)]
             )
 
-            # get the idx of each row in the submatrix
-            # this is stride*i:stride*i+kernel for each idx in i
-            i = torch.repeat_interleave(stride * i, kernel) + k
-            # repeat each row idx kernel times (to match pairwise with every col idx)
-            i = i.repeat_interleave(kernel)
-            # reshape to repeat each submatrix's list of kernel^2 row idxs once for each channel
-            # (in order to take the receptive field through all channels)
-            i = i.view(num_idxs, kernel * kernel).repeat(1, num_ch).view(-1)
-
-            # get the idx of each col in the submatrix
-            # this is stride*j:stride*j+kernel for each idx in j
-            j = torch.repeat_interleave(stride * j, kernel) + k
-            # reshape to repeat each submatrix's list of kernel col idxs once for each row idx and channel
-            # (pairwise match with each row idx for all num_ch copies of the list of row idxs)
-            j = j.view(num_idxs, kernel).repeat(1, kernel * num_ch).view(-1)
-
-            # return submatrices as #submatrices x #channels x kernel x kernel
-            return temp[ch, i, j].view(num_idxs, num_ch, kernel, kernel)
-
-    return submat
+    return batched_submat
 
 
 def matrix_convert(x: torch.Tensor) -> sp.coo_matrix:
