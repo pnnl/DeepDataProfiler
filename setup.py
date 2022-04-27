@@ -32,6 +32,7 @@ setup(
         "ripser>=0.6.0",
         "powerlaw>=1.4.6",
         "torchvision>=0.11.3",
+        "torch-lucent>=0.1.8",
     ],
     extras_require={
         "testing": ["pytest>=4.0"],
