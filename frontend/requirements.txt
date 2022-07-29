@@ -51,7 +51,7 @@ kornia==0.4.1
 MarkupSafe==2.0.1
 matplotlib==3.4.2
 matplotlib-inline==0.1.2
-mistune==0.8.4
+mistune==2.0.3
 mpmath==1.2.1
 nb2plots==0.6
 nbclient==0.5.3
