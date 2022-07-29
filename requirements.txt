@@ -56,7 +56,7 @@ kornia==0.4.1
 MarkupSafe==2.0.1
 matplotlib @ file:///opt/concourse/worker/volumes/live/41e8cd50-031f-4dda-5787-dd3c4f4e0f08/volume/matplotlib-suite_1613407855571/work
 matplotlib-inline==0.1.2
-mistune==0.8.4
+mistune==2.0.3
 mkl-fft==1.3.0
 mkl-random @ file:///opt/concourse/worker/volumes/live/133f1d0b-8fd8-4fa0-679e-7214401cbd75/volume/mkl_random_1626186083386/work
 mkl-service==2.4.0
