@@ -140,7 +140,7 @@ if __name__ == "__main__":
         page_icon=":lower_left_crayon:",  # layout="wide",
     )
 
-    tabs = ["About", "Feature Visualization", "TDA", "Spectral Analysis"]
+    tabs = ["About", "Feature Visualization", "TDA",]  # "Spectral Analysis"]
     active_tab = st.radio("Navigate to a page", options=tabs)
     st.write(
         "<style>div.row-widget.stRadio > div{flex-direction:row;}</style>",
@@ -362,7 +362,7 @@ if __name__ == "__main__":
                 pim = pimgr.transform(dgms, skew=True)
                 pimgr_diagram = pimgr.plot_image(pim).figure
                 col_tda_pers_heat.pyplot()
-    elif active_tab == "Spectral Analysis":
-        show_svd()
+#     elif active_tab == "Spectral Analysis":
+#         show_svd()
     else:
         st.write("Failure")
