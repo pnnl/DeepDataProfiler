@@ -1,10 +1,9 @@
 import numpy as np
-import pytest
 import torch
 
 
-def test_profiler_model(element_example):
-    tp = element_example
+def test_profiler_model(torch_example):
+    tp = torch_example
     x = tp.input
     y = tp.model.forward(x)
     yp, actives = tp.profiler.model.forward(x)
@@ -17,7 +16,9 @@ def test_create_layers(element_example):
     tp = element_example
     m = tp.profiler.model.available_modules()
     assert len(m) == 39
-    assert len(tp.layerdict) == 23
+    layerdict = tp.profiler.create_layers()
+    assert len(layerdict) == 23
+
 
 
 def test_contrib_linear(element_example, vgg16_linear):

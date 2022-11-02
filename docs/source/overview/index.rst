@@ -99,14 +99,14 @@ slice that tensor into neuron units in a few different ways.
 
 In a $c\times m\times m$ activation tensor, there are:
 
- - $c$ **channels**, which are the $m\times m$ matrices, or planes of 
+ - $c$ **channels**, which are the $m\times m$ matrices, or planes of
    the tensor,
  - $m^2$ **spatials**, which are the $c$-vectors through all channels of the
    tensor at a fixed spatial (row and column) position,
  - and $cm^2$ **elements**, which are the individual cells of the tensor at a fixed channel
    and spatial position.
 
-See the documentation for :code:`ddp.ElementProfiler`, :code:`ddp.ChannelProfiler`, and 
+See the documentation for :code:`ddp.ElementProfiler`, :code:`ddp.ChannelProfiler`, and
 :code:`ddp.SpatialProfiler` for more information on how each of these profiling methods, and
 visit Tutorial 1 for an interactive overview.
 
@@ -114,7 +114,7 @@ visit Tutorial 1 for an interactive overview.
 SVD Profiles
 ============
 
-Each convolutional layer has a learned weight tensor $\text W$ with dimensions $d\times c\times 
+Each convolutional layer has a learned weight tensor $\text W$ with dimensions $d\times c\times
 k\times k$. We can unfold that tensor into a $d\times ck^2$ matrix $\overline W$, and take its
 singular value decomposition (SVD) to find a basis of singular directions.
 
@@ -141,7 +141,7 @@ for more information.
 
 Deep Data Profiler builds a profile of a model-data pairing by
 identifying key neurons and the synapses that connect them. This data
-naturally lends itself to representation as a directed bipartite graph,
+naturally lends itself to representation as a graph,
 allowing us to take advantage of the rich field of graph theoretical
 analysis tools. Visit `Tutorial 2 - Topological Data
 Analysis <https://colab.research.google.com/github/pnnl/DeepDataProfiler/blob/master/tutorials/Tutorial%202%20-%20DDPAlgorithms.ipynb>`__

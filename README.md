@@ -1,6 +1,6 @@
 Deep Data Profiler (DDP)
-======================== 
-  
+========================
+
 The DDP library provides tools for analyzing the internal decision structure of a deep neural network within the
 context of a specific dataset. Documentation may be found [here](https://pnnl.github.io/DeepDataProfiler/)
 
@@ -12,12 +12,12 @@ Using Anaconda and Pip
 
 To install with tutorials and documentation using anaconda and pip:
 
-Note: Documentation is built using Sphinx, which requires we install the matplotlib package using conda *not pip*. 
+Note: Documentation is built using Sphinx, which requires we install the matplotlib package using conda *not pip*.
 
     >>> conda create -n ddp python=3.7 matplotlib
     >>> conda activate ddp
 
-From the root directory of deep_data_profiler do 
+From the root directory of deep_data_profiler do
 
     >>> pip install -e.[‘all’]
 
@@ -25,11 +25,11 @@ Then run
 
     >>> pytest
 
-To see the sphinx documentation 
+To see the sphinx documentation
 
     >>> open docs/index.html
 
-You may also install without editing, tutorials and testing simply using 
+You may also install without editing, tutorials and testing simply using
 
     >>> conda create -n ddp python=3.7
     >>> pip install .
@@ -65,9 +65,9 @@ A Streamlit visualization frontend
 
 Notes
 -----
-The DDP project is part of the Mathematics of Artificial Reasoning in Science (MARS) 
+The DDP project is part of the Mathematics of Artificial Reasoning in Science (MARS)
 Initiative at Pacific Northwest National Laboratory (PNNL).  
-Research was conducted under the Laboratory Directed Research and Development Program at PNNL, 
+Research was conducted under the Laboratory Directed Research and Development Program at PNNL,
 a multiprogram national laboratory operated by Battelle for the U.S. Department of Energy.
 
 * Principle Investigator: Brenda Praggastis
@@ -80,8 +80,8 @@ For questions and comments you may contact the developers directly at:
 
 Notice
 ------
-The research described in this paper is part of the Mathematics of Artificial Reasoning in Science (MARS) Initiative at Pacific Northwest National Laboratory (PNNL).  It was conducted under the Laboratory Directed Research and Development Program at PNNL, a multiprogram national laboratory operated by Battelle for the U.S. Department of Energy.
-  
+The research used in this repository is part of the Mathematics of Artificial Reasoning in Science (MARS) Initiative at Pacific Northwest National Laboratory (PNNL).  It was conducted under the Laboratory Directed Research and Development Program at PNNL, a multiprogram national laboratory operated by Battelle for the U.S. Department of Energy.
+
 Neither the United States Government nor the United States Department of Energy, nor Battelle, nor any of their employees, nor any jurisdiction or organization that has cooperated in the development of these materials, makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness or any information, apparatus, product, software, or process disclosed, or represents that its use would not infringe privately owned rights.
 Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States Government or any agency thereof, or Battelle Memorial Institute. The views and opinions of authors expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.
 
