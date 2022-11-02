@@ -1,17 +1,10 @@
 from collections import defaultdict, OrderedDict
-from typing import Optional, Tuple, List, Dict
 import torch
-import inspect
-from torch.nn.modules import dropout
-import scipy.sparse as sp
-import networkx as nx
+from deep_data_profiler.classes.torch_profiler import TorchProfiler
+from deep_data_profiler.utils import matrix_convert
 from deep_data_profiler.classes.profile import Profile
-from .torch_profiler import TorchProfiler
-from deep_data_profiler.utils import (
-    TorchHook,
-    model_graph,
-    matrix_convert,
-)
+import scipy.sparse as sp
+from typing import Dict, List, Optional, Tuple
 
 
 class SVDProfiler(TorchProfiler):
@@ -21,10 +14,25 @@ class SVDProfiler(TorchProfiler):
     register activations as it evaluates data. Using the activations,
     inputs to the model may be profiled.
 
+    The function call to generate an influenial SVD profile is slightly different
+    than that for SpatialProfiler/ChannelProfiler. Here is how to create a profile:
+
+    .. highlight:: python
+    .. code-block:: python
+
+        import deep_data_profiler as ddp
+        # define the profiler
+        influential_profiler = ddp.SVDProfiler(model)
+        # profile a tensor x
+        profile = influential_profiler.create_influential(x)
+        # view neuron weights dictionary
+        print(profile.neuron_weights)
+        # view the neuron weights for a specific layer
+        print(profile.neuron_weights[22].todense())
+        ...
+
     Attributes
     ----------
-    dropout_classes : list
-        List of dropout classes in PyTorch
     implemented_classes : list
         Set of classes in PyTorch which we can find influential for
     model : torch.nn.Sequential()
@@ -39,139 +47,20 @@ class SVDProfiler(TorchProfiler):
     ):
 
         super().__init__(model)
-        self.dropout_classes = [
-            m[1]
-            for m in inspect.getmembers(dropout, inspect.isclass)
-            if m[1].__module__ == "torch.nn.modules.dropout"
-        ]
-
+        self.device = device
         self.implemented_classes = [
             torch.nn.Linear,
             torch.nn.Conv2d,
         ]
-
-        self.contrib_functions = [
-            "contrib_linear",
-            "contrib_conv2d",
-        ]
-
-        self.model = TorchHook(model)
-        self.hooks = self.model.available_modules()
-        supernodes, SG, pos = self.super_nodes_graph()
-        self.supernodes = supernodes
-        self.SG = SG
-        self.pos = pos
-        self.sght = self.sgheadtail()
+        self.pred_dict = {
+            nd[0]: sorted([preds[0] for preds in self.SG.predecessors(nd)])
+            for nd in sorted(self.SG)
+        }
 
         if compute_svd:
             self.svd_dict = self.create_svd()
         else:
             self.svd_dict = None
-
-    def super_nodes_graph(self):
-        model = self.model.model  # grab back the original model
-        G, ndorder, pos = model_graph(model)
-
-        # links the graph nodes to PyTorch modules
-        pmas = self.model.available_modules()
-        nodes = G.nodes
-
-        # a layer starts with an implemented class, some of these correspond to
-        # PyTorch modules, others were custom made
-        # for the application, like 'add'
-        def chk_type(n):
-            try:
-                if type(pmas[n]) in self.implemented_classes:
-                    return True
-            except Exception:
-                return False
-
-        # The implemented nodes are the first function to apply to input
-        # into the DDPlayer,the successors which do not change the shape
-        # are added to the DDPlayer.
-        implemented_nodes = []
-        for n in nodes:
-            if chk_type(n):
-                implemented_nodes.append(n)
-        supernodes = OrderedDict({"x_in": ["x_in"]})
-
-        for n in implemented_nodes:
-            temp = [n]
-            while True:
-                scs = list(G.successors(temp[-1]))
-                scs = [item for item in scs if "resnetadd" not in item]
-                if (len(scs) == 0 or len(scs) > 1) or (
-                    len(scs) == 1 and (chk_type(scs[0]))
-                ):
-                    break
-                else:
-                    temp.append(scs[0])
-            supernodes[n] = temp
-
-        SGnodes = list(supernodes.keys())
-        SG = nx.DiGraph()  # the Digraph of the DDP network
-        for nd in SGnodes:
-            tail = supernodes[nd][-1]
-            try:
-                scs = list(G.successors(tail))
-                snds = [(nd, snd) for snd in scs if snd in SGnodes]
-                SG.add_edges_from(snds)
-            except Exception as ex:
-                print(ex)
-                continue
-
-        #  Rename nodes according to sorted node order for SG
-        # sequences layers in the graph
-        def sortorder(x):
-            return ndorder.index(x)
-
-        ordG = {
-            v: (k, v)
-            for k, v in enumerate(sorted(list(SG.nodes()), key=sortorder))
-        }
-        nx.relabel_nodes(SG, ordG, copy=False)
-
-        sgpos = dict()
-        for nd in SG.nodes():
-            sgpos[nd] = pos[nd[1]]
-
-        # filter dropout modules
-        for nd in SGnodes[1:]:
-            supernodes[nd] = [
-                n
-                for n in supernodes[nd]
-                if type(pmas[n]) not in self.dropout_classes
-            ]
-
-        return supernodes, SG, sgpos
-
-    def sgheadtail(self):
-        namelist = list()
-        sght = dict()
-        pmas = self.model.available_modules()
-        for nd in self.SG.nodes:
-            if nd[0] == 0:
-                sght[0] = ("x_in", "x_in")
-                continue
-            arr = self.supernodes[nd[1]]
-            n = -1 * len(arr) - 1
-            for k in arr:
-                if k in pmas:
-                    head = k
-                    namelist.append(k)
-                    break
-            else:
-                head = None
-            for k in arr[-1:n:-1]:
-                if k in pmas:
-                    tail = k
-                    namelist.append(k)
-                    break
-            else:
-                tail = None
-            sght[nd[0]] = (head, tail)
-            self.model.add_hooks(namelist)
-        return sght
 
     def create_svd(
         self, layers_to_find: Optional[List[int]] = None
@@ -179,9 +68,11 @@ class SVDProfiler(TorchProfiler):
         """
         Create a dictionary of the Singular Value Decomposition
         of a layer's weights.
-        Args:
-            layers_to_find (list, optional): Optional list of layers
-                to find influential SVD neurons for.
+
+        Parameters
+        ----------
+        layers_to_find : list, optional
+            Optional list of layers to find influential SVD neurons for.
 
         Returns
         -------
@@ -197,11 +88,7 @@ class SVDProfiler(TorchProfiler):
         if layers_to_find is None:
             ltf = range(1, len(SGnodes))
         elif isinstance(layers_to_find, list):
-            ltf = [
-                lyr
-                for lyr in layers_to_find
-                if lyr >= 1 or lyr <= len(SGnodes) - 1
-            ]
+            ltf = [lyr for lyr in layers_to_find if lyr >= 1 or lyr <= len(SGnodes) - 1]
         else:  # a tuple is expected
             start = max(1, layers_to_find[0])
             end = min(len(SGnodes), layers_to_find[1])
@@ -227,6 +114,8 @@ class SVDProfiler(TorchProfiler):
         x: torch.Tensor,
         layers_to_find: Optional[List[int]] = None,
         threshold: float = 0.1,
+        activations=None,
+        aggregation="sum",
     ) -> Profile:
         """
         Generate an influential profile for a single input data x.
@@ -251,21 +140,30 @@ class SVDProfiler(TorchProfiler):
         neuron_weights = defaultdict(torch.Tensor)
 
         with torch.no_grad():
-            y, activations = self.model.forward(x)
+            if not activations:
+                y, activations = self.model.forward(x)
+            else:
+                activations = activations
 
             # dictionary of SVDs of the weights per layer,
             # if not already pre-computed when SVDInfluential was defined
             if not self.svd_dict:
                 self.svd_dict = self.create_svd(layers_to_find=layers_to_find)
 
+            activation_shapes = {}
+            activations["x_in"] = x
+            for ldx, modules in self.svd_dict.items():
+                if "resnetadd" in modules[1]:
+                    activation_shapes[ldx] = activations[modules[0][1]].shape
+                else:
+                    activation_shapes[ldx] = activations[modules[0][0]].shape
+
             for k, (layer_name, svd) in self.svd_dict.items():
                 layer_name = layer_name[0]
                 layer_activations = activations[layer_name].squeeze(
                     0
                 )  # noqa remove batch dimension
-                layer_reshape = layer_activations.view(
-                    layer_activations.shape[0], -1
-                )
+                layer_reshape = layer_activations.view(layer_activations.shape[0], -1)
 
                 # get bias term, check it's not None
                 bias = self.hooks[layer_name]._parameters["bias"]
@@ -273,20 +171,43 @@ class SVDProfiler(TorchProfiler):
                     layer_reshape = layer_reshape - bias.unsqueeze(1)
 
                 # take SVD projection
-                uprojy = torch.matmul(svd.U.T, layer_reshape)
+                uprojy = torch.matmul(
+                    svd.U.T.to(self.device), layer_reshape.to(self.device)
+                )
                 # average over the spatial dimensions
-                agg = torch.sum(uprojy, axis=1) / uprojy.shape[1]  # noqa torch.max(uprojy, axis=1).values
-                # calculate influential neurons
-                (
-                    neuron_counts[k],
-                    neuron_weights[k],
-                ) = SVDProfiler.influential_svd_neurons(agg, threshold=threshold)
+                if aggregation == "sum":
+                    agg = (
+                        torch.sum(uprojy, axis=1) / uprojy.shape[1]
+                    )  # noqa torch.max(uprojy, axis=1).values
+                    # calculate influential neurons
+                    (
+                        neuron_counts[k],
+                        neuron_weights[k],
+                    ) = SVDProfiler.influential_svd_neurons(
+                        agg, threshold=threshold, device=self.device
+                    )
+                elif aggregation == "max":
+                    agg = torch.max(uprojy, dim=1).values
+                    (neuron_counts[k], neuron_weights[k],) = (
+                        matrix_convert(torch.ones(agg.shape)),
+                        matrix_convert(agg),
+                    )
+                elif aggregation == "min":
+                    agg = torch.min(uprojy, dim=1).values
+                    (neuron_counts[k], neuron_weights[k],) = (
+                        matrix_convert(torch.ones(agg.shape)),
+                        matrix_convert(agg),
+                    )
+                else:
+                    raise NotImplementedError(f"Do not recognize aggregation {agg}")
             return Profile(
                 neuron_counts=neuron_counts,
                 neuron_weights=neuron_weights,
                 num_inputs=1,
+                activation_shapes=activation_shapes,
+                pred_dict=self.pred_dict,
+                neuron_type="svd",
             )
-
 
     def create_projections(
         self,
@@ -324,9 +245,7 @@ class SVDProfiler(TorchProfiler):
             layer_activations = activations[layer_name].squeeze(
                 0
             )  # noqa remove batch dimension
-            layer_reshape = layer_activations.view(
-                layer_activations.shape[0], -1
-            )
+            layer_reshape = layer_activations.view(layer_activations.shape[0], -1)
 
             # get bias term, check it's not None
             bias = self.hooks[layer_name]._parameters["bias"]
@@ -341,11 +260,12 @@ class SVDProfiler(TorchProfiler):
 
     @staticmethod
     def influential_svd_neurons(
-        agg: torch.Tensor, threshold: float = 0.1, norm=1
+        agg: torch.Tensor, threshold: float = 0.1, norm=1, device=torch.device("cpu")
     ) -> Tuple[sp.coo_matrix, sp.coo_matrix]:
         """
         Returns a dictionary of relative contributions keyed by influential
         SVD neurons for layer up to some threshold
+
         Parameters
         ----------
         agg : torch.Tensor
@@ -364,43 +284,57 @@ class SVDProfiler(TorchProfiler):
             Matrix assigning weights to each influential neuron according to its
             contribution to the threshold
         """
-        m = torch.linalg.norm(
-            agg.view((agg.shape[0], -1)), ord=norm, dim=1
-        ).unsqueeze(0)
+        with torch.no_grad():
+            m = torch.linalg.norm(
+                agg.view((agg.shape[0], -1)), ord=norm, dim=1
+            ).unsqueeze(0)
 
-        # sort
-        ordsmat_vals, ordsmat_indices = torch.sort(m, descending=True)
+            # sort
+            ordsmat_vals, ordsmat_indices = torch.sort(m, descending=True)
 
-        # take the cumsum and normalize by total contribution per dim
-        cumsum = torch.cumsum(ordsmat_vals, dim=1)
-        totalsum = cumsum[:, -1].detach()
+            # take the cumsum and normalize by total contribution per dim
+            cumsum = torch.cumsum(ordsmat_vals, dim=1)
+            totalsum = cumsum[:, -1].detach()
 
-        # find the indices within the threshold goal, per dim
-        bool_accept = (cumsum / totalsum.unsqueeze(-1)) <= threshold
-        accept = torch.sum(bool_accept, dim=1)
+            # find the indices within the threshold goal, per dim
+            bool_accept = (cumsum / totalsum.unsqueeze(-1)) <= threshold
+            accept = torch.sum(bool_accept, dim=1)
 
-        # normalize by final accepted cumsum
-        ordsmat_vals /= cumsum[:, accept - 1]
+            # normalize by final accepted cumsum
+            ordsmat_vals /= cumsum[:, accept - 1]
 
-        # add additional accept, ie accept + 1
-        try:
-            # use range to enumerate over batch size entries of accept
-            bool_accept[range(len(accept)), accept] = True
-        except IndexError:
-            print("taking all values as influential")
+            # add additional accept, ie accept + 1
+            try:
+                # use range to enumerate over batch size entries of accept
+                bool_accept[range(len(accept)), accept] = True
+            except IndexError:
+                print("taking all values as influential")
 
-        # find accepted synapses, all other values zero.
-        # note: it is ordered by largest norm value
-        unordered_weights = torch.where(
-            bool_accept, ordsmat_vals, torch.zeros(ordsmat_vals.shape)
-        )
-        # re-order to mantain proper neuron ordering
-        influential_weights = unordered_weights.gather(
-            1, ordsmat_indices.argsort(1)
-        )
+            # find accepted synapses, all other values zero.
+            # note: it is ordered by largest norm value
+            unordered_weights = torch.where(
+                bool_accept,
+                ordsmat_vals,
+                torch.zeros(ordsmat_vals.shape, device=device),
+            )
+            # re-order to mantain proper neuron ordering
+            influential_weights = unordered_weights.gather(
+                1, ordsmat_indices.argsort(1)
+            )
 
-        influential_neurons = influential_weights.bool().int()
+            influential_neurons = influential_weights.bool().int()
 
-        return matrix_convert(influential_neurons), matrix_convert(
-            influential_weights
-        )
+            return matrix_convert(influential_neurons), matrix_convert(
+                influential_weights
+            )
+
+    # final three methods are defined so the method plays nicely
+    # with the newest ddp version
+    def influence_generator(self):
+        pass
+
+    def single_profile(self):
+        pass
+
+    def create_profile(self):
+        pass

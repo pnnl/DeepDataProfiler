@@ -24,7 +24,7 @@ def tuples_from_dict(
     Returns
     -------
     tuples : list
-        A list of tuples of the form ((layer1, neuron1), (layer2, neuron2), weight)
+        A list of tuples of the form ((layer1, (neuron1,)), (layer2, (neuron2,)), weight)
 
     Note
     ----
@@ -36,10 +36,7 @@ def tuples_from_dict(
         layers = d.keys()
 
     for ldx in layers:
-        temp = d[ldx]
-        tuples += [
-            ((t[0][0], t[0][1][0]), (t[1][0], t[1][1][0]), temp[t]) for t in temp
-        ]
+        tuples += [(*syn, val) for syn, val in d[ldx].items()]
 
     return tuples
 

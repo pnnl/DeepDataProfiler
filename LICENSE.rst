@@ -5,7 +5,7 @@ License
 
 Deep Data Profiler
 
-Copyright © 2020, Battelle Memorial Institute
+Copyright © 2020, 2022, Battelle Memorial Institute
 
 Battelle Memorial Institute (hereinafter Battelle) hereby grants permission
 to any person or entity lawfully obtaining a copy of this software and associated

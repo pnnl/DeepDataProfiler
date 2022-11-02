@@ -26,12 +26,14 @@ import lucent.misc.io.showing as show
 import IPython.display
 
 
-golden_eye_html = ('<img src="data:image/PNG;base64,iVBORw0KGgoAAAANSUhEUgAAAAU'
-    'AAAAFCAAAAACoBHk5AAAAEklEQVR4nGP4z8DAwMDAgJ0CAErTBPw/r52mAAAAAElFTkSuQmCC">')
+golden_eye_html = (
+    '<img src="data:image/PNG;base64,iVBORw0KGgoAAAANSUhEUgAAAAU'
+    'AAAAFCAAAAACoBHk5AAAAEklEQVR4nGP4z8DAwMDAgJ0CAErTBPw/r52mAAAAAElFTkSuQmCC">'
+)
 
 
 def test_show_image(mocker):
-    mock_display = mocker.patch('IPython.display.display')
+    mock_display = mocker.patch("IPython.display.display")
     array = np.eye(5)
     original = array.copy()
 
@@ -42,7 +44,7 @@ def test_show_image(mocker):
 
 
 def test_show_images(mocker):
-    mock_html = mocker.patch('IPython.display.HTML')
+    mock_html = mocker.patch("IPython.display.HTML")
     labels = ["one", "two", "three"]
 
     show.show([np.eye(5)] * 3, labels=labels)
@@ -57,16 +59,16 @@ def test_show_images(mocker):
 
 
 def test_show_textured_mesh(mocker):
-    mock_html = mocker.patch('IPython.display.HTML')
+    mock_html = mocker.patch("IPython.display.HTML")
 
     texture = np.ones((16, 16, 3), np.float32)
     old_texture = texture.copy()
     mesh = dict(
-        position = np.float32([[0, 0, 0], [1, 0, 0], [0, 1, 0]]),
-        uv = np.float32([[0, 0], [1, 0], [0, 1]]),
-        face = np.int32([0, 1, 2])
+        position=np.float32([[0, 0, 0], [1, 0, 0], [0, 1, 0]]),
+        uv=np.float32([[0, 0], [1, 0], [0, 1]]),
+        face=np.int32([0, 1, 2]),
     )
     show.textured_mesh(mesh, texture)
 
-    assert (texture==old_texture).all()  # check that we don't modify data
+    assert (texture == old_texture).all()  # check that we don't modify data
     mock_html.assert_called_once()

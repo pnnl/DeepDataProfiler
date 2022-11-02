@@ -9,7 +9,7 @@
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
@@ -17,10 +17,10 @@
         <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -70,14 +70,16 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
 
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
  <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
@@ -90,12 +92,14 @@
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
- 
+
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.activation_classes">activation_classes (classes.torch_profiler.TorchProfiler attribute)</a>
+</li>
+      <li><a href="classes/classes.html#classes.profile.Profile.activation_shapes">activation_shapes (classes.profile.Profile property)</a>
 </li>
       <li>
     algorithms
@@ -132,9 +136,19 @@
   </ul></td>
 </tr></table>
 
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.build_dicts">build_dicts() (classes.torch_profiler.TorchProfiler method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/classes.html#classes.channel_profiler.ChannelProfiler">ChannelProfiler (class in classes.channel_profiler)</a>
+</li>
       <li>
     classes
 
@@ -143,10 +157,31 @@
 </li>
       </ul></li>
       <li>
+    classes.channel_profiler
+
+      <ul>
+        <li><a href="classes/classes.html#module-classes.channel_profiler">module</a>
+</li>
+      </ul></li>
+      <li>
+    classes.element_profiler
+
+      <ul>
+        <li><a href="classes/classes.html#module-classes.element_profiler">module</a>
+</li>
+      </ul></li>
+      <li>
     classes.profile
 
       <ul>
         <li><a href="classes/classes.html#module-classes.profile">module</a>
+</li>
+      </ul></li>
+      <li>
+    classes.spatial_profiler
+
+      <ul>
+        <li><a href="classes/classes.html#module-classes.spatial_profiler">module</a>
 </li>
       </ul></li>
       <li>
@@ -163,27 +198,79 @@
         <li><a href="classes/classes.html#module-classes.torch_profiler">module</a>
 </li>
       </ul></li>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_adaptive_avg_pool2d">contrib_adaptive_avg_pool2d() (classes.torch_profiler.TorchProfiler method)</a>
+      <li><a href="classes/classes.html#classes.channel_profiler.ChannelProfiler.contrib_adaptive_avg_pool2d">contrib_adaptive_avg_pool2d() (classes.channel_profiler.ChannelProfiler method)</a>
+
+      <ul>
+        <li><a href="classes/classes.html#classes.element_profiler.ElementProfiler.contrib_adaptive_avg_pool2d">(classes.element_profiler.ElementProfiler method)</a>
 </li>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_conv2d">contrib_conv2d() (classes.torch_profiler.TorchProfiler method)</a>
+        <li><a href="classes/classes.html#classes.spatial_profiler.SpatialProfiler.contrib_adaptive_avg_pool2d">(classes.spatial_profiler.SpatialProfiler method)</a>
 </li>
+      </ul></li>
+      <li><a href="classes/classes.html#classes.channel_profiler.ChannelProfiler.contrib_conv2d">contrib_conv2d() (classes.channel_profiler.ChannelProfiler method)</a>
+
+      <ul>
+        <li><a href="classes/classes.html#classes.element_profiler.ElementProfiler.contrib_conv2d">(classes.element_profiler.ElementProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.spatial_profiler.SpatialProfiler.contrib_conv2d">(classes.spatial_profiler.SpatialProfiler method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_functions">contrib_functions (classes.torch_profiler.TorchProfiler attribute)</a>
 </li>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_identity">contrib_identity() (classes.torch_profiler.TorchProfiler method)</a>
+      <li><a href="classes/classes.html#classes.channel_profiler.ChannelProfiler.contrib_identity">contrib_identity() (classes.channel_profiler.ChannelProfiler method)</a>
+
+      <ul>
+        <li><a href="classes/classes.html#classes.element_profiler.ElementProfiler.contrib_identity">(classes.element_profiler.ElementProfiler method)</a>
 </li>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_linear">contrib_linear() (classes.torch_profiler.TorchProfiler method)</a>
+        <li><a href="classes/classes.html#classes.spatial_profiler.SpatialProfiler.contrib_identity">(classes.spatial_profiler.SpatialProfiler method)</a>
 </li>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_max2d">contrib_max2d() (classes.torch_profiler.TorchProfiler method)</a>
+      </ul></li>
+      <li><a href="classes/classes.html#classes.channel_profiler.ChannelProfiler.contrib_linear">contrib_linear() (classes.channel_profiler.ChannelProfiler method)</a>
+
+      <ul>
+        <li><a href="classes/classes.html#classes.element_profiler.ElementProfiler.contrib_linear">(classes.element_profiler.ElementProfiler method)</a>
 </li>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.contrib_resnetadd">contrib_resnetadd() (classes.torch_profiler.TorchProfiler method)</a>
+        <li><a href="classes/classes.html#classes.spatial_profiler.SpatialProfiler.contrib_linear">(classes.spatial_profiler.SpatialProfiler method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/classes.html#classes.channel_profiler.ChannelProfiler.contrib_max2d">contrib_max2d() (classes.channel_profiler.ChannelProfiler method)</a>
+
+      <ul>
+        <li><a href="classes/classes.html#classes.element_profiler.ElementProfiler.contrib_max2d">(classes.element_profiler.ElementProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.spatial_profiler.SpatialProfiler.contrib_max2d">(classes.spatial_profiler.SpatialProfiler method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/classes.html#classes.channel_profiler.ChannelProfiler.contrib_resnetadd">contrib_resnetadd() (classes.channel_profiler.ChannelProfiler method)</a>
+
+      <ul>
+        <li><a href="classes/classes.html#classes.element_profiler.ElementProfiler.contrib_resnetadd">(classes.element_profiler.ElementProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.spatial_profiler.SpatialProfiler.contrib_resnetadd">(classes.spatial_profiler.SpatialProfiler method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.create_influential">create_influential() (classes.svd_influential.SVDProfiler method)</a>
 </li>
       <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.create_influential">create_influential() (classes.svd_influential.SVDProfiler method)</a>
 </li>
       <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.create_layers">create_layers() (classes.torch_profiler.TorchProfiler method)</a>
 </li>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.create_profile">create_profile() (classes.torch_profiler.TorchProfiler method)</a>
+      <li><a href="classes/classes.html#classes.channel_profiler.ChannelProfiler.create_profile">create_profile() (classes.channel_profiler.ChannelProfiler method)</a>
+
+      <ul>
+        <li><a href="classes/classes.html#classes.element_profiler.ElementProfiler.create_profile">(classes.element_profiler.ElementProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.spatial_profiler.SpatialProfiler.create_profile">(classes.spatial_profiler.SpatialProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.create_profile">(classes.svd_influential.SVDProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.create_profile">(classes.torch_profiler.TorchProfiler method)</a>
+</li>
+      </ul></li>
+      <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.create_projections">create_projections() (classes.svd_influential.SVDProfiler method)</a>
+</li>
+      <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.create_svd">create_svd() (classes.svd_influential.SVDProfiler method)</a>
 </li>
       <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.create_projections">create_projections() (classes.svd_influential.SVDProfiler method)</a>
 </li>
@@ -195,7 +282,7 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.dict_view">dict_view() (classes.torch_profiler.TorchProfiler method)</a>
+      <li><a href="classes/classes.html#classes.profile.Profile.dict_view">dict_view() (classes.profile.Profile method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -205,6 +292,14 @@
         <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.dropout_classes">(classes.torch_profiler.TorchProfiler attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/classes.html#classes.element_profiler.ElementProfiler">ElementProfiler (class in classes.element_profiler)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -235,9 +330,21 @@
         <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.implemented_classes">(classes.torch_profiler.TorchProfiler attribute)</a>
 </li>
       </ul></li>
+      <li><a href="classes/classes.html#classes.channel_profiler.ChannelProfiler.influence_generator">influence_generator() (classes.channel_profiler.ChannelProfiler method)</a>
+
+      <ul>
+        <li><a href="classes/classes.html#classes.element_profiler.ElementProfiler.influence_generator">(classes.element_profiler.ElementProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.spatial_profiler.SpatialProfiler.influence_generator">(classes.spatial_profiler.SpatialProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.influence_generator">(classes.svd_influential.SVDProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.influence_generator">(classes.torch_profiler.TorchProfiler method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.influence_generator">influence_generator() (classes.torch_profiler.TorchProfiler method)</a>
+      <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.influential_svd_neurons">influential_svd_neurons() (classes.svd_influential.SVDProfiler static method)</a>
 </li>
       <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.influential_svd_neurons">influential_svd_neurons() (classes.svd_influential.SVDProfiler static method)</a>
 </li>
@@ -293,7 +400,13 @@
 </li>
         <li><a href="classes/classes.html#module-classes">classes</a>
 </li>
+        <li><a href="classes/classes.html#module-classes.channel_profiler">classes.channel_profiler</a>
+</li>
+        <li><a href="classes/classes.html#module-classes.element_profiler">classes.element_profiler</a>
+</li>
         <li><a href="classes/classes.html#module-classes.profile">classes.profile</a>
+</li>
+        <li><a href="classes/classes.html#module-classes.spatial_profiler">classes.spatial_profiler</a>
 </li>
         <li><a href="classes/classes.html#module-classes.svd_influential">classes.svd_influential</a>
 </li>
@@ -324,6 +437,10 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/classes.html#classes.profile.Profile.pred_dict">pred_dict (classes.profile.Profile property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classes/classes.html#classes.profile.Profile">Profile (class in classes.profile)</a>
 </li>
   </ul></td>
@@ -349,15 +466,26 @@
       <ul>
         <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.sgheadtail">(classes.torch_profiler.TorchProfiler method)</a>
 </li>
+      <li><a href="classes/classes.html#classes.channel_profiler.ChannelProfiler.single_profile">single_profile() (classes.channel_profiler.ChannelProfiler method)</a>
+
+      <ul>
+        <li><a href="classes/classes.html#classes.element_profiler.ElementProfiler.single_profile">(classes.element_profiler.ElementProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.spatial_profiler.SpatialProfiler.single_profile">(classes.spatial_profiler.SpatialProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.single_profile">(classes.svd_influential.SVDProfiler method)</a>
+</li>
+        <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.single_profile">(classes.torch_profiler.TorchProfiler method)</a>
+</li>
       </ul></li>
-      <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.single_profile">single_profile() (classes.torch_profiler.TorchProfiler method)</a>
-</li>
       <li><a href="classes/classes.html#classes.profile.Profile.size">size (classes.profile.Profile property)</a>
-</li>
-      <li><a href="algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.spectral_analysis">spectral_analysis() (algorithms.spectral_analysis.SpectralAnalysis method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="classes/classes.html#classes.spatial_profiler.SpatialProfiler">SpatialProfiler (class in classes.spatial_profiler)</a>
+</li>
+      <li><a href="algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.spectral_analysis">spectral_analysis() (algorithms.spectral_analysis.SpectralAnalysis method)</a>
+</li>
       <li><a href="algorithms/algorithms.html#algorithms.spectral_analysis.SpectralAnalysis">SpectralAnalysis (class in algorithms.spectral_analysis)</a>
 </li>
       <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler.super_nodes_graph">super_nodes_graph() (classes.svd_influential.SVDProfiler method)</a>
@@ -366,6 +494,8 @@
         <li><a href="classes/classes.html#classes.torch_profiler.TorchProfiler.super_nodes_graph">(classes.torch_profiler.TorchProfiler method)</a>
 </li>
       </ul></li>
+      <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler">SVDProfiler (class in classes.svd_influential)</a>
+</li>
       <li><a href="classes/classes.html#classes.svd_influential.SVDProfiler">SVDProfiler (class in classes.svd_influential)</a>
 </li>
       <li><a href="classes/classes.html#classes.profile.Profile.synapse_counts">synapse_counts (classes.profile.Profile property)</a>
@@ -412,7 +542,7 @@
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -423,7 +553,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>
