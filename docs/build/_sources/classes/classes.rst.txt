@@ -12,6 +12,14 @@ classes.profile module
    :undoc-members:
    :show-inheritance:
 
+classes.svd\_influential module
+-------------------------------
+
+.. automodule:: classes.svd_influential
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 classes.torch\_profiler module
 ------------------------------
 
