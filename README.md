@@ -9,7 +9,7 @@ Installing Deep Data Profiler
 
 To install from PyPI:
 
-    ... pip install deep-data-profiler
+    >>> pip install deep-data-profiler
 
 Using Anaconda and Pip
 ----------------------
