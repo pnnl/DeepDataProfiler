@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>classes &mdash; Deep Data Profiler 2.0.0 documentation</title>
+  <title>classes &mdash; Deep Data Profiler 2.0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -44,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Overview</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Profiling</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Classes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="classes.html">classes package</a></li>
 </ul>
 </li>
@@ -67,8 +69,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>classes</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">classes</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/classes/modules.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -79,17 +81,107 @@
            <div itemprop="articleBody">
              
   <section id="classes">
-<h1>classes<a class="headerlink" href="#classes" title="Permalink to this headline"></a></h1>
+<h1>classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="classes.html">classes package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="classes.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.channel_profiler">classes.channel_profiler module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.element_profiler">classes.element_profiler module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.profile">classes.profile module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.spatial_profiler">classes.spatial_profiler module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.svd_influential">classes.svd_influential module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.torch_profiler">classes.torch_profiler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.channel_profiler">classes.channel_profiler module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.channel_profiler.ChannelProfiler"><code class="docutils literal notranslate"><span class="pre">ChannelProfiler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.channel_profiler.ChannelProfiler.contrib_adaptive_avg_pool2d"><code class="docutils literal notranslate"><span class="pre">ChannelProfiler.contrib_adaptive_avg_pool2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.channel_profiler.ChannelProfiler.contrib_conv2d"><code class="docutils literal notranslate"><span class="pre">ChannelProfiler.contrib_conv2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.channel_profiler.ChannelProfiler.contrib_identity"><code class="docutils literal notranslate"><span class="pre">ChannelProfiler.contrib_identity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.channel_profiler.ChannelProfiler.contrib_linear"><code class="docutils literal notranslate"><span class="pre">ChannelProfiler.contrib_linear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.channel_profiler.ChannelProfiler.contrib_max2d"><code class="docutils literal notranslate"><span class="pre">ChannelProfiler.contrib_max2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.channel_profiler.ChannelProfiler.contrib_resnetadd"><code class="docutils literal notranslate"><span class="pre">ChannelProfiler.contrib_resnetadd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.channel_profiler.ChannelProfiler.create_profile"><code class="docutils literal notranslate"><span class="pre">ChannelProfiler.create_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.channel_profiler.ChannelProfiler.influence_generator"><code class="docutils literal notranslate"><span class="pre">ChannelProfiler.influence_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.channel_profiler.ChannelProfiler.single_profile"><code class="docutils literal notranslate"><span class="pre">ChannelProfiler.single_profile()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.element_profiler">classes.element_profiler module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.element_profiler.ElementProfiler"><code class="docutils literal notranslate"><span class="pre">ElementProfiler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.element_profiler.ElementProfiler.contrib_adaptive_avg_pool2d"><code class="docutils literal notranslate"><span class="pre">ElementProfiler.contrib_adaptive_avg_pool2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.element_profiler.ElementProfiler.contrib_conv2d"><code class="docutils literal notranslate"><span class="pre">ElementProfiler.contrib_conv2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.element_profiler.ElementProfiler.contrib_identity"><code class="docutils literal notranslate"><span class="pre">ElementProfiler.contrib_identity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.element_profiler.ElementProfiler.contrib_linear"><code class="docutils literal notranslate"><span class="pre">ElementProfiler.contrib_linear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.element_profiler.ElementProfiler.contrib_max2d"><code class="docutils literal notranslate"><span class="pre">ElementProfiler.contrib_max2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.element_profiler.ElementProfiler.contrib_resnetadd"><code class="docutils literal notranslate"><span class="pre">ElementProfiler.contrib_resnetadd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.element_profiler.ElementProfiler.create_profile"><code class="docutils literal notranslate"><span class="pre">ElementProfiler.create_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.element_profiler.ElementProfiler.influence_generator"><code class="docutils literal notranslate"><span class="pre">ElementProfiler.influence_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.element_profiler.ElementProfiler.single_profile"><code class="docutils literal notranslate"><span class="pre">ElementProfiler.single_profile()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.profile">classes.profile module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.profile.Profile"><code class="docutils literal notranslate"><span class="pre">Profile</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.activation_shapes"><code class="docutils literal notranslate"><span class="pre">Profile.activation_shapes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.dict_view"><code class="docutils literal notranslate"><span class="pre">Profile.dict_view()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.neuron_counts"><code class="docutils literal notranslate"><span class="pre">Profile.neuron_counts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.neuron_type"><code class="docutils literal notranslate"><span class="pre">Profile.neuron_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.neuron_weights"><code class="docutils literal notranslate"><span class="pre">Profile.neuron_weights</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.num_inputs"><code class="docutils literal notranslate"><span class="pre">Profile.num_inputs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.num_synapses"><code class="docutils literal notranslate"><span class="pre">Profile.num_synapses</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.pred_dict"><code class="docutils literal notranslate"><span class="pre">Profile.pred_dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.size"><code class="docutils literal notranslate"><span class="pre">Profile.size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.synapse_counts"><code class="docutils literal notranslate"><span class="pre">Profile.synapse_counts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.synapse_weights"><code class="docutils literal notranslate"><span class="pre">Profile.synapse_weights</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.profile.Profile.total"><code class="docutils literal notranslate"><span class="pre">Profile.total</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.spatial_profiler">classes.spatial_profiler module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.spatial_profiler.SpatialProfiler"><code class="docutils literal notranslate"><span class="pre">SpatialProfiler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.spatial_profiler.SpatialProfiler.contrib_adaptive_avg_pool2d"><code class="docutils literal notranslate"><span class="pre">SpatialProfiler.contrib_adaptive_avg_pool2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.spatial_profiler.SpatialProfiler.contrib_conv2d"><code class="docutils literal notranslate"><span class="pre">SpatialProfiler.contrib_conv2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.spatial_profiler.SpatialProfiler.contrib_identity"><code class="docutils literal notranslate"><span class="pre">SpatialProfiler.contrib_identity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.spatial_profiler.SpatialProfiler.contrib_linear"><code class="docutils literal notranslate"><span class="pre">SpatialProfiler.contrib_linear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.spatial_profiler.SpatialProfiler.contrib_max2d"><code class="docutils literal notranslate"><span class="pre">SpatialProfiler.contrib_max2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.spatial_profiler.SpatialProfiler.contrib_resnetadd"><code class="docutils literal notranslate"><span class="pre">SpatialProfiler.contrib_resnetadd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.spatial_profiler.SpatialProfiler.create_profile"><code class="docutils literal notranslate"><span class="pre">SpatialProfiler.create_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.spatial_profiler.SpatialProfiler.influence_generator"><code class="docutils literal notranslate"><span class="pre">SpatialProfiler.influence_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.spatial_profiler.SpatialProfiler.single_profile"><code class="docutils literal notranslate"><span class="pre">SpatialProfiler.single_profile()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.svd_influential">classes.svd_influential module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.svd_influential.SVDProfiler"><code class="docutils literal notranslate"><span class="pre">SVDProfiler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.svd_influential.SVDProfiler.implemented_classes"><code class="docutils literal notranslate"><span class="pre">SVDProfiler.implemented_classes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.svd_influential.SVDProfiler.model"><code class="docutils literal notranslate"><span class="pre">SVDProfiler.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.svd_influential.SVDProfiler.create_influential"><code class="docutils literal notranslate"><span class="pre">SVDProfiler.create_influential()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.svd_influential.SVDProfiler.create_profile"><code class="docutils literal notranslate"><span class="pre">SVDProfiler.create_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.svd_influential.SVDProfiler.create_projections"><code class="docutils literal notranslate"><span class="pre">SVDProfiler.create_projections()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.svd_influential.SVDProfiler.create_svd"><code class="docutils literal notranslate"><span class="pre">SVDProfiler.create_svd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.svd_influential.SVDProfiler.influence_generator"><code class="docutils literal notranslate"><span class="pre">SVDProfiler.influence_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.svd_influential.SVDProfiler.influential_svd_neurons"><code class="docutils literal notranslate"><span class="pre">SVDProfiler.influential_svd_neurons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.svd_influential.SVDProfiler.single_profile"><code class="docutils literal notranslate"><span class="pre">SVDProfiler.single_profile()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes.torch_profiler">classes.torch_profiler module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler"><code class="docutils literal notranslate"><span class="pre">TorchProfiler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.activation_classes"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.activation_classes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.dropout_classes"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.dropout_classes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.implemented_classes"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.implemented_classes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.contrib_functions"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.contrib_functions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.model"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.build_dicts"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.build_dicts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.create_layers"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.create_layers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.create_profile"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.create_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.influence_generator"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.influence_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.sgheadtail"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.sgheadtail()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.single_profile"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.single_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="classes.html#classes.torch_profiler.TorchProfiler.super_nodes_graph"><code class="docutils literal notranslate"><span class="pre">TorchProfiler.super_nodes_graph()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="classes.html#module-classes">Module contents</a></li>
 </ul>
 </li>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>algorithms &mdash; Deep Data Profiler 2.0.0 documentation</title>
+  <title>algorithms &mdash; Deep Data Profiler 2.0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -14,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -44,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview/index.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../classes/modules.html">Profiling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes/modules.html">Classes</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Algorithms</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="algorithms.html">algorithms package</a></li>
 </ul>
@@ -67,8 +69,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>algorithms</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">algorithms</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/algorithms/modules.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -79,14 +81,38 @@
            <div itemprop="articleBody">
              
   <section id="algorithms">
-<h1>algorithms<a class="headerlink" href="#algorithms" title="Permalink to this headline"></a></h1>
+<h1>algorithms<a class="headerlink" href="#algorithms" title="Permalink to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="algorithms.html">algorithms package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="algorithms.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#module-algorithms.homology">algorithms.homology module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#module-algorithms.jaccard">algorithms.jaccard module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="algorithms.html#module-algorithms.spectral_analysis">algorithms.spectral_analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="algorithms.html#module-algorithms.homology">algorithms.homology module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="algorithms.html#algorithms.homology.graph_from_tuples"><code class="docutils literal notranslate"><span class="pre">graph_from_tuples()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="algorithms.html#algorithms.homology.mat_from_graph"><code class="docutils literal notranslate"><span class="pre">mat_from_graph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="algorithms.html#algorithms.homology.ripser_of_distmat"><code class="docutils literal notranslate"><span class="pre">ripser_of_distmat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="algorithms.html#algorithms.homology.ripser_of_graph"><code class="docutils literal notranslate"><span class="pre">ripser_of_graph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="algorithms.html#algorithms.homology.tuples_from_dict"><code class="docutils literal notranslate"><span class="pre">tuples_from_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="algorithms.html#module-algorithms.jaccard">algorithms.jaccard module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="algorithms.html#algorithms.jaccard.avg_jaccard"><code class="docutils literal notranslate"><span class="pre">avg_jaccard()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="algorithms.html#algorithms.jaccard.instance_jaccard"><code class="docutils literal notranslate"><span class="pre">instance_jaccard()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="algorithms.html#algorithms.jaccard.jaccard"><code class="docutils literal notranslate"><span class="pre">jaccard()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="algorithms.html#algorithms.jaccard.jaccard_simple"><code class="docutils literal notranslate"><span class="pre">jaccard_simple()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="algorithms.html#module-algorithms.spectral_analysis">algorithms.spectral_analysis module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="algorithms.html#algorithms.spectral_analysis.SpectralAnalysis"><code class="docutils literal notranslate"><span class="pre">SpectralAnalysis</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.implemented_classes"><code class="docutils literal notranslate"><span class="pre">SpectralAnalysis.implemented_classes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.model"><code class="docutils literal notranslate"><span class="pre">SpectralAnalysis.model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.fit_power_law"><code class="docutils literal notranslate"><span class="pre">SpectralAnalysis.fit_power_law()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.layer_RMT"><code class="docutils literal notranslate"><span class="pre">SpectralAnalysis.layer_RMT()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.spectral_analysis"><code class="docutils literal notranslate"><span class="pre">SpectralAnalysis.spectral_analysis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="algorithms.html#algorithms.spectral_analysis.SpectralAnalysis.universal_metric"><code class="docutils literal notranslate"><span class="pre">SpectralAnalysis.universal_metric()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="algorithms.html#module-algorithms">Module contents</a></li>
 </ul>
 </li>

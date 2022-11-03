@@ -8,16 +8,14 @@ Deep Data Profiler (DDP)
 Description
 ===========
 The `DeepDataProfiler`_ library provides tools for analyzing the internal decision structure of a deep neural network within the
-context of a specific dataset. The Deep Data Profiler project is part of the Mathematics of Artificial Reasoning in Science (MARS) 
-Initiative at Pacific Northwest National Laboratory (PNNL).  
-Research was conducted under the Laboratory Directed Research and Development Program at PNNL, 
+context of a specific dataset. The Deep Data Profiler project is part of the Mathematics of Artificial Reasoning in Science (MARS)
+Initiative at Pacific Northwest National Laboratory (PNNL).
+Research was conducted under the Laboratory Directed Research and Development Program at PNNL,
 a multiprogram national laboratory operated by Battelle for the U.S. Department of Energy.
 
 * Principle Investigator: Brenda Praggastis
 * Design and Development: Davis Brown, Brenda Praggastis, Madelyn Shapiro
 * Topological Data Analysis Contributors: Emilie Purvine, Bei Wang
-* Consultant: Frederick Hohman
-* Original authors: Nichole Nichols, Brenda Praggastis, Aaron Tuor
 
 For questions and comments you may contact the developers directly at:
     deepdataprofiler@pnnl.gov
@@ -29,7 +27,7 @@ Contents
    :maxdepth: 2
 
    overview/index
-   Profiling <classes/modules.rst>
+   Classes <classes/modules.rst>
    Algorithms <algorithms/modules.rst>
    install
    license
