@@ -7,6 +7,10 @@ context of a specific dataset. Documentation may be found [here](https://pnnl.gi
 Installing Deep Data Profiler
 =============================
 
+To install from PyPI:
+
+    ... pip install deep-data-profiler
+
 Using Anaconda and Pip
 ----------------------
 
