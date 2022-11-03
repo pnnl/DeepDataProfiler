@@ -27,7 +27,7 @@ Contents
    :maxdepth: 2
 
    overview/index
-   Profiling <classes/modules.rst>
+   Classes <classes/modules.rst>
    Algorithms <algorithms/modules.rst>
    install
    license

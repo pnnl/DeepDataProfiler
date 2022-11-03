@@ -6,8 +6,7 @@ import inspect
 import networkx as nx
 import torch
 from torch.nn.modules import activation, dropout, batchnorm
-from typing import Dict, List, Optional, Tuple, Union
-
+from typing import Dict, List, Optional, Tuple, Union, Any
 
 class TorchProfiler(ABC):
 
@@ -81,7 +80,7 @@ class TorchProfiler(ABC):
         }
         self.layerdict = self.create_layers()
 
-    def super_nodes_graph(self) -> Tuple[OrderedDict, nx.DiGraph, Dict]:
+    def super_nodes_graph(self) -> Tuple[OrderedDict, Any, Dict]:
         """
         Returns
         -------
