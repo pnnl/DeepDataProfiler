@@ -80,7 +80,7 @@ py==1.10.0
 pyarrow==4.0.1
 pycparser==2.20
 pydeck==0.6.2
-Pygments==2.9.0
+Pygments==2.15.0
 pyparsing==2.4.7
 pyrsistent==0.18.0
 pytest==6.2.4
