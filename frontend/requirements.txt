@@ -117,7 +117,7 @@ threadpoolctl==2.1.0
 toml==0.10.2
 toolz==0.11.1
 torch-lucent==0.1.8
-tornado==6.1
+tornado==6.3.3
 tqdm==4.61.1
 traitlets==5.0.5
 typing-extensions==3.10.0.0
