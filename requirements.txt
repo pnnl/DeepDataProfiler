@@ -60,7 +60,7 @@ mistune==0.8.4
 mkl-fft==1.3.0
 mkl-random @ file:///opt/concourse/worker/volumes/live/133f1d0b-8fd8-4fa0-679e-7214401cbd75/volume/mkl_random_1626186083386/work
 mkl-service==2.4.0
-mpmath==1.2.1
+mpmath==1.3.0
 nb2plots==0.6
 nbclient==0.5.3
 nbconvert==6.1.0
