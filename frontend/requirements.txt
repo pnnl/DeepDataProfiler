@@ -31,7 +31,7 @@ docutils==0.16
 entrypoints==0.3
 future==0.18.2
 gitdb==4.0.7
-GitPython==3.1.18
+GitPython==3.1.32
 hopcroftkarp==1.2.5
 idna==2.10
 imagesize==1.2.0
