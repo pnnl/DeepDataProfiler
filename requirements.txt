@@ -125,7 +125,7 @@ texext==0.6.6
 threadpoolctl==2.2.0
 toml==0.10.2
 toolz==0.11.1
-torch==1.9.0
+torch==2.8.0
 torch-lucent==0.1.8
 torchvision==0.10.0
 tornado @ file:///opt/concourse/worker/volumes/live/d531d395-893c-4ca1-6a5f-717b318eb08c/volume/tornado_1606942307627/work
